@@ -25,7 +25,7 @@ public class GetUserDataManager {
    * this is their first login and we enter a new user object in the db.
    *
    * @param activeUser The user that made the api request, trying to get data about themselves.
-   * @return Standard result status object giving insight on whether the request was successful
+   * @return Result status that will be sent to frontend with appropriate data or error messages.
    */
   public ResultStatus<String> execute(final String activeUser) {
     final String classMethod = "GetUserDataManager.execute";

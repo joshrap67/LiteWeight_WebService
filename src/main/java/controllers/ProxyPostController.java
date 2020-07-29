@@ -25,6 +25,7 @@ public class ProxyPostController implements
   private static final Map<String, Class<? extends ApiRequestController>> ACTIONS_TO_CONTROLLERS = Maps
       .newHashMap(ImmutableMap.<String, Class<? extends ApiRequestController>>builder()
           .put("getUserData", GetUserDataController.class)
+          .put("newUser", NewUserController.class)
           .build());
 
   public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
@@ -86,7 +87,7 @@ public class ProxyPostController implements
             put("body", request.getBody());
           }},
           classMethod, e));
-      resultStatus = ResultStatus.failure("Exception occurred.");
+      resultStatus = ResultStatus.failure("Exception occurred."+request.getBody()+ " "+e.toString());
     }
 
     metrics.commonClose(resultStatus.success);
