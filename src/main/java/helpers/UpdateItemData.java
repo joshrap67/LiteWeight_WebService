@@ -1,18 +1,18 @@
-package aws;
+package helpers;
 
+import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.Delete;
 import com.amazonaws.services.dynamodbv2.model.Update;
-import helpers.AttributeValueHelper;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
 
 @Data
-public class UpdateItemTemplate {
+public class UpdateItemData {
 
     private final String keyValue;
     private final String tableName;
@@ -21,22 +21,22 @@ public class UpdateItemTemplate {
     private ValueMap valueMap;
     private NameMap nameMap;
 
-    public UpdateItemTemplate(final String keyValue, final String tableName) {
+    public UpdateItemData(final String keyValue, final String tableName) {
         this.keyValue = keyValue;
         this.tableName = tableName;
     }
 
-    public UpdateItemTemplate withUpdateExpression(final String updateExpression) {
+    public UpdateItemData withUpdateExpression(final String updateExpression) {
         this.updateExpression = updateExpression;
         return this;
     }
 
-    public UpdateItemTemplate withValueMap(final ValueMap valueMap) {
+    public UpdateItemData withValueMap(final ValueMap valueMap) {
         this.valueMap = valueMap;
         return this;
     }
 
-    public UpdateItemTemplate withNameMap(final NameMap nameMap) {
+    public UpdateItemData withNameMap(final NameMap nameMap) {
         this.nameMap = nameMap;
         return this;
     }

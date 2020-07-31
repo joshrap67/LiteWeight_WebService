@@ -2,6 +2,8 @@ package modules;
 
 import controllers.GetUserDataController;
 import controllers.NewUserController;
+import controllers.NewWorkoutController;
+import controllers.WarmingController;
 import dagger.Component;
 import javax.inject.Singleton;
 
@@ -9,7 +11,11 @@ import javax.inject.Singleton;
 @Component(modules = LiteWeightModule.class)
 public interface LiteWeightComponent {
 
-  void inject(GetUserDataController getUserDataController);
+    void inject(GetUserDataController getUserDataController);
 
-  void inject(NewUserController newUserController);
+    void inject(NewUserController newUserController);
+
+    void inject(NewWorkoutController newWorkoutController);
+
+    void inject(WarmingController warmingController);
 }

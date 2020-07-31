@@ -7,6 +7,6 @@ import helpers.ResultStatus;
 
 public interface ApiRequestController {
 
-  ResultStatus processApiRequest(final Map<String, Object> requestBody, final Metrics metrics)
-      throws MissingApiRequestKeyException;
+    ResultStatus processApiRequest(final Map<String, Object> requestBody, final Metrics metrics)
+        throws MissingApiRequestKeyException;
 }

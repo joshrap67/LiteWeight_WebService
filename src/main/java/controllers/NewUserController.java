@@ -15,32 +15,33 @@ import modules.Injector;
 
 public class NewUserController implements ApiRequestController {
 
-  @Inject
-  public NewUserManager newUserManager;
+    @Inject
+    public NewUserManager newUserManager;
 
-  @Override
-  public ResultStatus processApiRequest(Map<String, Object> json,
-      Metrics metrics) throws MissingApiRequestKeyException {
-    final String classMethod = "NewUserController.processApiRequest";
+    @Override
+    public ResultStatus processApiRequest(Map<String, Object> json,
+        Metrics metrics) throws MissingApiRequestKeyException {
+        final String classMethod = "NewUserController.processApiRequest";
 
-    ResultStatus<String> resultStatus;
+        ResultStatus<String> resultStatus;
 
-    try {
-      Injector.getInjector(metrics).inject(this);
+        try {
+            Injector.getInjector(metrics).inject(this);
 
-      if (json.containsKey(User.USERNAME)) {
-        final String username = (String) json.get(User.USERNAME);
-        resultStatus = this.newUserManager.execute(username);
-      } else {
-        throw new MissingApiRequestKeyException(ImmutableList.of(RequestFields.ACTIVE_USER));
-      }
-    } catch (final MissingApiRequestKeyException e) {
-      throw e;
-    } catch (final Exception e) {
-      metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
-      resultStatus = ResultStatus.failure("Exception in " + classMethod);
+            if (json.containsKey(User.USERNAME)) {
+                final String username = (String) json.get(User.USERNAME);
+                resultStatus = this.newUserManager.execute(username);
+            } else {
+                throw new MissingApiRequestKeyException(
+                    ImmutableList.of(RequestFields.ACTIVE_USER));
+            }
+        } catch (final MissingApiRequestKeyException e) {
+            throw e;
+        } catch (final Exception e) {
+            metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
+            resultStatus = ResultStatus.failure("Exception in " + classMethod);
+        }
+
+        return resultStatus;
     }
-
-    return resultStatus;
-  }
 }

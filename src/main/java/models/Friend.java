@@ -7,16 +7,22 @@ import lombok.Data;
 
 @Data
 public class Friend implements Model {
-  private String icon;
 
-  public Friend(Map<String, Object> json){
-    this.icon = (String) json.get(User.ICON);
-  }
+    public static final String CONFIRMED = "confirmed";
 
-  @Override
-  public Map<String, Object> asMap() {
-    HashMap<String, Object> retVal = new HashMap<>();
-    retVal.putIfAbsent(User.ICON, this.icon);
-    return retVal;
-  }
+    private String icon;
+    private boolean confirmed;
+
+    public Friend(Map<String, Object> json) {
+        this.icon = (String) json.get(User.ICON);
+        this.confirmed = (boolean) json.get(CONFIRMED);
+    }
+
+    @Override
+    public Map<String, Object> asMap() {
+        HashMap<String, Object> retVal = new HashMap<>();
+        retVal.putIfAbsent(User.ICON, this.icon);
+        retVal.putIfAbsent(CONFIRMED, this.confirmed);
+        return retVal;
+    }
 }

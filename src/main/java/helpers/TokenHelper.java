@@ -18,39 +18,39 @@ import java.util.Map;
 
 public class TokenHelper {
 
-  private static final String PUBLIC_RSA_KEY_URL = "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_zT5hI22RX/.well-known/jwks.json";
-  private static final List LIVE_FUNCTIONS = ImmutableList.of("ProxyPostEndpoint");
-  private static final String EMULATED_ACTIVE_USER_KEY = "EMULATED_ACTIVE_USER";
-  private static final String cognitoClaim = "cognito:username";
+    private static final String PUBLIC_RSA_KEY_URL = "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_LipSO6zpl/.well-known/jwks.json";
+    private static final List LIVE_FUNCTIONS = ImmutableList.of("ProxyEndpoint");
+    private static final String EMULATED_ACTIVE_USER_KEY = "EMULATED_ACTIVE_USER";
+    private static final String cognitoClaim = "cognito:username";
 
-  public static String getActiveUserFromRequest(APIGatewayProxyRequestEvent request,
-      Context context)
-      throws JwkException, MalformedURLException {
-    String functionName = context.getFunctionName();
+    public static String getActiveUserFromRequest(APIGatewayProxyRequestEvent request,
+        Context context)
+        throws JwkException, MalformedURLException {
+        String functionName = context.getFunctionName();
 
-    if (!LIVE_FUNCTIONS.contains(functionName)) {
-      String emulatedActiveUser = System.getenv(EMULATED_ACTIVE_USER_KEY);
+        if (!LIVE_FUNCTIONS.contains(functionName)) {
+            String emulatedActiveUser = System.getenv(EMULATED_ACTIVE_USER_KEY);
 
-      if (emulatedActiveUser != null) {
-        return emulatedActiveUser;
-      }
+            if (emulatedActiveUser != null) {
+                return emulatedActiveUser;
+            }
+        }
+
+        Map<String, String> headers = request.getHeaders();
+        String authorization = headers.get(RequestFields.AUTHORIZATION);
+
+        String token = authorization.substring(RequestFields.BEARER.length());
+
+        DecodedJWT jwt = JWT.decode(token);
+
+        JwkProvider provider = new UrlJwkProvider(new URL(PUBLIC_RSA_KEY_URL));
+        Jwk jwk = provider.get(jwt.getKeyId());
+
+        Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
+
+        algorithm.verify(jwt);
+
+        return jwt.getClaim(cognitoClaim).asString();
     }
-
-    Map<String, String> headers = request.getHeaders();
-    String authorization = headers.get(RequestFields.AUTHORIZATION);
-
-    String token = authorization.substring(RequestFields.BEARER.length());
-
-    DecodedJWT jwt = JWT.decode(token);
-
-    JwkProvider provider = new UrlJwkProvider(new URL(PUBLIC_RSA_KEY_URL));
-    Jwk jwk = provider.get(jwt.getKeyId());
-
-    Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) jwk.getPublicKey(), null);
-
-    algorithm.verify(jwt);
-
-    return jwt.getClaim(cognitoClaim).asString();
-  }
 
 }

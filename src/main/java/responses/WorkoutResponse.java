@@ -4,12 +4,12 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import exceptions.InvalidAttributeException;
 import interfaces.Model;
 import java.util.Map;
-import models.User;
+import models.Workout;
 
-public class UserResponse extends User implements Model {
+public class WorkoutResponse extends Workout implements Model {
 
-    public UserResponse(Item user) throws InvalidAttributeException {
-        super(user);
+    public WorkoutResponse(Item workoutItem) throws InvalidAttributeException {
+        super(workoutItem);
     }
 
     @Override
