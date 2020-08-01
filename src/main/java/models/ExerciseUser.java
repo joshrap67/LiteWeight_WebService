@@ -1,5 +1,6 @@
 package models;
 
+import helpers.Parser;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,9 +22,9 @@ public class ExerciseUser implements Model {
 
     private String exerciseName;
     private boolean defaultExercise;
-    private double defaultWeight; // stored in lbs
-    private int defaultSets;
-    private int defaultReps;
+    private Double defaultWeight; // stored in lbs
+    private Integer defaultSets;
+    private Integer defaultReps;
     private String defaultNote;
     private String videoUrl;
     @Setter(AccessLevel.NONE)
@@ -35,9 +36,9 @@ public class ExerciseUser implements Model {
     public ExerciseUser(Map<String, Object> json) {
         this.exerciseName = (String) json.get(EXERCISE_NAME);
         this.defaultExercise = (boolean) json.get(DEFAULT_EXERCISE);
-        this.defaultWeight = (double) json.get(DEFAULT_WEIGHT);
-        this.defaultSets = (int) json.get(DEFAULT_SETS);
-        this.defaultReps = (int) json.get(DEFAULT_REPS);
+        this.defaultWeight = Parser.convertObjectToDouble(json.get(DEFAULT_WEIGHT));
+        this.defaultSets = Parser.convertObjectToInteger(json.get(DEFAULT_SETS));
+        this.defaultReps = Parser.convertObjectToInteger(json.get(DEFAULT_REPS));
         this.defaultNote = (String) json.get(DEFAULT_DETAILS);
         this.videoUrl = (String) json.get(VIDEO_URL);
         this.setWorkouts((Map<String, Object>) json.get(User.WORKOUTS));

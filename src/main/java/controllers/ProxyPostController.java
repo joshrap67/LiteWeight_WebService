@@ -52,7 +52,7 @@ public class ProxyPostController implements
                         .setRequestBody(jsonMap); // attach here for logging before handling action
 
                     if (!jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
-                        //get the active user from the authorization header and put it in the request payload
+                        // get active user from id token passed to API and put it in the request payload
                         jsonMap.put(RequestFields.ACTIVE_USER,
                             TokenHelper.getActiveUserFromRequest(request, context));
 

@@ -72,7 +72,7 @@ public class NewWorkoutManager {
 
                     final WorkoutUser workoutUser = new WorkoutUser();
                     workoutUser.setWorkoutName(workoutName.trim());
-                    workoutUser.setAverageExercisesCompleted(0);
+                    workoutUser.setAverageExercisesCompleted(0.0);
                     workoutUser.setDateLast(creationTime);
                     workoutUser.setTimesCompleted(0);
                     workoutUser.setTotalExercisesSum(0);

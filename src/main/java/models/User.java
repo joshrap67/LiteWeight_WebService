@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toMap;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import exceptions.InvalidAttributeException;
+import helpers.Parser;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,9 +37,9 @@ public class User implements Model {
     private String pushEndpointArn;
     private String premiumToken;
     private String currentWorkout;
-    private int workoutsSent;
+    private Integer workoutsSent;
     private boolean privateAccount;
-    private int notificationPreferences;
+    private Integer notificationPreferences;
 
     @Setter(AccessLevel.NONE)
     private Map<String, WorkoutUser> userWorkouts;
@@ -63,9 +64,10 @@ public class User implements Model {
         this.setPushEndpointArn((String) json.get(PUSH_ENDPOINT_ARN));
         this.setPremiumToken((String) json.get(PREMIUM_TOKEN));
         this.setCurrentWorkout((String) json.get(CURRENT_WORKOUT));
-        this.setWorkoutsSent((Integer) json.get(WORKOUTS_SENT));
+        this.setWorkoutsSent(Parser.convertObjectToInteger(json.get(WORKOUTS_SENT)));
         this.setPrivateAccount((Boolean) json.get(PRIVATE_ACCOUNT));
-        this.setNotificationPreferences((Integer) json.get(NOTIFICATION_PREFERENCES));
+        this.setNotificationPreferences(
+            Parser.convertObjectToInteger(json.get(NOTIFICATION_PREFERENCES)));
         this.setUserWorkouts((Map<String, Object>) json.get(WORKOUTS));
         this.setUserExercises((Map<String, Object>) json.get(EXERCISES));
         this.setFriends((Map<String, Object>) json.get(FRIENDS));
@@ -184,5 +186,4 @@ public class User implements Model {
                 toMap(Entry::getKey, (Map.Entry<String, Friend> e) -> e.getValue().asMap()),
                 HashMap::new));
     }
-
 }

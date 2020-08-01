@@ -17,12 +17,12 @@ public class ExerciseRoutine implements Model {
     public static final String REPS = "reps";
     public static final String DETAILS = "details";
 
-    private int sortIndex;
+    private Integer sortIndex;
     private boolean completed;
     private String exerciseId;
     private double weight;
-    private int sets;
-    private int reps;
+    private Integer sets;
+    private Integer reps;
     private String details;
 
     public ExerciseRoutine(Map<String, Object> json) throws InvalidAttributeException {

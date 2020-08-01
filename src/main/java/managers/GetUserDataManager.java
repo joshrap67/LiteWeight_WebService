@@ -43,10 +43,7 @@ public class GetUserDataManager {
                     .successful(JsonHelper.convertObjectToJson(userResponse.asMap()));
             } else {
                 resultStatus = ResultStatus.failure("User does not exist.");
-
             }
-
-
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failure("Exception in " + classMethod);

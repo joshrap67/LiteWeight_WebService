@@ -1,5 +1,6 @@
 package models;
 
+import helpers.Parser;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,16 +21,17 @@ public class WorkoutUser implements Model {
     private String workoutName;
     private Map<Integer, Integer> currentDay;
     private String dateLast;
-    private int timesCompleted;
-    private double averageExercisesCompleted;
-    private int totalExercisesSum;
+    private Integer timesCompleted;
+    private Double averageExercisesCompleted;
+    private Integer totalExercisesSum;
 
     public WorkoutUser(Map<String, Object> json) {
         this.workoutName = (String) json.get(WORKOUT_NAME); // TODO validate?
         this.currentDay = (Map<Integer, Integer>) json.get(CURRENT_DAY);
         this.dateLast = (String) json.get(DATE_LAST);
         this.timesCompleted = (int) json.get(TIMES_COMPLETED);
-        this.averageExercisesCompleted = (double) json.get(AVERAGE_EXERCISES_COMPLETED);
+        this.averageExercisesCompleted = Parser
+            .convertObjectToDouble(json.get(AVERAGE_EXERCISES_COMPLETED));
         this.totalExercisesSum = (int) json.get(TOTAL_EXERCISES_SUM);
     }
 
