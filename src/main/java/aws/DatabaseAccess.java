@@ -36,8 +36,6 @@ public class DatabaseAccess {
 
     private final AmazonDynamoDBClient client;
 
-    private final HashMap<String, Item> cache;
-
     public DatabaseAccess() {
         final Regions region = Regions.US_EAST_2;
         this.client = (AmazonDynamoDBClient) AmazonDynamoDBClient.builder()
@@ -48,7 +46,6 @@ public class DatabaseAccess {
 
         this.workoutTable = dynamoDb.getTable(WORKOUT_TABLE_NAME);
         this.usersTable = dynamoDb.getTable(USERS_TABLE_NAME);
-        this.cache = new HashMap<>();
     }
 
     // Workout table methods
@@ -62,37 +59,13 @@ public class DatabaseAccess {
         return this.usersTable.putItem(user);
     }
 
-    public User getUserNoCache(final String username)
-        throws InvalidAttributeException {
-        final Item userItem = this.usersTable.getItem(new PrimaryKey(USERS_PRIMARY_KEY, username));
-        this.cache.put(username, userItem);
-
-        return new User(userItem);
-    }
-
     public User getUser(final String username)
         throws NullPointerException, InvalidAttributeException {
-        Item userItem;
-        if (this.cache.containsKey(username)) {
-            userItem = this.cache.get(username);
-        } else {
-            userItem = this.usersTable.getItem(new PrimaryKey(USERS_PRIMARY_KEY, username));
-            this.cache.put(username, userItem);
-        }
-
-        return new User(userItem);
+        return new User(this.usersTable.getItem(new PrimaryKey(USERS_PRIMARY_KEY, username)));
     }
 
     public Item getUserItem(final String username) throws NullPointerException {
-        Item userItem;
-        if (this.cache.containsKey(username)) {
-            userItem = this.cache.get(username);
-        } else {
-            userItem = this.usersTable.getItem(new PrimaryKey(USERS_PRIMARY_KEY, username));
-            this.cache.put(username, userItem);
-        }
-
-        return userItem;
+        return this.usersTable.getItem(new PrimaryKey(USERS_PRIMARY_KEY, username));
     }
 
     public UpdateItemOutcome updateUser(final String username,

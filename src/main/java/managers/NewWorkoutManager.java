@@ -1,7 +1,7 @@
 package managers;
 
 import aws.DatabaseAccess;
-import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.Put;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
@@ -28,6 +28,7 @@ import models.Routine;
 import models.User;
 import models.Workout;
 import models.WorkoutUser;
+import responses.UserWithWorkout;
 
 public class NewWorkoutManager {
 
@@ -54,7 +55,6 @@ public class NewWorkoutManager {
         try {
             User user = this.databaseAccess.getUser(activeUser);
             if (user != null) {
-                // validate input
                 final String workoutId = UUID.randomUUID().toString();
                 final String creationTime = Instant.now().toString();
                 final Routine routine = new Routine(routineMap);
@@ -69,6 +69,8 @@ public class NewWorkoutManager {
                     newWorkout.setWorkoutId(workoutId);
                     newWorkout.setWorkoutName(workoutName.trim());
                     newWorkout.setRoutine(routine);
+                    newWorkout.setCurrentDay(0);
+                    newWorkout.setCurrentWeek(0);
 
                     final WorkoutUser workoutUser = new WorkoutUser();
                     workoutUser.setWorkoutName(workoutName.trim());
@@ -76,25 +78,27 @@ public class NewWorkoutManager {
                     workoutUser.setDateLast(creationTime);
                     workoutUser.setTimesCompleted(0);
                     workoutUser.setTotalExercisesSum(0);
-                    workoutUser.setCurrentDay(new HashMap<Integer, Integer>() {{
-                        put(0, 0);
-                    }});
 
-                    // make the new workout the current workout, update exercises that are apart of this workout
+                    // update all the exercises that are now apart of this workout
+                    updateUserExercises(user, routine, workoutId, workoutName);
+
                     final UpdateItemData updateItemData = new UpdateItemData(activeUser,
                         DatabaseAccess.USERS_TABLE_NAME)
                         .withUpdateExpression(
-                            "set " + User.CURRENT_WORKOUT + " = :" + User.CURRENT_WORKOUT + "," +
-                                User.WORKOUTS + "= :" + User.WORKOUTS + "," +
-                                User.EXERCISES + "." + workoutId + "= :" + User.EXERCISES)
+                            "set " +
+                                User.CURRENT_WORKOUT + " = :" + User.CURRENT_WORKOUT + ", " +
+                                User.WORKOUTS + ".#workoutId= :" + User.WORKOUTS + ", " +
+                                User.EXERCISES + "= :" + User.EXERCISES)
                         .withValueMap(
-                            new ValueMap().withString(":" + User.CURRENT_WORKOUT, workoutId)
-                                .withString(":" + User.WORKOUTS, workoutName)
-                                .withMap(":" + User.EXERCISES, workoutUser.asMap()));
+                            new ValueMap()
+                                .withString(":" + User.CURRENT_WORKOUT, workoutId)
+                                .withMap(":" + User.WORKOUTS, workoutUser.asMap())
+                                .withMap(":" + User.EXERCISES, user.getUserExercisesMap()))
+                        .withNameMap(new NameMap()
+                            .with("#workoutId", workoutId));
 
                     // want a transaction since more than one object is being updated at once
                     final List<TransactWriteItem> actions = new ArrayList<>();
-
                     actions.add(new TransactWriteItem().withUpdate(updateItemData.asUpdate()));
                     actions.add(new TransactWriteItem()
                         .withPut(
@@ -105,7 +109,9 @@ public class NewWorkoutManager {
                     this.databaseAccess.executeWriteTransaction(actions);
 
                     resultStatus = ResultStatus
-                        .successful(JsonHelper.convertObjectToJson(newWorkout.asMap()));
+                        .successful(
+                            JsonHelper.convertObjectToJson(
+                                new UserWithWorkout(user, newWorkout).asMap()));
                 } else {
                     this.metrics.log("Input error: " + errorMessage);
                     resultStatus = ResultStatus.failure(errorMessage);
@@ -126,13 +132,17 @@ public class NewWorkoutManager {
 
     private void updateUserExercises(User user, Routine routine, String workoutId,
         String workoutName) {
-        // TODO allow for propagation of new weight/reps/sets/details to user object?
         // updates the list of exercises on the user object to include this new workout in all contained exercises
+        // get a list of all exercises (by id, not name of course)
         Set<String> exercises = new HashSet<>();
         for (Integer week : routine.getRoutine().keySet()) {
-            for (Integer day : routine.getRoutine().keySet()) {
-                String exerciseId = routine.getRoutine().get(week).get(day).getExerciseId();
-                exercises.add(exerciseId);
+            for (Integer day : routine.getRoutine().get(week).keySet()) {
+                List<ExerciseRoutine> exerciseListForDay = routine
+                    .getExerciseListForDay(week, day);
+                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
+                    String exerciseId = exerciseRoutine.getExerciseId();
+                    exercises.add(exerciseId);
+                }
             }
         }
 
@@ -144,6 +154,7 @@ public class NewWorkoutManager {
 
     private String validNewWorkoutInput(final String workoutName, final User activeUser,
         final Routine routine) {
+
         StringBuilder error = new StringBuilder();
         if (activeUser.getUserWorkouts().size() > Globals.MAX_FREE_WORKOUTS
             && activeUser.getPremiumToken() != null) {
@@ -186,17 +197,19 @@ public class NewWorkoutManager {
         Map<String, Integer> focusCount = new HashMap<>();
         for (Integer week : routine.getRoutine().keySet()) {
             for (Integer day : routine.getRoutine().get(week).keySet()) {
-                String exerciseId = routine.getRoutine().get(week).get(day).getExerciseId();
-                String focuses = user.getUserExercises().get(exerciseId).getFocuses().keySet()
-                    .toString();
-                String[] focusesSplit = focuses.split(FileReader.FOCUS_DELIM);
-                for (String focus : focusesSplit) {
-                    focusCount.merge(focus, 1, Integer::sum);
+                List<ExerciseRoutine> exerciseListForDay = routine
+                    .getExerciseListForDay(week, day);
+                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
+                    String exerciseId = exerciseRoutine.getExerciseId();
+                    for (String focus : user.getUserExercises().get(exerciseId).getFocuses()
+                        .keySet()) {
+                        focusCount.merge(focus, 1, Integer::sum);
+                    }
                 }
             }
         }
 
-        StringJoiner retVal = new StringJoiner(FileReader.FOCUS_DELIM);
+        StringJoiner retVal = new StringJoiner(FileReader.FOCUS_DELIM, "", "");
         int max = 0;
         for (String focus : focusCount.keySet()) {
             int count = focusCount.get(focus);
@@ -210,7 +223,6 @@ public class NewWorkoutManager {
                 retVal.add(focus);
             }
         }
-
         return retVal.toString();
     }
 }

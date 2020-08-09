@@ -30,7 +30,7 @@ public class ExerciseUser implements Model {
     @Setter(AccessLevel.NONE)
     private Map<String, Boolean> focuses;
     @Setter(AccessLevel.NONE)
-    private Map<String, String> workouts; // id to workout name that this exericse is apart of
+    private Map<String, String> workouts; // id to workout name that this exercise is apart of
 
 
     public ExerciseUser(Map<String, Object> json) {

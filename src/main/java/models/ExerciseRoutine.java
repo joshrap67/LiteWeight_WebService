@@ -1,6 +1,7 @@
 package models;
 
 import exceptions.InvalidAttributeException;
+import helpers.Parser;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,6 @@ import lombok.Data;
 @Data
 public class ExerciseRoutine implements Model {
 
-    public static final String SORT_INDEX = "sortIndex";
     public static final String COMPLETED = "completed";
     public static final String EXERCISE_ID = "exerciseId";
     public static final String WEIGHT = "weight";
@@ -17,7 +17,6 @@ public class ExerciseRoutine implements Model {
     public static final String REPS = "reps";
     public static final String DETAILS = "details";
 
-    private Integer sortIndex;
     private boolean completed;
     private String exerciseId;
     private double weight;
@@ -26,12 +25,11 @@ public class ExerciseRoutine implements Model {
     private String details;
 
     public ExerciseRoutine(Map<String, Object> json) throws InvalidAttributeException {
-        this.sortIndex = (int) json.get(SORT_INDEX);
         this.completed = (boolean) json.get(COMPLETED);
         this.exerciseId = (String) json.get(EXERCISE_ID);
-        this.weight = (double) json.get(WEIGHT);
-        this.sets = (int) json.get(SETS);
-        this.reps = (int) json.get(REPS);
+        this.weight = Parser.convertObjectToDouble(json.get(WEIGHT));
+        this.sets = Parser.convertObjectToInteger(json.get(SETS));
+        this.reps = Parser.convertObjectToInteger(json.get(REPS));
         this.details = (String) json.get(DETAILS);
     }
 
@@ -39,7 +37,6 @@ public class ExerciseRoutine implements Model {
     @Override
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();
-        retVal.putIfAbsent(SORT_INDEX, this.sortIndex);
         retVal.putIfAbsent(COMPLETED, this.completed);
         retVal.putIfAbsent(EXERCISE_ID, this.exerciseId);
         retVal.putIfAbsent(WEIGHT, this.weight);

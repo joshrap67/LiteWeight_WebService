@@ -9,17 +9,18 @@ import java.util.Map;
 
 public class JsonHelper {
 
-    public static String convertObjectToJson(Map<String, Object> object)
+    public static String convertObjectToJson(Map<String, Object> map)
         throws JsonProcessingException {
         String retVal;
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            retVal = mapper.writeValueAsString(object);
+            retVal = mapper.writeValueAsString(map);
         } catch (JsonProcessingException e) {
             retVal = "Error";
         }
-        return retVal;
+        // TODO i dont like this
+        return retVal.replace("\"","\\\"");
 
     }
 

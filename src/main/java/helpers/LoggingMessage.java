@@ -1,6 +1,8 @@
 package helpers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Map;
 
 public class LoggingMessage<T> {
@@ -77,7 +79,11 @@ public class LoggingMessage<T> {
         }
 
         if (this.exception != null) {
-            retString += "\n\texception: " + this.exception.toString();
+            // convert entire exception into string
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            this.exception.printStackTrace(pw);
+            retString += "\n\texception: " + sw.toString();
         }
 
         return retString;

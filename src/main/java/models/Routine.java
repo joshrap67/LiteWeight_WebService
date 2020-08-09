@@ -2,7 +2,9 @@ package models;
 
 import exceptions.InvalidAttributeException;
 import interfaces.Model;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -12,7 +14,7 @@ import lombok.Setter;
 public class Routine implements Model {
 
     @Setter(AccessLevel.NONE)
-    Map<Integer, Map<Integer, ExerciseRoutine>> routine;
+    Map<Integer, Map<Integer, RoutineDayMap>> routine;
 
     public Routine(Map<String, Object> json) throws InvalidAttributeException {
         if (json == null) {
@@ -21,14 +23,30 @@ public class Routine implements Model {
             this.routine = new HashMap<>();
             for (String week : json.keySet()) {
                 Map<String, Object> days = (Map<String, Object>) json.get(week);
+                Map<Integer, RoutineDayMap> specificDay = new HashMap<>();
                 for (String day : days.keySet()) {
-                    Map<Integer, ExerciseRoutine> specificDay = new HashMap<>();
-                    specificDay.putIfAbsent(Integer.parseInt(day), new ExerciseRoutine(
-                        (Map<String, Object>) days.get(day)));
-                    this.routine.putIfAbsent(Integer.parseInt(week), specificDay);
+
+                    RoutineDayMap dayExerciseMap = new RoutineDayMap(
+                        (Map<String, Object>) ((Map<String, Object>) json
+                            .get(week)).get(day));
+
+                    specificDay.putIfAbsent(Integer.parseInt(day), dayExerciseMap);
                 }
+                this.routine.putIfAbsent(Integer.parseInt(week), specificDay);
             }
         }
+    }
+
+    public List<ExerciseRoutine> getExerciseListForDay(int week, int day) {
+        List<ExerciseRoutine> list = new ArrayList<>();
+        for (Integer sortVal : this.routine.get(week).get(day).getExerciseRoutineMap().keySet()) {
+            list.add(this.routine.get(week).get(day).getExerciseRoutineMap().get(sortVal));
+        }
+        return list;
+    }
+
+    public void removeExercise(int week, int day, String exerciseId) {
+        this.routine.get(week).get(day).deleteExercise(exerciseId);
     }
 
     @Override
@@ -36,12 +54,18 @@ public class Routine implements Model {
         HashMap<String, Object> retVal = new HashMap<>();
         if (this.routine != null) {
             for (Integer week : this.routine.keySet()) {
-                for (Integer day : this.routine.keySet()) {
-                    Map<String, Object> specificDay = new HashMap<>();
-                    specificDay
-                        .putIfAbsent(day.toString(), this.routine.get(week).get(day).asMap());
-                    retVal.putIfAbsent(week.toString(), specificDay);
+                Map<String, Object> specificDay = new HashMap<>();
+                for (Integer day : this.routine.get(week).keySet()) {
+                    Map<String, Object> exercisesForDay = new HashMap<>();
+                    for (Integer sortVal : this.routine.get(week).get(day).getExerciseRoutineMap()
+                        .keySet()) {
+                        exercisesForDay.putIfAbsent(sortVal.toString(),
+                            this.routine.get(week).get(day).getExerciseRoutineMap().get(sortVal)
+                                .asMap());
+                    }
+                    specificDay.putIfAbsent(day.toString(), exercisesForDay);
                 }
+                retVal.putIfAbsent(week.toString(), specificDay);
             }
         }
         return retVal;

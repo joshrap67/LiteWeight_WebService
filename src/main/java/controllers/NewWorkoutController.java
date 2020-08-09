@@ -37,7 +37,7 @@ public class NewWorkoutController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 resultStatus = this.newWorkoutManager
-                    .execute(activeUser, workoutName, routine);
+                    .execute(workoutName, activeUser, routine);
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failure("Exception in " + classMethod);
