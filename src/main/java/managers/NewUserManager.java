@@ -27,7 +27,7 @@ public class NewUserManager {
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
     public ResultStatus<String> execute(final String username) {
-        final String classMethod = "GetUserDataManager.execute";
+        final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;

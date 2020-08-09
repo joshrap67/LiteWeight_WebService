@@ -22,7 +22,7 @@ public class NewWorkoutController implements ApiRequestController {
     @Override
     public ResultStatus processApiRequest(Map<String, Object> json,
         Metrics metrics) throws MissingApiRequestKeyException {
-        final String classMethod = "NewWorkoutController.processApiRequest";
+        final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
 

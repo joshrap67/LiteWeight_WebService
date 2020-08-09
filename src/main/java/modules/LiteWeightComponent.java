@@ -1,6 +1,7 @@
 package modules;
 
 import controllers.GetUserDataController;
+import controllers.GetUserWorkoutController;
 import controllers.NewUserController;
 import controllers.NewWorkoutController;
 import controllers.WarmingController;
@@ -18,4 +19,6 @@ public interface LiteWeightComponent {
     void inject(NewWorkoutController newWorkoutController);
 
     void inject(WarmingController warmingController);
+
+    void inject(GetUserWorkoutController getUserWorkoutController);
 }

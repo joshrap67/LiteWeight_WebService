@@ -20,14 +20,13 @@ public class WarmingManager {
         this.metrics = metrics;
     }
 
-    public ResultStatus handle() {
-        final String classMethod = "WarmingManager.handle";
+    public ResultStatus<String> execute() {
+        final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        //squelch metrics on warming -> we only want metrics on user impacting cold starts
         this.metrics.setPrintMetrics(false);
 
-        ResultStatus resultStatus;
+        ResultStatus<String> resultStatus;
 
         try {
             this.dbAccessManager.describeTables();

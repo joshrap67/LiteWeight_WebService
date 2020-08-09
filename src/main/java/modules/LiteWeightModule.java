@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import aws.DatabaseAccess;
 import helpers.Metrics;
 import managers.GetUserDataManager;
+import managers.GetUserWorkoutManager;
 import managers.NewUserManager;
 import managers.NewWorkoutManager;
 import managers.WarmingManager;
@@ -40,7 +41,12 @@ public class LiteWeightModule {
     }
 
     @Provides
-    public WarmingManager provideWarmingHandler(final DatabaseAccess dbAccessManager) {
-        return new WarmingManager(dbAccessManager, this.metrics);
+    public WarmingManager provideWarmingHandler(final DatabaseAccess databaseAccess) {
+        return new WarmingManager(databaseAccess, this.metrics);
+    }
+
+    @Provides
+    public GetUserWorkoutManager provideGetUserWorkoutManager(final DatabaseAccess databaseAccess) {
+        return new GetUserWorkoutManager(databaseAccess, this.metrics);
     }
 }

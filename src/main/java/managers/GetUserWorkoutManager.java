@@ -1,28 +1,29 @@
 package managers;
 
 import aws.DatabaseAccess;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import javax.inject.Inject;
 import helpers.ErrorMessage;
 import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.ResultStatus;
-import responses.UserResponse;
+import javax.inject.Inject;
+import models.User;
+import models.Workout;
+import responses.UserWithWorkout;
 
-public class GetUserDataManager {
+public class GetUserWorkoutManager {
 
     private final DatabaseAccess databaseAccess;
     private final Metrics metrics;
 
     @Inject
-    public GetUserDataManager(final DatabaseAccess dbAccessManager, final Metrics metrics) {
-        this.databaseAccess = dbAccessManager;
+    public GetUserWorkoutManager(DatabaseAccess databaseAccess, Metrics metrics) {
+        this.databaseAccess = databaseAccess;
         this.metrics = metrics;
     }
 
     /**
-     * This method gets the active user's data. If the active user's data does not exist, we assume
-     * this is their first login and we enter a new user object in the db.
+     * This method is used when the user first successfully signs into the app. It provides the user
+     * object to the user as well as the current workout if there is one.
      *
      * @param activeUser The user that made the api request, trying to get data about themselves.
      * @return Result status that will be sent to frontend with appropriate data or error messages.
@@ -34,13 +35,23 @@ public class GetUserDataManager {
         ResultStatus<String> resultStatus;
 
         try {
-            UserResponse userResponse;
-            Item user = this.databaseAccess.getUserItem(activeUser);
+            User user = this.databaseAccess.getUser(activeUser);
 
             if (user != null) {
-                userResponse = new UserResponse(user);
+                UserWithWorkout userWithWorkout;
+                String currentWorkoutId = user.getCurrentWorkout();
+                if (currentWorkoutId == null) {
+                    // user has no workouts
+                    userWithWorkout = new UserWithWorkout(user, null);
+                } else {
+                    // user has a workout so try and fetch it from the DB
+                    Workout workout = new Workout(
+                        this.databaseAccess.getWorkoutItem(currentWorkoutId));
+                    userWithWorkout = new UserWithWorkout(user, workout);
+                }
+
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.convertObjectToJson(userResponse.asMap()));
+                    .successful(JsonHelper.convertObjectToJson(userWithWorkout.asMap()));
             } else {
                 resultStatus = ResultStatus.failure("User does not exist.");
             }

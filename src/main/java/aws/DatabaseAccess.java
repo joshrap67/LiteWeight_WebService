@@ -18,7 +18,6 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsRequest;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsResult;
 import exceptions.InvalidAttributeException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import models.User;
 import models.Workout;
@@ -52,6 +51,16 @@ public class DatabaseAccess {
 
     public PutItemOutcome putWorkout(final Item workout) {
         return this.workoutTable.putItem(workout);
+    }
+
+    public Item getWorkoutItem(String currentWorkoutId) {
+        return this.workoutTable.getItem(new PrimaryKey(WORKOUT_TABLE_KEY, currentWorkoutId));
+    }
+
+    public Workout getWorkout(String currentWorkoutId)
+        throws NullPointerException, InvalidAttributeException {
+        return new Workout(
+            this.workoutTable.getItem(new PrimaryKey(WORKOUT_TABLE_KEY, currentWorkoutId)));
     }
 
     // Users table methods

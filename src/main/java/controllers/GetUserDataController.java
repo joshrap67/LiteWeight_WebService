@@ -22,7 +22,7 @@ public class GetUserDataController implements ApiRequestController {
     public ResultStatus<String> processApiRequest(final Map<String, Object> jsonMap,
         final Metrics metrics)
         throws MissingApiRequestKeyException {
-        final String classMethod = "GetUserDataController.processApiRequest";
+        final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
 

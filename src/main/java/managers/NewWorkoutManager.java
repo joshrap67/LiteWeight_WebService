@@ -47,7 +47,7 @@ public class NewWorkoutManager {
      */
     public ResultStatus<String> execute(final String workoutName, final String activeUser,
         final Map<String, Object> routineMap) {
-        final String classMethod = "NewWorkoutManager.execute";
+        final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;

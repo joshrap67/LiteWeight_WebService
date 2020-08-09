@@ -28,11 +28,12 @@ public class ProxyPostController implements
             .put("newUser", NewUserController.class)
             .put("newWorkout", NewWorkoutController.class)
             .put("warmingEndpoint", WarmingController.class)
+            .put("getUserWorkout", GetUserWorkoutController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
         Context context) {
-        final String classMethod = "ProxyPostController.handleRequest";
+        final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         final Metrics metrics = new Metrics(context.getAwsRequestId(), context.getLogger());
         metrics.commonSetup(classMethod);

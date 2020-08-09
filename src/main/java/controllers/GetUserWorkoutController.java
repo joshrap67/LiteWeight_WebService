@@ -9,17 +9,17 @@ import helpers.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Map;
 import javax.inject.Inject;
-import managers.NewUserManager;
+import managers.GetUserWorkoutManager;
 import models.User;
 import modules.Injector;
 
-public class NewUserController implements ApiRequestController {
+public class GetUserWorkoutController implements ApiRequestController {
 
     @Inject
-    public NewUserManager newUserManager;
+    public GetUserWorkoutManager getUserWorkoutManager;
 
     @Override
-    public ResultStatus processApiRequest(Map<String, Object> json,
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonMap,
         Metrics metrics) throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
@@ -28,9 +28,12 @@ public class NewUserController implements ApiRequestController {
         try {
             Injector.getInjector(metrics).inject(this);
 
-            if (json.containsKey(User.USERNAME)) {
-                final String username = (String) json.get(User.USERNAME);
-                resultStatus = this.newUserManager.execute(username);
+            if (jsonMap.containsKey(User.USERNAME)) {
+                final String username = (String) jsonMap.get(User.USERNAME);
+                resultStatus = this.getUserWorkoutManager.execute(username);
+            } else if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
+                final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
+                resultStatus = this.getUserWorkoutManager.execute(activeUser);
             } else {
                 throw new MissingApiRequestKeyException(
                     ImmutableList.of(RequestFields.ACTIVE_USER));
