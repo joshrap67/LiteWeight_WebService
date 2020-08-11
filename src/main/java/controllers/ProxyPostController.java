@@ -29,6 +29,7 @@ public class ProxyPostController implements
             .put("newWorkout", NewWorkoutController.class)
             .put("warmingEndpoint", WarmingController.class)
             .put("getUserWorkout", GetUserWorkoutController.class)
+            .put("switchWorkout", SwitchWorkoutController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,

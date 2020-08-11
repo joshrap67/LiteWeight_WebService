@@ -10,34 +10,35 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import managers.NewWorkoutManager;
+import managers.SwitchWorkoutManager;
 import models.Workout;
 import modules.Injector;
 
-public class NewWorkoutController implements ApiRequestController {
+public class SwitchWorkoutController implements ApiRequestController {
 
     @Inject
-    public NewWorkoutManager newWorkoutManager;
+    public SwitchWorkoutManager switchWorkoutManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody,
         Metrics metrics) throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
 
         final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_NAME, Workout.ROUTINE);
+            .asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_ID, RequestFields.WORKOUT);
 
-        if (json.keySet().containsAll(requiredKeys)) {
+        if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {
-                final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
-                final String workoutName = (String) json.get(Workout.WORKOUT_NAME);
-                final Map<String, Object> routine = (Map<String, Object>) json.get(Workout.ROUTINE);
+                final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
+                final String newWorkoutId = (String) jsonBody.get(Workout.WORKOUT_ID);
+                final Map<String, Object> oldWorkout = (Map<String, Object>) jsonBody
+                    .get(RequestFields.WORKOUT);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.newWorkoutManager
-                    .execute(workoutName, activeUser, routine);
+                resultStatus = this.switchWorkoutManager
+                    .execute(activeUser, newWorkoutId, oldWorkout);
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failure("Exception in " + classMethod);

@@ -78,6 +78,8 @@ public class NewWorkoutManager {
                     workoutUser.setDateLast(creationTime);
                     workoutUser.setTimesCompleted(0);
                     workoutUser.setTotalExercisesSum(0);
+                    // need to set it here so frontend gets updated user item back
+                    user.setUserWorkouts(workoutId, workoutUser);
 
                     // update all the exercises that are now apart of this workout
                     updateUserExercises(user, routine, workoutId, workoutName);

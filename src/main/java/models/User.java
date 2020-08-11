@@ -194,4 +194,8 @@ public class User implements Model {
                 toMap(Entry::getKey, (Map.Entry<String, Friend> e) -> e.getValue().asMap()),
                 HashMap::new));
     }
+
+    public void setUserWorkouts(String workoutId, WorkoutUser workoutUser) {
+        this.userWorkouts.putIfAbsent(workoutId, workoutUser);
+    }
 }

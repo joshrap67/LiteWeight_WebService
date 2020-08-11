@@ -4,6 +4,7 @@ import controllers.GetUserDataController;
 import controllers.GetUserWorkoutController;
 import controllers.NewUserController;
 import controllers.NewWorkoutController;
+import controllers.SwitchWorkoutController;
 import controllers.WarmingController;
 import dagger.Component;
 import javax.inject.Singleton;
@@ -21,4 +22,6 @@ public interface LiteWeightComponent {
     void inject(WarmingController warmingController);
 
     void inject(GetUserWorkoutController getUserWorkoutController);
+
+    void inject(SwitchWorkoutController switchWorkoutController);
 }
