@@ -30,6 +30,7 @@ public class ProxyPostController implements
             .put("warmingEndpoint", WarmingController.class)
             .put("getUserWorkout", GetUserWorkoutController.class)
             .put("switchWorkout", SwitchWorkoutController.class)
+            .put("copyWorkout", CopyWorkoutController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
@@ -65,8 +66,8 @@ public class ProxyPostController implements
                             .newInstance();
                         resultStatus = apiRequestManager.processApiRequest(jsonMap, metrics);
                     } else {
-                        //bad request body
-                        resultStatus = ResultStatus.failure("Bad request body.");
+                        resultStatus = ResultStatus
+                            .failure("Bad request body. Missing active user.");
                     }
                 } else {
                     metrics.log(new WarningMessage(

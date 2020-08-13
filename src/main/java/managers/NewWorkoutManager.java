@@ -7,23 +7,18 @@ import com.amazonaws.services.dynamodbv2.model.Put;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import helpers.AttributeValueHelper;
 import helpers.ErrorMessage;
-import helpers.FileReader;
-import helpers.Globals;
 import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.ResultStatus;
 import helpers.UpdateItemData;
+import helpers.Validator;
+import helpers.WorkoutHelper;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
 import java.util.UUID;
 import javax.inject.Inject;
-import models.ExerciseRoutine;
 import models.Routine;
 import models.User;
 import models.Workout;
@@ -58,14 +53,15 @@ public class NewWorkoutManager {
                 final String workoutId = UUID.randomUUID().toString();
                 final String creationTime = Instant.now().toString();
                 final Routine routine = new Routine(routineMap);
-                String errorMessage = validNewWorkoutInput(workoutName, user, routine);
+                String errorMessage = Validator.validNewWorkoutInput(workoutName, user, routine);
 
                 if (errorMessage == null) {
                     // no error, so go ahead and try and insert this new workout along with updating active user
                     final Workout newWorkout = new Workout();
                     newWorkout.setCreationDate(creationTime);
                     newWorkout.setCreator(activeUser);
-                    newWorkout.setMostFrequentFocus(findMostFrequentFocus(user, routine));
+                    newWorkout
+                        .setMostFrequentFocus(WorkoutHelper.findMostFrequentFocus(user, routine));
                     newWorkout.setWorkoutId(workoutId);
                     newWorkout.setWorkoutName(workoutName.trim());
                     newWorkout.setRoutine(routine);
@@ -82,7 +78,7 @@ public class NewWorkoutManager {
                     user.setUserWorkouts(workoutId, workoutUser);
 
                     // update all the exercises that are now apart of this workout
-                    updateUserExercises(user, routine, workoutId, workoutName);
+                    WorkoutHelper.updateUserExercises(user, routine, workoutId, workoutName);
 
                     final UpdateItemData updateItemData = new UpdateItemData(activeUser,
                         DatabaseAccess.USERS_TABLE_NAME)
@@ -130,101 +126,5 @@ public class NewWorkoutManager {
 
         this.metrics.commonClose(resultStatus.success);
         return resultStatus;
-    }
-
-    private void updateUserExercises(User user, Routine routine, String workoutId,
-        String workoutName) {
-        // updates the list of exercises on the user object to include this new workout in all contained exercises
-        // get a list of all exercises (by id, not name of course)
-        Set<String> exercises = new HashSet<>();
-        for (Integer week : routine.getRoutine().keySet()) {
-            for (Integer day : routine.getRoutine().get(week).keySet()) {
-                List<ExerciseRoutine> exerciseListForDay = routine
-                    .getExerciseListForDay(week, day);
-                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
-                    String exerciseId = exerciseRoutine.getExerciseId();
-                    exercises.add(exerciseId);
-                }
-            }
-        }
-
-        for (String exerciseId : exercises) {
-            user.getUserExercises().get(exerciseId).getWorkouts()
-                .putIfAbsent(workoutId, workoutName.trim());
-        }
-    }
-
-    private String validNewWorkoutInput(final String workoutName, final User activeUser,
-        final Routine routine) {
-
-        StringBuilder error = new StringBuilder();
-        if (activeUser.getUserWorkouts().size() > Globals.MAX_FREE_WORKOUTS
-            && activeUser.getPremiumToken() != null) {
-            // TODO need to actually verify that token is good?
-            error.append("Max amount of free workouts reached.\n");
-        }
-        if (workoutName.length() > Globals.MAX_WORKOUT_NAME_LENGTH) {
-            error.append("Workout name is too long.\n");
-        }
-        boolean repeat = false;
-        for (String workoutId : activeUser.getUserWorkouts().keySet()) {
-            if (activeUser.getUserWorkouts().get(workoutId).getWorkoutName()
-                .equals(workoutName.trim())) {
-                repeat = true;
-                break;
-            }
-        }
-        if (repeat) {
-            error.append("Workout name already exists.\n");
-        }
-
-        if (routine.getRoutine().keySet().size() > Globals.MAX_WEEKS_ROUTINE) {
-            error.append("Workout exceeds maximum amount of weeks allowed.");
-        }
-
-        for (Integer week : routine.getRoutine().keySet()) {
-            int dayCount = routine.getRoutine().get(week).keySet().size();
-            if (dayCount > Globals.MAX_DAYS_ROUTINE) {
-                error.append("Week: ").append(week)
-                    .append(" exceeds maximum amount of days in a week.");
-            }
-        }
-
-        return ((error.length() == 0) ? null : error.toString().trim());
-    }
-
-    public static String findMostFrequentFocus(User user,
-        Routine routine) {
-
-        Map<String, Integer> focusCount = new HashMap<>();
-        for (Integer week : routine.getRoutine().keySet()) {
-            for (Integer day : routine.getRoutine().get(week).keySet()) {
-                List<ExerciseRoutine> exerciseListForDay = routine
-                    .getExerciseListForDay(week, day);
-                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
-                    String exerciseId = exerciseRoutine.getExerciseId();
-                    for (String focus : user.getUserExercises().get(exerciseId).getFocuses()
-                        .keySet()) {
-                        focusCount.merge(focus, 1, Integer::sum);
-                    }
-                }
-            }
-        }
-
-        StringJoiner retVal = new StringJoiner(FileReader.FOCUS_DELIM, "", "");
-        int max = 0;
-        for (String focus : focusCount.keySet()) {
-            int count = focusCount.get(focus);
-            if (count > max) {
-                max = count;
-            }
-        }
-        for (String focus : focusCount.keySet()) {
-            int count = focusCount.get(focus);
-            if (count == max) {
-                retVal.add(focus);
-            }
-        }
-        return retVal.toString();
     }
 }

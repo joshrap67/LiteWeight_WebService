@@ -37,6 +37,17 @@ public class Routine implements Model {
         }
     }
 
+    public void resetAllExercises() {
+        // marks all exercises in the routine as not completed
+        for (Integer week : this.getRoutine().keySet()) {
+            for (Integer day : this.getRoutine().get(week).keySet()) {
+                for (ExerciseRoutine exerciseRoutine : this.getExerciseListForDay(week, day)) {
+                    exerciseRoutine.setCompleted(false);
+                }
+            }
+        }
+    }
+
     public List<ExerciseRoutine> getExerciseListForDay(int week, int day) {
         List<ExerciseRoutine> list = new ArrayList<>();
         for (Integer sortVal : this.routine.get(week).get(day).getExerciseRoutineMap().keySet()) {

@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import aws.DatabaseAccess;
 import helpers.Metrics;
+import managers.CopyWorkoutManager;
 import managers.GetUserDataManager;
 import managers.GetUserWorkoutManager;
 import managers.NewUserManager;
@@ -54,5 +55,10 @@ public class LiteWeightModule {
     @Provides
     public SwitchWorkoutManager provideSwitchWorkoutManager(final DatabaseAccess databaseAccess) {
         return new SwitchWorkoutManager(databaseAccess, this.metrics);
+    }
+
+    @Provides
+    public CopyWorkoutManager provideCopyWorkoutManager(final DatabaseAccess databaseAccess) {
+        return new CopyWorkoutManager(databaseAccess, this.metrics);
     }
 }
