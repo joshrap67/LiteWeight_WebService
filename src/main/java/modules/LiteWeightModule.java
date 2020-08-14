@@ -14,6 +14,7 @@ import managers.GetUserWorkoutManager;
 import managers.NewUserManager;
 import managers.NewWorkoutManager;
 import managers.RenameWorkoutManager;
+import managers.ResetWorkoutStatisticsManager;
 import managers.SwitchWorkoutManager;
 import managers.WarmingManager;
 
@@ -72,5 +73,11 @@ public class LiteWeightModule {
     @Provides
     public DeleteWorkoutManager provideDeleteWorkoutManager(final DatabaseAccess databaseAccess) {
         return new DeleteWorkoutManager(databaseAccess, this.metrics);
+    }
+
+    @Provides
+    public ResetWorkoutStatisticsManager provideResetWorkoutStatisticsManager(
+        final DatabaseAccess databaseAccess) {
+        return new ResetWorkoutStatisticsManager(databaseAccess, this.metrics);
     }
 }
