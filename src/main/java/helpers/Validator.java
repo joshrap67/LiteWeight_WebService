@@ -17,16 +17,9 @@ public class Validator {
         if (workoutName.length() > Globals.MAX_WORKOUT_NAME_LENGTH) {
             error.append("Workout name is too long.\n");
         }
-        boolean repeat = false;
-        for (String workoutId : activeUser.getUserWorkouts().keySet()) {
-            if (activeUser.getUserWorkouts().get(workoutId).getWorkoutName()
-                .equals(workoutName.trim())) {
-                repeat = true;
-                break;
-            }
-        }
-        if (repeat) {
-            error.append("Workout name already exists.\n");
+        String workoutNameError = validWorkoutName(workoutName, activeUser);
+        if (workoutNameError != null) {
+            error.append(String.format("%s\n", workoutNameError));
         }
 
         if (routine.getRoutine().keySet().size() > Globals.MAX_WEEKS_ROUTINE) {
@@ -42,5 +35,21 @@ public class Validator {
         }
 
         return ((error.length() == 0) ? null : error.toString().trim());
+    }
+
+    public static String validWorkoutName(final String workoutName, final User user) {
+        String error = null;
+        boolean repeat = false;
+        for (String workoutId : user.getUserWorkouts().keySet()) {
+            if (user.getUserWorkouts().get(workoutId).getWorkoutName()
+                .equals(workoutName.trim())) {
+                repeat = true;
+                break;
+            }
+        }
+        if (repeat) {
+            error = "Workout name already exists.";
+        }
+        return error;
     }
 }

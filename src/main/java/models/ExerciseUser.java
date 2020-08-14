@@ -75,7 +75,7 @@ public class ExerciseUser implements Model {
         } else {
             this.workouts = new HashMap<>();
             for (String workoutId : json.keySet()) {
-                this.workouts.putIfAbsent(workoutId, (String) json.get(Workout.WORKOUT_NAME));
+                this.workouts.putIfAbsent(workoutId, (String) json.get(workoutId));
             }
         }
     }
