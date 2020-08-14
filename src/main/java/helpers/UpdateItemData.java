@@ -84,9 +84,8 @@ public class UpdateItemData {
 
     private Map<String, AttributeValue> getKeyMap() throws Exception {
         final String keyIndex = DatabaseAccess.getKeyIndex(this.tableName);
-        final String keyValueCopy = this.keyValue;
         return new HashMap<String, AttributeValue>() {{
-            put(keyIndex, new AttributeValue().withS(keyValueCopy));
+            put(keyIndex, new AttributeValue().withS(UpdateItemData.this.keyValue));
         }};
     }
 }
