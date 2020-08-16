@@ -13,9 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import models.User;
-import models.Workout;
 import models.WorkoutUser;
-import responses.UserWithWorkout;
 
 public class ResetWorkoutStatisticsManager {
 

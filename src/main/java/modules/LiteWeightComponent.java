@@ -2,6 +2,7 @@ package modules;
 
 import controllers.CopyWorkoutController;
 import controllers.DeleteWorkoutController;
+import controllers.EditWorkoutController;
 import controllers.GetUserDataController;
 import controllers.GetUserWorkoutController;
 import controllers.NewUserController;
@@ -36,4 +37,6 @@ public interface LiteWeightComponent {
     void inject(DeleteWorkoutController deleteWorkoutController);
 
     void inject(ResetWorkoutStatisticsController resetWorkoutStatisticsController);
+
+    void inject(EditWorkoutController editWorkoutController);
 }

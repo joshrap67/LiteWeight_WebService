@@ -31,8 +31,8 @@ public class User implements Model {
     public static final String FRIENDS = "friends";
     public static final String FRIENDS_OF = "friendsOf";
     public static final String RECEIVED_WORKOUTS = "receivedWorkouts";
-    public static final String PROPAGATE_DEFAULT_ON_SAVE = "propagateDefaultOnSave";
-    public static final String PROPAGATE_DEFAULT_ON_RESET = "propagateDefaultOnReset";
+    public static final String UPDATE_DEFAULT_WEIGHT_ON_SAVE = "updateDefaultWeightOnSave";
+    public static final String UPDATE_DEFAULT_WEIGHT_ON_RESTART = "updateDefaultWeightOnRestart";
 
     private String username;
     private String icon;
@@ -41,8 +41,8 @@ public class User implements Model {
     private String currentWorkout;
     private Integer workoutsSent;
     private boolean privateAccount;
-    private boolean propagateDefaultOnSave;
-    private boolean propagateDefaultOnReset;
+    private boolean updateDefaultWeightOnSave;
+    private boolean updateDefaultWeightOnRestart;
     private Integer notificationPreferences;
 
     @Setter(AccessLevel.NONE)
@@ -70,8 +70,8 @@ public class User implements Model {
         this.setCurrentWorkout((String) json.get(CURRENT_WORKOUT));
         this.setWorkoutsSent(Parser.convertObjectToInteger(json.get(WORKOUTS_SENT)));
         this.setPrivateAccount((Boolean) json.get(PRIVATE_ACCOUNT));
-        this.setPropagateDefaultOnReset((Boolean) json.get(PROPAGATE_DEFAULT_ON_RESET));
-        this.setPropagateDefaultOnSave((Boolean) json.get(PROPAGATE_DEFAULT_ON_SAVE));
+        this.setUpdateDefaultWeightOnRestart((Boolean) json.get(UPDATE_DEFAULT_WEIGHT_ON_RESTART));
+        this.setUpdateDefaultWeightOnSave((Boolean) json.get(UPDATE_DEFAULT_WEIGHT_ON_SAVE));
         this.setNotificationPreferences(
             Parser.convertObjectToInteger(json.get(NOTIFICATION_PREFERENCES)));
         this.setUserWorkouts((Map<String, Object>) json.get(WORKOUTS));
@@ -157,8 +157,8 @@ public class User implements Model {
         retVal.putIfAbsent(FRIENDS, this.getFriendsMap());
         retVal.putIfAbsent(FRIENDS_OF, this.friendsOf);
         retVal.putIfAbsent(RECEIVED_WORKOUTS, this.receivedWorkouts);
-        retVal.putIfAbsent(PROPAGATE_DEFAULT_ON_SAVE, this.propagateDefaultOnSave);
-        retVal.putIfAbsent(PROPAGATE_DEFAULT_ON_RESET, this.propagateDefaultOnReset);
+        retVal.putIfAbsent(UPDATE_DEFAULT_WEIGHT_ON_SAVE, this.updateDefaultWeightOnSave);
+        retVal.putIfAbsent(UPDATE_DEFAULT_WEIGHT_ON_RESTART, this.updateDefaultWeightOnRestart);
         return retVal;
     }
 

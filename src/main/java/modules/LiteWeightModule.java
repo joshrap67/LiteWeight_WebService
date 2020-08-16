@@ -9,6 +9,7 @@ import aws.DatabaseAccess;
 import helpers.Metrics;
 import managers.CopyWorkoutManager;
 import managers.DeleteWorkoutManager;
+import managers.EditWorkoutManager;
 import managers.GetUserDataManager;
 import managers.GetUserWorkoutManager;
 import managers.NewUserManager;
@@ -79,5 +80,11 @@ public class LiteWeightModule {
     public ResetWorkoutStatisticsManager provideResetWorkoutStatisticsManager(
         final DatabaseAccess databaseAccess) {
         return new ResetWorkoutStatisticsManager(databaseAccess, this.metrics);
+    }
+
+    @Provides
+    public EditWorkoutManager provideEditWorkoutManager(
+        final DatabaseAccess databaseAccess) {
+        return new EditWorkoutManager(databaseAccess, this.metrics);
     }
 }

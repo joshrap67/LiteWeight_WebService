@@ -60,6 +60,18 @@ public class Routine implements Model {
         this.routine.get(week).get(day).deleteExercise(exerciseId);
     }
 
+    public Map<Integer, RoutineDayMap> getWeek(int week) {
+        return this.getRoutine().get(week);
+    }
+
+    public RoutineDayMap getDay(int week, int day) {
+        return this.getRoutine().get(week).get(day);
+    }
+
+    public int size() {
+        return this.routine.size();
+    }
+
     @Override
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();

@@ -73,7 +73,7 @@ public class SwitchWorkoutManager {
                         "set " +
                             Workout.CURRENT_DAY + " = :" + Workout.CURRENT_DAY + ", " +
                             Workout.CURRENT_WEEK + " = :" + Workout.CURRENT_WEEK + ", " +
-                            "#routine" + " =:" + Workout.ROUTINE)
+                            "#routine =:" + Workout.ROUTINE)
                     .withValueMap(
                         new ValueMap()
                             .withNumber(":" + Workout.CURRENT_DAY, oldWorkout.getCurrentDay())

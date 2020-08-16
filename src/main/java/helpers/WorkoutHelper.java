@@ -12,19 +12,29 @@ import models.User;
 
 public class WorkoutHelper {
 
-    public static void updateUserExercises(User user, Routine routine, String workoutId,
-        String workoutName) {
+    public static void updateUserExercises(final User user, final Routine routine,
+        final String workoutId,
+        final String workoutName) {
         // updates the list of exercises on the user object to include this new workout in all contained exercises
 
+        boolean updateDefaultWeight = user.isUpdateDefaultWeightOnSave();
         // get a list of all exercises (by id, not name of course)
         Set<String> exercises = new HashSet<>();
-        for (Integer week : routine.getRoutine().keySet()) {
-            for (Integer day : routine.getRoutine().get(week).keySet()) {
+        for (int week = 0; week < routine.size(); week++) {
+            for (int day = 0; day < routine.getWeek(week).size(); day++) {
                 List<ExerciseRoutine> exerciseListForDay = routine
                     .getExerciseListForDay(week, day);
                 for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
                     String exerciseId = exerciseRoutine.getExerciseId();
+                    if (updateDefaultWeight && exerciseRoutine.getWeight() > user.getUserExercises()
+                        .get(exerciseId).getDefaultWeight()) {
+                        // if user wants to update default weight on save and this exercise has a greater
+                        // weight than the current default, then update the default
+                        user.getUserExercises().get(exerciseId)
+                            .setDefaultWeight(exerciseRoutine.getWeight());
+                    }
                     exercises.add(exerciseId);
+
                 }
             }
         }
@@ -35,12 +45,65 @@ public class WorkoutHelper {
         }
     }
 
-    public static String findMostFrequentFocus(User user,
-        Routine routine) {
+    public static void updateUserExercisesOnEdit(final User user, final Routine newRoutine,
+        final Routine oldRoutine,
+        final String workoutId,
+        final String workoutName) {
+        // updates the list of exercises on the user object to include this new workout in all contained exercises
+
+        boolean updateDefaultWeight = user.isUpdateDefaultWeightOnSave();
+        // get a list of all new exercises (by id)
+        Set<String> newExercises = new HashSet<>();
+        for (int week = 0; week < newRoutine.size(); week++) {
+            for (int day = 0; day < newRoutine.getWeek(week).size(); day++) {
+                List<ExerciseRoutine> exerciseListForDay = newRoutine
+                    .getExerciseListForDay(week, day);
+                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
+                    String exerciseId = exerciseRoutine.getExerciseId();
+                    if (updateDefaultWeight && exerciseRoutine.getWeight() > user.getUserExercises()
+                        .get(exerciseId).getDefaultWeight()) {
+                        // if user wants to update default weight on save and this exercise has a greater
+                        // weight than the current default, then update the default
+                        user.getUserExercises().get(exerciseId)
+                            .setDefaultWeight(exerciseRoutine.getWeight());
+                    }
+                    newExercises.add(exerciseId);
+                }
+            }
+        }
+        // get a set of all the old exercises (by id)
+        Set<String> oldExercises = new HashSet<>();
+        for (int week = 0; week < oldRoutine.size(); week++) {
+            for (int day = 0; day < oldRoutine.getWeek(week).size(); day++) {
+                List<ExerciseRoutine> exerciseListForDay = oldRoutine
+                    .getExerciseListForDay(week, day);
+                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
+                    String exerciseId = exerciseRoutine.getExerciseId();
+                    oldExercises.add(exerciseId);
+                }
+            }
+        }
+        // find the exercises that are no longer being used in this workout
+        Set<String> deletedExercises = new HashSet<>(oldExercises);
+        deletedExercises.removeAll(newExercises);
+
+        for (String exerciseId : newExercises) {
+            // exercise is now in this workout, so reflect that in the user object
+            user.getUserExercises().get(exerciseId).getWorkouts()
+                .putIfAbsent(workoutId, workoutName.trim());
+        }
+        for (String exerciseId : deletedExercises) {
+            // exercise is no longer in the workout, so remove that mapping from exercise on user object
+            user.getUserExercises().get(exerciseId).getWorkouts().remove(workoutId);
+        }
+    }
+
+    public static String findMostFrequentFocus(final User user,
+        final Routine routine) {
 
         Map<String, Integer> focusCount = new HashMap<>();
-        for (Integer week : routine.getRoutine().keySet()) {
-            for (Integer day : routine.getRoutine().get(week).keySet()) {
+        for (int week = 0; week < routine.size(); week++) {
+            for (int day = 0; day < routine.getWeek(week).size(); day++) {
                 List<ExerciseRoutine> exerciseListForDay = routine
                     .getExerciseListForDay(week, day);
                 for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {

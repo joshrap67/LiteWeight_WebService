@@ -22,16 +22,42 @@ public class Validator {
             error.append(String.format("%s\n", workoutNameError));
         }
 
-        if (routine.getRoutine().keySet().size() > Globals.MAX_WEEKS_ROUTINE) {
+        if (routine.size() > Globals.MAX_WEEKS_ROUTINE) {
             error.append("Workout exceeds maximum amount of weeks allowed.");
         }
 
-        for (Integer week : routine.getRoutine().keySet()) {
-            int dayCount = routine.getRoutine().get(week).keySet().size();
+        for (int week = 0; week < routine.size(); week++) {
+            int dayCount = routine.getWeek(week).size();
             if (dayCount > Globals.MAX_DAYS_ROUTINE) {
                 error.append("Week: ").append(week)
                     .append(" exceeds maximum amount of days in a week.");
             }
+        }
+
+        return ((error.length() == 0) ? null : error.toString().trim());
+    }
+
+    public static String validEditWorkoutInput(Routine routine) {
+        StringBuilder error = new StringBuilder();
+        if (routine.size() > Globals.MAX_WEEKS_ROUTINE) {
+            error.append("Workout exceeds maximum amount of weeks allowed.");
+        }
+
+        boolean emptyDays = false;
+        for (int week = 0; week < routine.size(); week++) {
+            int dayCount = routine.getWeek(week).size();
+            if (dayCount > Globals.MAX_DAYS_ROUTINE) {
+                error.append("Week: ").append(week)
+                    .append(" exceeds maximum amount of days in a week.");
+            }
+            for (int day = 0; day < routine.getWeek(week).size(); day++) {
+                if (routine.getExerciseListForDay(week, day).isEmpty()) {
+                    emptyDays = true;
+                }
+            }
+        }
+        if (emptyDays) {
+            error.append("Workout has a day without any exercises.");
         }
 
         return ((error.length() == 0) ? null : error.toString().trim());

@@ -42,8 +42,8 @@ public class NewUserManager {
                 .withNull(User.PUSH_ENDPOINT_ARN) // todo get this
                 .withInt(User.WORKOUTS_SENT, 0)
                 .withBoolean(User.PRIVATE_ACCOUNT, false)
-                .withBoolean(User.PROPAGATE_DEFAULT_ON_RESET, true)
-                .withBoolean(User.PROPAGATE_DEFAULT_ON_SAVE, true)
+                .withBoolean(User.UPDATE_DEFAULT_WEIGHT_ON_RESTART, true)
+                .withBoolean(User.UPDATE_DEFAULT_WEIGHT_ON_SAVE, true)
                 .withInt(User.NOTIFICATION_PREFERENCES, 0) // TODO use constant
                 .withMap(User.FRIENDS, new HashMap<>())
                 .withMap(User.FRIENDS_OF, new HashMap<>())

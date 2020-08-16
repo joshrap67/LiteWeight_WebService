@@ -10,14 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import managers.DeleteWorkoutManager;
-import models.Workout;
+import managers.EditWorkoutManager;
 import modules.Injector;
 
-public class DeleteWorkoutController implements ApiRequestController {
+public class EditWorkoutController implements ApiRequestController {
 
     @Inject
-    public DeleteWorkoutManager deleteWorkoutManager;
+    EditWorkoutManager editWorkoutManager;
 
     @Override
     public ResultStatus<String> processApiRequest(Map<String, Object> json,
@@ -27,16 +26,17 @@ public class DeleteWorkoutController implements ApiRequestController {
         ResultStatus<String> resultStatus;
 
         final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_ID);
+            .asList(RequestFields.ACTIVE_USER, RequestFields.WORKOUT);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
-                final String workoutId = (String) json.get(Workout.WORKOUT_ID);
+                final Map<String, Object> workout = (Map<String, Object>) json
+                    .get(RequestFields.WORKOUT);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.deleteWorkoutManager
-                    .execute(activeUser, workoutId);
+                resultStatus = this.editWorkoutManager
+                    .execute(activeUser, workout);
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failure("Exception in " + classMethod);
