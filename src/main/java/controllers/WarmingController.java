@@ -26,7 +26,7 @@ public class WarmingController implements ApiRequestController {
             resultStatus = this.warmingManager.execute();
         } catch (final Exception e) {
             metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
-            resultStatus = ResultStatus.failure("Exception in " + classMethod);
+            resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
         }
 
         return resultStatus;

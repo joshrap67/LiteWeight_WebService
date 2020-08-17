@@ -68,7 +68,7 @@ public class LoggingMessage<T> {
             try {
                 retString +=
                     "\n\tinput: " + JsonHelper
-                        .convertObjectToJson((Map<String, Object>) this.input);
+                        .serializeObject((Map<String, Object>) this.input);
             } catch (JsonProcessingException e) {
                 retString += "Error";
             }

@@ -92,17 +92,17 @@ public class DeleteWorkoutManager {
                 resultStatus = ResultStatus
                     .successful(
                         JsonHelper
-                            .convertObjectToJson(new UserWithWorkout(user, nextWorkout).asMap()));
+                            .serializeObject(new UserWithWorkout(user, nextWorkout).asMap()));
             } else {
                 this.metrics.log("Active user does not exist");
-                resultStatus = ResultStatus.failure("User does not exist.");
+                resultStatus = ResultStatus.failureBadEntity("User does not exist.");
             }
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failure("Exception in " + classMethod + ". " + e);
+            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod + ". " + e);
         }
 
-        this.metrics.commonClose(resultStatus.success);
+        this.metrics.commonClose(resultStatus.responseCode);
         return resultStatus;
     }
 }

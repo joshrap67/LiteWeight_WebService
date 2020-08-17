@@ -42,7 +42,7 @@ public class GetUserWorkoutController implements ApiRequestController {
             throw e;
         } catch (final Exception e) {
             metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
-            resultStatus = ResultStatus.failure("Exception in " + classMethod);
+            resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
         }
 
         return resultStatus;

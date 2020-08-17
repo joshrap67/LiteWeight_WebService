@@ -40,7 +40,7 @@ public class NewWorkoutController implements ApiRequestController {
                     .execute(workoutName, activeUser, routine);
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-                resultStatus = ResultStatus.failure("Exception in " + classMethod);
+                resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
             }
         } else {
             throw new MissingApiRequestKeyException(requiredKeys);

@@ -54,7 +54,7 @@ public class ProxyPostController implements
                 action = splitAction[1]; // the action is after the '/'
 
                 if (ACTIONS_TO_CONTROLLERS.containsKey(action)) {
-                    final Map<String, Object> jsonMap = JsonHelper.parseInput(request.getBody());
+                    final Map<String, Object> jsonMap = JsonHelper.deserialize(request.getBody());
                     metrics
                         .setRequestBody(jsonMap); // attach here for logging before handling action
 
@@ -71,7 +71,7 @@ public class ProxyPostController implements
                         resultStatus = apiRequestManager.processApiRequest(jsonMap, metrics);
                     } else {
                         resultStatus = ResultStatus
-                            .failure("Bad request body. Missing active user.");
+                            .failureBadRequest("Bad request body. Missing active user.");
                     }
                 } else {
                     metrics.log(new WarningMessage(
@@ -80,7 +80,7 @@ public class ProxyPostController implements
                             put("body", request.getBody());
                         }},
                         classMethod, "Unknown action."));
-                    resultStatus = ResultStatus.failure("Unknown action.");
+                    resultStatus = ResultStatus.failureBadRequest("Unknown action.");
                 }
             } else {
                 metrics.log(new WarningMessage<>(
@@ -89,7 +89,7 @@ public class ProxyPostController implements
                         put("body", request.getBody());
                     }},
                     classMethod, "Bad request format."));
-                resultStatus = ResultStatus.failure("Bad request format.");
+                resultStatus = ResultStatus.failureBadRequest("Bad request format.");
             }
         } catch (final Exception e) {
             metrics.log(new ErrorMessage(
@@ -99,12 +99,13 @@ public class ProxyPostController implements
                 }},
                 classMethod, e));
             resultStatus = ResultStatus
-                .failure("Exception occurred." + request.getBody() + " " + e.toString());
+                .failureBadRequest("Exception occurred." + request.getBody() + " " + e.toString());
         }
 
-        metrics.commonClose(resultStatus.success);
+        metrics.commonClose(resultStatus.responseCode);
         metrics.logMetrics();
 
-        return new APIGatewayProxyResponseEvent().withBody(resultStatus.toString());
+        return new APIGatewayProxyResponseEvent().withBody(resultStatus.resultMessage)
+            .withStatusCode(resultStatus.responseCode);
     }
 }

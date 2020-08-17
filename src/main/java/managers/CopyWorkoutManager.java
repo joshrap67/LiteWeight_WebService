@@ -96,20 +96,20 @@ public class CopyWorkoutManager {
                     .add(new TransactWriteItem().withUpdate(updateOldWorkoutItemData.asUpdate()));
 
                 this.databaseAccess.executeWriteTransaction(actions);
-                resultStatus = ResultStatus.successful(JsonHelper.convertObjectToJson(
+                resultStatus = ResultStatus.successful(JsonHelper.serializeObject(
                     new UserWithWorkout(user, newWorkout).asMap()));
             } else {
                 this.metrics
                     .log("Cannot copy workout.");
-                resultStatus = ResultStatus.failure("Workout could not be copied.");
+                resultStatus = ResultStatus.failureBadEntity("Workout could not be copied.");
             }
 
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failure("Exception in " + classMethod);
+            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.success);
+        this.metrics.commonClose(resultStatus.responseCode);
         return resultStatus;
     }
 

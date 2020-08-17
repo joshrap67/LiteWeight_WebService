@@ -51,13 +51,13 @@ public class NewUserManager {
                 .withMap(User.EXERCISES, FileReader.getDefaultExercises());
 
             this.databaseAccess.putUser(user);
-            resultStatus = ResultStatus.successful(JsonHelper.convertObjectToJson(user.asMap()));
+            resultStatus = ResultStatus.successful(JsonHelper.serializeObject(user.asMap()));
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failure("Exception in " + classMethod);
+            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.success);
+        this.metrics.commonClose(resultStatus.responseCode);
         return resultStatus;
     }
 }

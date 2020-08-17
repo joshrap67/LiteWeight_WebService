@@ -40,16 +40,16 @@ public class GetUserDataManager {
             if (user != null) {
                 userResponse = new UserResponse(user);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.convertObjectToJson(userResponse.asMap()));
+                    .successful(JsonHelper.serializeObject(userResponse.asMap()));
             } else {
-                resultStatus = ResultStatus.failure("User does not exist.");
+                resultStatus = ResultStatus.failureBadEntity("User does not exist.");
             }
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failure("Exception in " + classMethod);
+            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.success);
+        this.metrics.commonClose(resultStatus.responseCode);
         return resultStatus;
     }
 }

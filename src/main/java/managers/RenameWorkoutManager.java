@@ -83,22 +83,22 @@ public class RenameWorkoutManager {
                     this.databaseAccess.executeWriteTransaction(actions);
 
                     resultStatus = ResultStatus
-                        .successful(JsonHelper.convertObjectToJson(user.asMap()));
+                        .successful(JsonHelper.serializeObject(user.asMap()));
                 } else {
                     this.metrics.log("Input error: " + errorMessage);
-                    resultStatus = ResultStatus.failure(errorMessage);
+                    resultStatus = ResultStatus.failureBadEntity(errorMessage);
                 }
 
             } else {
                 this.metrics.log("Active user does not exist");
-                resultStatus = ResultStatus.failure("User does not exist.");
+                resultStatus = ResultStatus.failureBadEntity("User does not exist.");
             }
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failure("Exception in " + classMethod + ". " + e);
+            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod + ". " + e);
         }
 
-        this.metrics.commonClose(resultStatus.success);
+        this.metrics.commonClose(resultStatus.responseCode);
         return resultStatus;
     }
 

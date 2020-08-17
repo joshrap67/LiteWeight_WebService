@@ -42,7 +42,7 @@ public class CopyWorkoutController implements ApiRequestController {
                     .execute(activeUser, newWorkoutName, oldWorkout);
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-                resultStatus = ResultStatus.failure("Exception in " + classMethod);
+                resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
             }
         } else {
             throw new MissingApiRequestKeyException(requiredKeys);

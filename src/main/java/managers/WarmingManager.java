@@ -36,10 +36,10 @@ public class WarmingManager {
             resultStatus = ResultStatus.successful("Endpoints warmed.");
         } catch (Exception e) {
             this.metrics.log(new ErrorMessage(classMethod, e));
-            resultStatus = ResultStatus.failure("Exception in " + classMethod);
+            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.success);
+        this.metrics.commonClose(resultStatus.responseCode);
         return resultStatus;
     }
 }

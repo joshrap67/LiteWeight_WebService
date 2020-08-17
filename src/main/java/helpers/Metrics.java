@@ -56,8 +56,8 @@ public class Metrics {
         this.incrementMetric(Metrics.INVOCATIONS);
     }
 
-    public void commonClose(boolean success) {
-        this.addBooleanMetric(success);
+    public void commonClose(int statusCode) {
+        this.addBooleanMetric(statusCode == ResultStatus.SUCCESS_CODE);
         this.finalizeTimeMetric(Metrics.TIME);
         this.removeFunctionName();
     }
