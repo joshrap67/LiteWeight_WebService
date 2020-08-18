@@ -25,7 +25,7 @@ public class ExerciseUser implements Model {
     private Double defaultWeight; // stored in lbs
     private Integer defaultSets;
     private Integer defaultReps;
-    private String defaultNote;
+    private String defaultDetails;
     private String videoUrl;
     @Setter(AccessLevel.NONE)
     private Map<String, Boolean> focuses;
@@ -39,7 +39,7 @@ public class ExerciseUser implements Model {
         this.defaultWeight = Parser.convertObjectToDouble(json.get(DEFAULT_WEIGHT));
         this.defaultSets = Parser.convertObjectToInteger(json.get(DEFAULT_SETS));
         this.defaultReps = Parser.convertObjectToInteger(json.get(DEFAULT_REPS));
-        this.defaultNote = (String) json.get(DEFAULT_DETAILS);
+        this.defaultDetails = (String) json.get(DEFAULT_DETAILS);
         this.videoUrl = (String) json.get(VIDEO_URL);
         this.setWorkouts((Map<String, Object>) json.get(User.WORKOUTS));
         this.setFocuses((Map<String, Object>) json.get(FOCUSES));
@@ -52,9 +52,9 @@ public class ExerciseUser implements Model {
         this.focuses = focuses;
         this.defaultExercise = true;
         this.defaultWeight = 0.0;
-        this.defaultReps = 12; // TODO use const
+        this.defaultReps = 12; // TODO use const?
         this.defaultSets = 3;
-        this.defaultNote = "";
+        this.defaultDetails = "";
         this.workouts = new HashMap<>();
     }
 
@@ -88,7 +88,7 @@ public class ExerciseUser implements Model {
         retVal.putIfAbsent(DEFAULT_WEIGHT, this.defaultWeight);
         retVal.putIfAbsent(DEFAULT_REPS, this.defaultReps);
         retVal.putIfAbsent(DEFAULT_SETS, this.defaultSets);
-        retVal.putIfAbsent(DEFAULT_DETAILS, this.defaultNote);
+        retVal.putIfAbsent(DEFAULT_DETAILS, this.defaultDetails);
         retVal.putIfAbsent(VIDEO_URL, this.videoUrl);
         retVal.putIfAbsent(FOCUSES, this.focuses);
         retVal.putIfAbsent(User.WORKOUTS, this.workouts);

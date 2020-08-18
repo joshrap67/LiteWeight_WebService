@@ -8,4 +8,6 @@ public class RequestFields {
     // THESE MUST MATCH THE FRONT END
     public static final String WORKOUT = "workout";
     public static final String USER = "user";
+    public static final String EXERCISE = "exercise";
+    public static final String EXERCISE_ID = "exerciseId";
 }
