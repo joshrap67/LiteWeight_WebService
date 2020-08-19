@@ -5,6 +5,7 @@ import controllers.DeleteWorkoutController;
 import controllers.EditWorkoutController;
 import controllers.GetUserDataController;
 import controllers.GetUserWorkoutController;
+import controllers.NewExerciseController;
 import controllers.NewUserController;
 import controllers.NewWorkoutController;
 import controllers.RenameWorkoutController;
@@ -42,4 +43,6 @@ public interface LiteWeightComponent {
     void inject(EditWorkoutController editWorkoutController);
 
     void inject(UpdateExerciseController updateExerciseController);
+
+    void inject(NewExerciseController newExerciseController);
 }

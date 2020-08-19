@@ -108,8 +108,7 @@ public class WorkoutHelper {
                     .getExerciseListForDay(week, day);
                 for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
                     String exerciseId = exerciseRoutine.getExerciseId();
-                    for (String focus : user.getUserExercises().get(exerciseId).getFocuses()
-                        .keySet()) {
+                    for (String focus : user.getUserExercises().get(exerciseId).getFocuses()) {
                         focusCount.merge(focus, 1, Integer::sum);
                     }
                 }

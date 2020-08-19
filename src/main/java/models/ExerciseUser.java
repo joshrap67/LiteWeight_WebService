@@ -3,6 +3,7 @@ package models;
 import helpers.Parser;
 import interfaces.Model;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -20,6 +21,12 @@ public class ExerciseUser implements Model {
     public static final String DEFAULT_DETAILS = "defaultDetails";
     public static final String VIDEO_URL = "videoUrl";
 
+    public static final int defaultSetsValue = 3;
+    public static final int defaultRepsValue = 15;
+    public static final double defaultWeightValue = 0.0;
+    public static final String defaultDetailsValue = "";
+    public static final String defaultVideoValue = "";
+
     private String exerciseName;
     private boolean defaultExercise;
     private Double defaultWeight; // stored in lbs
@@ -27,8 +34,8 @@ public class ExerciseUser implements Model {
     private Integer defaultReps;
     private String defaultDetails;
     private String videoUrl;
-    @Setter(AccessLevel.NONE)
-    private Map<String, Boolean> focuses;
+    //    @Setter(AccessLevel.NONE)
+    private List<String> focuses;
     @Setter(AccessLevel.NONE)
     private Map<String, String> workouts; // id to workout name that this exercise is apart of
 
@@ -42,31 +49,21 @@ public class ExerciseUser implements Model {
         this.defaultDetails = (String) json.get(DEFAULT_DETAILS);
         this.videoUrl = (String) json.get(VIDEO_URL);
         this.setWorkouts((Map<String, Object>) json.get(User.WORKOUTS));
-        this.setFocuses((Map<String, Object>) json.get(FOCUSES));
+        this.focuses = (List<String>) json.get(FOCUSES);
     }
 
-    public ExerciseUser(String exerciseName, String videUrl, Map<String, Boolean> focuses) {
-        // constructor that is called when user is created for the first time with default exercises
+    public ExerciseUser(String exerciseName, String videUrl, List<String> focuses,
+        boolean isDefault) {
+        // constructor that is called when user is created for the first time with default exercises or when making new exercise
         this.exerciseName = exerciseName;
         this.videoUrl = videUrl;
         this.focuses = focuses;
-        this.defaultExercise = true;
-        this.defaultWeight = 0.0;
-        this.defaultReps = 12; // TODO use const?
-        this.defaultSets = 3;
-        this.defaultDetails = "";
+        this.defaultExercise = isDefault;
+        this.defaultWeight = defaultWeightValue;
+        this.defaultReps = defaultRepsValue;
+        this.defaultSets = defaultSetsValue;
+        this.defaultDetails = defaultDetailsValue;
         this.workouts = new HashMap<>();
-    }
-
-    public void setFocuses(Map<String, Object> json) {
-        if (json == null) {
-            this.focuses = null;
-        } else {
-            this.focuses = new HashMap<>();
-            for (String focusName : json.keySet()) {
-                this.focuses.putIfAbsent(focusName, true);
-            }
-        }
     }
 
     public void setWorkouts(Map<String, Object> json) {

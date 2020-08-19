@@ -1,5 +1,6 @@
 package helpers;
 
+import java.util.ArrayList;
 import java.util.List;
 import models.ExerciseUser;
 import models.Routine;
@@ -7,8 +8,10 @@ import models.User;
 
 public class Validator {
 
-    private static final int MAX_WEIGHT = 99999, MAX_SETS = 99, MAX_REPS = 999, MAX_DETAILS_LENGTH = 120,
-        MAX_URL_LENGTH = 200;
+    private static final int
+        MAX_WEIGHT = 99999, MAX_SETS = 99, MAX_REPS = 999, MAX_DETAILS_LENGTH = 120,
+        MAX_URL_LENGTH = 200, MAX_EXERCISE_NAME = 40,
+        MAX_FREE_CUSTOM_EXERCISES = 15, MAX_PREMIUM_CUSTOM_EXERCISES = 30;
 
     public static String validNewWorkoutInput(final String workoutName, final User activeUser,
         final Routine routine) {
@@ -106,7 +109,39 @@ public class Validator {
             .contains(exerciseUser.getExerciseName())) {
             error.append("Exercise name already exists.");
         }
+        if (!exerciseUser.isDefaultExercise()
+            && exerciseUser.getExerciseName().length() > MAX_EXERCISE_NAME) {
+            error.append("Exercise name too long.");
+        }
 
         return ((error.length() == 0) ? null : error.toString().trim());
+    }
+
+    public static String validNewExercise(User activeUser, String exerciseName) {
+        StringBuilder error = new StringBuilder();
+        List<String> exerciseNames = new ArrayList<>();
+        int customCount = 0;
+        for (String _exerciseId : activeUser.getUserExercises().keySet()) {
+            if (!activeUser.getUserExercises().get(_exerciseId).isDefaultExercise()) {
+                customCount++;
+            }
+            exerciseNames.add(activeUser.getUserExercises().get(_exerciseId).getExerciseName());
+        }
+        if (exerciseNames.contains(exerciseName)) {
+            error.append("Exercise name already exists.");
+        }
+        if (exerciseName.length() > MAX_EXERCISE_NAME) {
+            error.append("Exercise length is too long.");
+        }
+
+        if (activeUser.getPremiumToken() == null && customCount >= MAX_FREE_CUSTOM_EXERCISES) {
+            error.append("Max free custom exercise limit reached.");
+        } else if (activeUser.getPremiumToken() != null
+            && customCount >= MAX_PREMIUM_CUSTOM_EXERCISES) {
+            error.append("Max custom exercise limit reached.");
+        }
+
+        return ((error.length() == 0) ? null : error.toString().trim());
+
     }
 }

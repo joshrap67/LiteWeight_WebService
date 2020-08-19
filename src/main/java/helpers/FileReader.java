@@ -2,7 +2,10 @@ package helpers;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import models.ExerciseUser;
@@ -32,11 +35,9 @@ public class FileReader {
                 String video = line.split(EXERCISE_SPLIT_DELIM)[VIDEO_INDEX];
                 String[] focuses = line.split(EXERCISE_SPLIT_DELIM)[FOCUS_INDEX_FILE]
                     .split(FOCUS_DELIM);
-                HashMap<String, Boolean> focusMap = new HashMap<>();
-                for (String focus : focuses) {
-                    focusMap.putIfAbsent(focus, true);
-                }
-                ExerciseUser exerciseUser = new ExerciseUser(name, video, focusMap);
+
+                List<String> focusList = new ArrayList<>(Arrays.asList(focuses));
+                ExerciseUser exerciseUser = new ExerciseUser(name, video, focusList, true);
                 retVal.putIfAbsent(uuid, exerciseUser.asMap());
             }
             reader.close();

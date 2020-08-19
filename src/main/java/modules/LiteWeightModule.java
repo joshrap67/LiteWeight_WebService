@@ -12,6 +12,7 @@ import managers.DeleteWorkoutManager;
 import managers.EditWorkoutManager;
 import managers.GetUserDataManager;
 import managers.GetUserWorkoutManager;
+import managers.NewExerciseManager;
 import managers.NewUserManager;
 import managers.NewWorkoutManager;
 import managers.RenameWorkoutManager;
@@ -93,5 +94,11 @@ public class LiteWeightModule {
     public UpdateExerciseManager provideUpdateExerciseManager(
         final DatabaseAccess databaseAccess) {
         return new UpdateExerciseManager(databaseAccess, this.metrics);
+    }
+
+    @Provides
+    public NewExerciseManager provideNewExerciseManager(
+        final DatabaseAccess databaseAccess) {
+        return new NewExerciseManager(databaseAccess, this.metrics);
     }
 }
