@@ -11,6 +11,7 @@ import controllers.NewWorkoutController;
 import controllers.RenameWorkoutController;
 import controllers.ResetWorkoutStatisticsController;
 import controllers.SwitchWorkoutController;
+import controllers.SyncWorkoutController;
 import controllers.UpdateExerciseController;
 import controllers.WarmingController;
 import dagger.Component;
@@ -45,4 +46,6 @@ public interface LiteWeightComponent {
     void inject(UpdateExerciseController updateExerciseController);
 
     void inject(NewExerciseController newExerciseController);
+
+    void inject(SyncWorkoutController syncWorkoutController);
 }

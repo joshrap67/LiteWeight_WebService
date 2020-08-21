@@ -88,7 +88,7 @@ public class Validator {
     }
 
     public static String validExerciseUser(final ExerciseUser exerciseUser,
-        List<String> exerciseNames) {
+        List<String> exerciseNames, String oldExerciseName) {
         StringBuilder error = new StringBuilder();
         if (exerciseUser.getDefaultWeight() > MAX_WEIGHT) {
             error.append("Weight exceeds max allowed.");
@@ -105,8 +105,10 @@ public class Validator {
         if (exerciseUser.getVideoUrl().length() > MAX_URL_LENGTH) {
             error.append("URL length exceeds max allowed.");
         }
-        if (!exerciseUser.isDefaultExercise() && exerciseNames
-            .contains(exerciseUser.getExerciseName())) {
+        if (!exerciseUser.isDefaultExercise() &&
+            !exerciseUser.getExerciseName().equals(oldExerciseName) &&
+            exerciseNames.contains(exerciseUser.getExerciseName())) {
+            // make sure to compare old name since user might not have changed name and otherwise would always get error saying exercise already exists
             error.append("Exercise name already exists.");
         }
         if (!exerciseUser.isDefaultExercise()

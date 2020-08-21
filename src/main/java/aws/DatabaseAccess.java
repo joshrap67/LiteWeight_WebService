@@ -63,6 +63,12 @@ public class DatabaseAccess {
             this.workoutTable.getItem(new PrimaryKey(WORKOUT_TABLE_KEY, currentWorkoutId)));
     }
 
+    public UpdateItemOutcome updateWorkout(final String workoutId,
+        final UpdateItemSpec updateItemSpec) {
+        updateItemSpec.withPrimaryKey(WORKOUT_TABLE_KEY, workoutId);
+        return this.workoutTable.updateItem(updateItemSpec);
+    }
+
     // Users table methods
     public PutItemOutcome putUser(final Item user) {
         return this.usersTable.putItem(user);

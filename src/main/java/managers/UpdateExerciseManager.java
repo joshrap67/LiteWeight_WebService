@@ -47,7 +47,8 @@ public class UpdateExerciseManager {
                 for (String _exerciseId : user.getUserExercises().keySet()) {
                     exerciseNames.add(user.getUserExercises().get(_exerciseId).getExerciseName());
                 }
-                String exerciseError = Validator.validExerciseUser(exerciseUser, exerciseNames);
+                String oldExerciseName = user.getUserExercises().get(exerciseId).getExerciseName();
+                String exerciseError = Validator.validExerciseUser(exerciseUser, exerciseNames, oldExerciseName);
                 if (exerciseError == null) {
                     // all input is valid so go ahead and just replace old exercise in db with updated one
                     final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
