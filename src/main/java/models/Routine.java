@@ -56,8 +56,8 @@ public class Routine implements Model {
         return list;
     }
 
-    public void removeExercise(int week, int day, String exerciseId) {
-        this.routine.get(week).get(day).deleteExercise(exerciseId);
+    public boolean removeExercise(int week, int day, String exerciseId) {
+        return this.routine.get(week).get(day).deleteExercise(exerciseId);
     }
 
     public Map<Integer, RoutineDayMap> getWeek(int week) {

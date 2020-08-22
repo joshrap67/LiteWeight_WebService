@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import aws.DatabaseAccess;
 import helpers.Metrics;
 import managers.CopyWorkoutManager;
+import managers.DeleteExerciseManager;
 import managers.DeleteWorkoutManager;
 import managers.EditWorkoutManager;
 import managers.GetUserDataManager;
@@ -114,5 +115,11 @@ public class LiteWeightModule {
     public RestartWorkoutManager provideRestartWorkoutManager(
         final DatabaseAccess databaseAccess) {
         return new RestartWorkoutManager(databaseAccess, this.metrics);
+    }
+
+    @Provides
+    public DeleteExerciseManager provideDeleteExerciseManager(
+        final DatabaseAccess databaseAccess) {
+        return new DeleteExerciseManager(databaseAccess, this.metrics);
     }
 }

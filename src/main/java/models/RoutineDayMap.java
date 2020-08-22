@@ -23,15 +23,21 @@ public class RoutineDayMap implements Model {
         return this.exerciseRoutineMap;
     }
 
-    void deleteExercise(String exerciseId) {
+    boolean deleteExercise(String exerciseId) {
+        boolean deleted = false;
+
         int index = -1;
         for (Integer sortVal : this.exerciseRoutineMap.keySet()) {
             if (this.exerciseRoutineMap.get(sortVal).getExerciseId().equals(exerciseId)) {
                 index = sortVal;
             }
         }
-        this.exerciseRoutineMap.remove(index);
-        balanceMap();
+        if (index != -1) {
+            this.exerciseRoutineMap.remove(index);
+            balanceMap();
+            deleted = true;
+        }
+        return deleted;
     }
 
     private void balanceMap() {

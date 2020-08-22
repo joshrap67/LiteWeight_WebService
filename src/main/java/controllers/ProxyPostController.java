@@ -39,6 +39,7 @@ public class ProxyPostController implements
             .put("newExercise", NewExerciseController.class)
             .put("syncWorkout", SyncWorkoutController.class)
             .put("restartWorkout", RestartWorkoutController.class)
+            .put("deleteExercise", DeleteExerciseController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
@@ -109,7 +110,8 @@ public class ProxyPostController implements
         metrics.commonClose(resultStatus.responseCode);
         metrics.logMetrics();
 
-        return new APIGatewayProxyResponseEvent().withBody(resultStatus.resultMessage)
+        return new APIGatewayProxyResponseEvent()
+            .withBody(resultStatus.resultMessage)
             .withStatusCode(resultStatus.responseCode);
     }
 }

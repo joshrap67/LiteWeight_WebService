@@ -131,4 +131,13 @@ public class WorkoutHelper {
         }
         return retVal.toString();
     }
+
+    public static void deleteExerciseFromRoutine(final String exerciseId,
+        final Routine routine) {
+        for (int week = 0; week < routine.size(); week++) {
+            for (int day = 0; day < routine.getWeek(week).size(); day++) {
+                routine.removeExercise(week, day, exerciseId);
+            }
+        }
+    }
 }
