@@ -10,6 +10,7 @@ import controllers.NewUserController;
 import controllers.NewWorkoutController;
 import controllers.RenameWorkoutController;
 import controllers.ResetWorkoutStatisticsController;
+import controllers.RestartWorkoutController;
 import controllers.SwitchWorkoutController;
 import controllers.SyncWorkoutController;
 import controllers.UpdateExerciseController;
@@ -48,4 +49,6 @@ public interface LiteWeightComponent {
     void inject(NewExerciseController newExerciseController);
 
     void inject(SyncWorkoutController syncWorkoutController);
+
+    void inject(RestartWorkoutController restartWorkoutController);
 }
