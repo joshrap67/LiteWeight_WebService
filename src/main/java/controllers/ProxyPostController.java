@@ -40,6 +40,7 @@ public class ProxyPostController implements
             .put("syncWorkout", SyncWorkoutController.class)
             .put("restartWorkout", RestartWorkoutController.class)
             .put("deleteExercise", DeleteExerciseController.class)
+            .put("updateIcon", UpdateIconController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,

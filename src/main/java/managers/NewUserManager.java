@@ -1,6 +1,7 @@
 package managers;
 
 import aws.DatabaseAccess;
+import aws.S3Access;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import helpers.ErrorMessage;
 import helpers.FileReader;
@@ -15,10 +16,13 @@ public class NewUserManager {
 
     private final DatabaseAccess databaseAccess;
     private final Metrics metrics;
+    private final S3Access s3Access;
 
     @Inject
-    public NewUserManager(final DatabaseAccess dbAccessManager, final Metrics metrics) {
+    public NewUserManager(final DatabaseAccess dbAccessManager, final Metrics metrics,
+        final S3Access s3Access) {
         this.databaseAccess = dbAccessManager;
+        this.s3Access = s3Access;
         this.metrics = metrics;
     }
 
@@ -33,10 +37,15 @@ public class NewUserManager {
         ResultStatus<String> resultStatus;
 
         try {
+            // whenever a user is created, give them a unique UUID file path that will always get updated
+
+            String fileName = s3Access
+                .uploadImage(FileReader.getDefaultProfilePicture(), this.metrics);
+
             Item user = new Item()
                 .withString(User.USERNAME, username)
                 .withNull(User.PREMIUM_TOKEN)
-                .withNull(User.ICON)
+                .withString(User.ICON, fileName)
                 .withNull(User.CURRENT_WORKOUT)
                 .withMap(User.WORKOUTS, new HashMap<>())
                 .withNull(User.PUSH_ENDPOINT_ARN) // todo get this

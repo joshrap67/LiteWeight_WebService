@@ -15,6 +15,7 @@ import controllers.RestartWorkoutController;
 import controllers.SwitchWorkoutController;
 import controllers.SyncWorkoutController;
 import controllers.UpdateExerciseController;
+import controllers.UpdateIconController;
 import controllers.WarmingController;
 import dagger.Component;
 import javax.inject.Singleton;
@@ -54,4 +55,6 @@ public interface LiteWeightComponent {
     void inject(RestartWorkoutController restartWorkoutController);
 
     void inject(DeleteExerciseController deleteExerciseController);
+
+    void inject(UpdateIconController updateIconController);
 }

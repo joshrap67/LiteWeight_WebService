@@ -1,5 +1,6 @@
 package modules;
 
+import aws.S3Access;
 import dagger.Module;
 import dagger.Provides;
 
@@ -22,6 +23,7 @@ import managers.RestartWorkoutManager;
 import managers.SwitchWorkoutManager;
 import managers.SyncWorkoutManager;
 import managers.UpdateExerciseManager;
+import managers.UpdateIconManager;
 import managers.WarmingManager;
 
 @Module
@@ -37,13 +39,20 @@ public class LiteWeightModule {
     }
 
     @Provides
+    @Singleton
+    public S3Access provideS3Access() {
+        return new S3Access();
+    }
+
+    @Provides
     public GetUserDataManager provideGetUserManager(final DatabaseAccess databaseAccess) {
         return new GetUserDataManager(databaseAccess, this.metrics);
     }
 
     @Provides
-    public NewUserManager provideNewUserManager(final DatabaseAccess databaseAccess) {
-        return new NewUserManager(databaseAccess, this.metrics);
+    public NewUserManager provideNewUserManager(final DatabaseAccess databaseAccess,
+        final S3Access s3Access) {
+        return new NewUserManager(databaseAccess, this.metrics, s3Access);
     }
 
     @Provides
@@ -52,8 +61,9 @@ public class LiteWeightModule {
     }
 
     @Provides
-    public WarmingManager provideWarmingHandler(final DatabaseAccess databaseAccess) {
-        return new WarmingManager(databaseAccess, this.metrics);
+    public WarmingManager provideWarmingHandler(final DatabaseAccess databaseAccess,
+        final S3Access s3Access) {
+        return new WarmingManager(databaseAccess, this.metrics, s3Access);
     }
 
     @Provides
@@ -121,5 +131,11 @@ public class LiteWeightModule {
     public DeleteExerciseManager provideDeleteExerciseManager(
         final DatabaseAccess databaseAccess) {
         return new DeleteExerciseManager(databaseAccess, this.metrics);
+    }
+
+    @Provides
+    public UpdateIconManager provideUpdateIconManager(
+        final DatabaseAccess databaseAccess, final S3Access s3Access) {
+        return new UpdateIconManager(databaseAccess, this.metrics, s3Access);
     }
 }
