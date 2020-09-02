@@ -37,7 +37,7 @@ public class UpdateIconManager {
             if (user != null) {
                 // same filename is always used. Content is just overwritten
                 String fileName = user.getIcon();
-                boolean success = this.s3Access.updateImage(imageData, fileName, this.metrics);
+                boolean success = this.s3Access.uploadImage(imageData, fileName, this.metrics);
                 if (success) {
                     resultStatus = ResultStatus.successful("Picture updated successfully.");
                 } else {

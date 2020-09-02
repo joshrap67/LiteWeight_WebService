@@ -2,6 +2,8 @@ package managers;
 
 import aws.DatabaseAccess;
 import aws.S3Access;
+import aws.SnsAccess;
+import helpers.Config;
 import javax.inject.Inject;
 import helpers.ErrorMessage;
 import helpers.Metrics;
@@ -11,15 +13,16 @@ public class WarmingManager {
 
     private final DatabaseAccess dbAccessManager;
     private final S3Access s3Access;
-    //    private final SnsAccessManager snsAccessManager;
+    private final SnsAccess snsAccess;
     private final Metrics metrics;
 
     @Inject
     public WarmingManager(final DatabaseAccess dbAccessManager,
-        final Metrics metrics, final S3Access s3Access) {
+        final Metrics metrics, final S3Access s3Access, final SnsAccess snsAccess) {
         this.dbAccessManager = dbAccessManager;
         this.s3Access = s3Access;
         this.metrics = metrics;
+        this.snsAccess = snsAccess;
     }
 
     public ResultStatus<String> execute() {
@@ -33,7 +36,7 @@ public class WarmingManager {
         try {
             this.dbAccessManager.describeTables();
             this.s3Access.imageBucketExists();
-//            this.snsAccessManager.getPlatformAttributes(Config.PUSH_SNS_PLATFORM_ARN);
+            this.snsAccess.getPlatformAttributes(Config.PUSH_SNS_PLATFORM_ARN_DEV);
 
             resultStatus = ResultStatus.successful("Endpoints warmed.");
         } catch (Exception e) {

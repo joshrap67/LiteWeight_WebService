@@ -9,6 +9,7 @@ import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.ResultStatus;
 import java.util.HashMap;
+import java.util.UUID;
 import javax.inject.Inject;
 import models.User;
 
@@ -39,8 +40,9 @@ public class NewUserManager {
         try {
             // whenever a user is created, give them a unique UUID file path that will always get updated
 
-            String fileName = s3Access
-                .uploadImage(FileReader.getDefaultProfilePicture(), this.metrics);
+            final UUID uuid = UUID.randomUUID();
+            final String fileName = uuid.toString() + "." + S3Access.JPG_TYPE;
+            s3Access.uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
 
             Item user = new Item()
                 .withString(User.USERNAME, username)
