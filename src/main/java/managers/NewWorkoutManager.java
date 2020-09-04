@@ -108,7 +108,7 @@ public class NewWorkoutManager {
 
                     resultStatus = ResultStatus
                         .successful(
-                            JsonHelper.serializeObject(
+                            JsonHelper.serializeMap(
                                 new UserWithWorkout(user, newWorkout).asMap()));
                 } else {
                     this.metrics.log("Input error: " + errorMessage);

@@ -31,10 +31,10 @@ public class GetUserDataController implements ApiRequestController {
 
             if (jsonMap.containsKey(User.USERNAME)) {
                 final String username = (String) jsonMap.get(User.USERNAME);
-                resultStatus = this.getUserDataManager.execute(username);
+                resultStatus = this.getUserDataManager.getUserData(username);
             } else if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
-                resultStatus = this.getUserDataManager.execute(activeUser);
+                resultStatus = this.getUserDataManager.getActiveUserData(activeUser);
             } else {
                 throw new MissingApiRequestKeyException(
                     ImmutableList.of(RequestFields.ACTIVE_USER));

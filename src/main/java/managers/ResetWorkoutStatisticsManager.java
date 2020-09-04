@@ -65,7 +65,7 @@ public class ResetWorkoutStatisticsManager {
                 resultStatus = ResultStatus
                     .successful(
                         JsonHelper
-                            .serializeObject(user.asMap()));
+                            .serializeMap(user.asMap()));
             } else {
                 this.metrics.log("Active user does not exist");
                 resultStatus = ResultStatus.failureBadEntity("User does not exist.");

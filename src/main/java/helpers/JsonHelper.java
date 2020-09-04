@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class JsonHelper {
 
-    public static String serializeObject(Map<String, Object> map)
+    public static String serializeMap(Map<String, Object> map)
         throws JsonProcessingException {
         String retVal;
         ObjectMapper mapper = new ObjectMapper();

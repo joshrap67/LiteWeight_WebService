@@ -1,7 +1,6 @@
 package managers;
 
 import aws.DatabaseAccess;
-import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
@@ -19,7 +18,6 @@ import models.ExerciseUser;
 import models.User;
 import models.Workout;
 import models.WorkoutUser;
-import org.graalvm.compiler.lir.LIRInstruction.Use;
 import responses.UserWithWorkout;
 
 public class RestartWorkoutManager {
@@ -92,7 +90,7 @@ public class RestartWorkoutManager {
 
                 resultStatus = ResultStatus
                     .successful(
-                        JsonHelper.serializeObject(new UserWithWorkout(user, workout).asMap()));
+                        JsonHelper.serializeMap(new UserWithWorkout(user, workout).asMap()));
             } else {
                 this.metrics.log("User does not exist in database.");
                 resultStatus = ResultStatus

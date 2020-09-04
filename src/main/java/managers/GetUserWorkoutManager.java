@@ -1,6 +1,7 @@
 package managers;
 
 import aws.DatabaseAccess;
+import com.amazonaws.services.dynamodbv2.document.Item;
 import helpers.ErrorMessage;
 import helpers.JsonHelper;
 import helpers.Metrics;
@@ -14,6 +15,8 @@ public class GetUserWorkoutManager {
 
     private final DatabaseAccess databaseAccess;
     private final Metrics metrics;
+    @Inject
+    public NewUserManager newUserManager;
 
     @Inject
     public GetUserWorkoutManager(DatabaseAccess databaseAccess, Metrics metrics) {
@@ -35,11 +38,13 @@ public class GetUserWorkoutManager {
         ResultStatus<String> resultStatus;
 
         try {
-            User user = this.databaseAccess.getUser(activeUser);
+            Item userItem = this.databaseAccess.getUserItem(activeUser);
 
-            if (user != null) {
-                UserWithWorkout userWithWorkout;
+            if (userItem != null) {
+                User user = new User(userItem);
                 String currentWorkoutId = user.getCurrentWorkout();
+                UserWithWorkout userWithWorkout;
+
                 if (currentWorkoutId == null) {
                     // user has no workouts
                     userWithWorkout = new UserWithWorkout(user, null);
@@ -51,9 +56,19 @@ public class GetUserWorkoutManager {
                 }
 
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeObject(userWithWorkout.asMap()));
+                    .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
             } else {
-                resultStatus = ResultStatus.failureBadEntity("User does not exist.");
+                // this will be reached if the user just created an account or it somehow got deleted in DB, so put user in DB
+                ResultStatus<Item> userResultStatus = this.newUserManager.execute(activeUser);
+                if (userResultStatus.responseCode == ResultStatus.SUCCESS_CODE) {
+                    UserWithWorkout userWithWorkout = new UserWithWorkout(
+                        new User(userResultStatus.data), null);
+                    resultStatus = ResultStatus
+                        .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
+                } else {
+                    this.metrics.log(userResultStatus.resultMessage);
+                    resultStatus = ResultStatus.failureBadEntity(userResultStatus.resultMessage);
+                }
             }
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));

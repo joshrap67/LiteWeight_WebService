@@ -1,11 +1,11 @@
 package aws;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import helpers.Config;
 import helpers.Metrics;
 import helpers.ResultStatus;
 import java.io.ByteArrayInputStream;
@@ -24,7 +24,7 @@ public class S3Access {
     public S3Access() {
         this.s3Client = AmazonS3ClientBuilder
             .standard()
-            .withRegion(Regions.US_EAST_2)
+            .withRegion(Config.REGION)
             .build();
     }
 
@@ -32,7 +32,8 @@ public class S3Access {
         this.s3Client = amazonS3;
     }
 
-    public boolean uploadImage(final byte[] fileData, final String fileName, final Metrics metrics) {
+    public boolean uploadImage(final byte[] fileData, final String fileName,
+        final Metrics metrics) {
         final String classMethod = this.getClass().getSimpleName() + ".uploadImage";
         metrics.commonSetup(classMethod);
         boolean success = false;

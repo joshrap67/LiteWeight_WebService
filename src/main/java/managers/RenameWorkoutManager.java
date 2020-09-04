@@ -83,7 +83,7 @@ public class RenameWorkoutManager {
                     this.databaseAccess.executeWriteTransaction(actions);
 
                     resultStatus = ResultStatus
-                        .successful(JsonHelper.serializeObject(user.asMap()));
+                        .successful(JsonHelper.serializeMap(user.asMap()));
                 } else {
                     this.metrics.log("Input error: " + errorMessage);
                     resultStatus = ResultStatus.failureBadEntity(errorMessage);

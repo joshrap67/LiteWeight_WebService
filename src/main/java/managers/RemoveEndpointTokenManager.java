@@ -3,12 +3,7 @@ package managers;
 import aws.DatabaseAccess;
 import aws.SnsAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
-import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
-import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
 import com.amazonaws.services.sns.model.DeleteEndpointRequest;
-import com.amazonaws.services.sns.model.InvalidParameterException;
-import helpers.Config;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.ResultStatus;
@@ -34,7 +29,7 @@ public class RemoveEndpointTokenManager {
      * This function takes in a device token registered in google cloud messaging and creates a SNS
      * endpoint for this token and then registers the ARN of the SNS endpoint on the user item.
      *
-     * @param activeUser The user making the api request whos push endpoint is being registered.
+     * @param activeUser The user making the api request whose push endpoint is being registered.
      * @return Standard result status object giving insight on whether the request was successful.
      */
     public ResultStatus<String> execute(final String activeUser) {
@@ -46,7 +41,8 @@ public class RemoveEndpointTokenManager {
         try {
             final User user = this.databaseAccess.getUser(activeUser);
 
-            if (user.getPushEndpointArn() == null) {
+            if (user.getPushEndpointArn() != null) {
+                // todo just change it to null?
                 final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                     .withUpdateExpression("remove " + User.PUSH_ENDPOINT_ARN);
 
@@ -59,9 +55,9 @@ public class RemoveEndpointTokenManager {
                     .withEndpointArn(user.getPushEndpointArn());
                 this.snsAccess.unregisterPlatformEndpoint(deleteEndpointRequest);
 
-                resultStatus = ResultStatus.successful("endpoint unregistered");
+                resultStatus = ResultStatus.successful("Endpoint unregistered.");
             } else {
-                resultStatus = ResultStatus.successful("no endpoint to unregister");
+                resultStatus = ResultStatus.successful("No endpoint to unregister.");
             }
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
@@ -70,29 +66,5 @@ public class RemoveEndpointTokenManager {
 
         this.metrics.commonClose(resultStatus.responseCode);
         return resultStatus;
-    }
-
-    private void attemptToRegisterUserEndpoint(final String activeUser,
-        final String deviceToken) throws InvalidParameterException {
-        //first thing to do is register the device token with SNS
-        final CreatePlatformEndpointRequest createPlatformEndpointRequest =
-            new CreatePlatformEndpointRequest()
-                .withPlatformApplicationArn(Config.PUSH_SNS_PLATFORM_ARN_DEV)
-                .withToken(deviceToken)
-                .withCustomUserData(activeUser);
-        final CreatePlatformEndpointResult createPlatformEndpointResult = this.snsAccess
-            .registerPlatformEndpoint(createPlatformEndpointRequest);
-
-        //this creation will give us a new ARN for the sns endpoint associated with the device token
-        final String userEndpointArn = createPlatformEndpointResult.getEndpointArn();
-
-        //we need to register the ARN for the user's device on the user item
-        final String updateExpression = "set " + User.PUSH_ENDPOINT_ARN + " = :userEndpointArn";
-        final ValueMap valueMap = new ValueMap().withString(":userEndpointArn", userEndpointArn);
-        final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-            .withUpdateExpression(updateExpression)
-            .withValueMap(valueMap);
-
-        this.databaseAccess.updateUser(activeUser, updateItemSpec);
     }
 }

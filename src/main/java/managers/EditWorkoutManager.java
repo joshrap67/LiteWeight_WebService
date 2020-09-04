@@ -103,7 +103,7 @@ public class EditWorkoutManager {
 
                     resultStatus = ResultStatus
                         .successful(
-                            JsonHelper.serializeObject(
+                            JsonHelper.serializeMap(
                                 new UserWithWorkout(user, editedWorkout).asMap()));
                 } else {
                     this.metrics.log("Input error: " + errorMessage);

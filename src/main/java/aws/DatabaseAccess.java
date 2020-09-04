@@ -1,7 +1,6 @@
 package aws;
 
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
@@ -17,6 +16,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsRequest;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsResult;
 import exceptions.InvalidAttributeException;
+import helpers.Config;
 import java.util.ArrayList;
 import java.util.List;
 import models.User;
@@ -36,9 +36,8 @@ public class DatabaseAccess {
     private final AmazonDynamoDBClient client;
 
     public DatabaseAccess() {
-        final Regions region = Regions.US_EAST_2;
         this.client = (AmazonDynamoDBClient) AmazonDynamoDBClient.builder()
-            .withRegion(region)
+            .withRegion(Config.REGION)
             .withCredentials(new EnvironmentVariableCredentialsProvider())
             .build();
         final DynamoDB dynamoDb = new DynamoDB(this.client);

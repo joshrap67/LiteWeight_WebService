@@ -18,8 +18,8 @@ import java.util.Map;
 
 public class TokenHelper {
 
-    private static final String PUBLIC_RSA_KEY_URL = "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_LipSO6zpl/.well-known/jwks.json";
-    private static final List LIVE_FUNCTIONS = ImmutableList.of("ProxyEndpoint");
+    private static final String PUBLIC_RSA_KEY_URL = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_vLSsBubHd/.well-known/jwks.json";
+    private static final List<String> LIVE_FUNCTIONS = ImmutableList.of("ProxyEndpoint");
     private static final String EMULATED_ACTIVE_USER_KEY = "EMULATED_ACTIVE_USER";
     private static final String cognitoClaim = "cognito:username";
 

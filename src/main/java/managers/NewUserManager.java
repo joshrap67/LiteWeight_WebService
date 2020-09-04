@@ -31,11 +31,11 @@ public class NewUserManager {
      * @param username Username of new user to be inserted
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String username) {
+    public ResultStatus<Item> execute(final String username) {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
+        ResultStatus<Item> resultStatus;
 
         try {
             // whenever a user is created, give them a unique UUID file path that will always get updated
@@ -50,19 +50,20 @@ public class NewUserManager {
                 .withString(User.ICON, fileName)
                 .withNull(User.CURRENT_WORKOUT)
                 .withMap(User.WORKOUTS, new HashMap<>())
-                .withNull(User.PUSH_ENDPOINT_ARN) // todo get this
+                .withNull(User.PUSH_ENDPOINT_ARN)
                 .withInt(User.WORKOUTS_SENT, 0)
                 .withBoolean(User.PRIVATE_ACCOUNT, false)
                 .withBoolean(User.UPDATE_DEFAULT_WEIGHT_ON_RESTART, true)
                 .withBoolean(User.UPDATE_DEFAULT_WEIGHT_ON_SAVE, true)
-                .withInt(User.NOTIFICATION_PREFERENCES, 0) // TODO use constant
+                .withInt(User.NOTIFICATION_PREFERENCES,
+                    0) // TODO make this a front end responsibility?
                 .withMap(User.FRIENDS, new HashMap<>())
-                .withMap(User.FRIENDS_OF, new HashMap<>())
+                .withMap(User.FRIEND_REQUESTS, new HashMap<>())
                 .withMap(User.RECEIVED_WORKOUTS, new HashMap<>())
                 .withMap(User.EXERCISES, FileReader.getDefaultExercises());
 
             this.databaseAccess.putUser(user);
-            resultStatus = ResultStatus.successful(JsonHelper.serializeObject(user.asMap()));
+            resultStatus = ResultStatus.successful(JsonHelper.serializeMap(user.asMap()), user);
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);

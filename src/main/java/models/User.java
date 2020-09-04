@@ -29,14 +29,14 @@ public class User implements Model {
     public static final String NOTIFICATION_PREFERENCES = "notificationPreferences";
     public static final String PUSH_ENDPOINT_ARN = "pushEndpointArn";
     public static final String FRIENDS = "friends";
-    public static final String FRIENDS_OF = "friendsOf";
+    public static final String FRIEND_REQUESTS = "friendRequests";
     public static final String RECEIVED_WORKOUTS = "receivedWorkouts";
     public static final String UPDATE_DEFAULT_WEIGHT_ON_SAVE = "updateDefaultWeightOnSave";
     public static final String UPDATE_DEFAULT_WEIGHT_ON_RESTART = "updateDefaultWeightOnRestart";
 
     private String username;
     private String icon;
-    private String pushEndpointArn;
+    private String pushEndpointArn; // todo don't return to frontend
     private String premiumToken;
     private String currentWorkout;
     private Integer workoutsSent;
@@ -52,7 +52,7 @@ public class User implements Model {
     @Setter(AccessLevel.NONE)
     private Map<String, Friend> friends;
     @Setter(AccessLevel.NONE)
-    private Map<String, Boolean> friendsOf;
+    private Map<String, Friend> friendRequests;
     @Setter(AccessLevel.NONE)
     private Map<String, String> receivedWorkouts;
 
@@ -77,7 +77,7 @@ public class User implements Model {
         this.setUserWorkouts((Map<String, Object>) json.get(WORKOUTS));
         this.setUserExercises((Map<String, Object>) json.get(EXERCISES));
         this.setFriends((Map<String, Object>) json.get(FRIENDS));
-        this.setFriendsOf((Map<String, Object>) json.get(FRIENDS_OF));
+        this.setFriendRequests((Map<String, Object>) json.get(FRIEND_REQUESTS));
         this.setReceivedWorkouts((Map<String, Object>) json.get(RECEIVED_WORKOUTS));
     }
 
@@ -107,13 +107,13 @@ public class User implements Model {
         }
     }
 
-    public void setFriendsOf(Map<String, Object> json) {
+    public void setFriendRequests(Map<String, Object> json) {
         if (json == null) {
-            this.friendsOf = null;
+            this.friendRequests = null;
         } else {
-            this.friendsOf = new HashMap<>();
+            this.friendRequests = new HashMap<>();
             for (String username : json.keySet()) {
-                this.friendsOf.putIfAbsent(username, (Boolean) json.get(username));
+                this.friendRequests.putIfAbsent(username, (Friend) json.get(username));
             }
         }
     }
@@ -155,7 +155,7 @@ public class User implements Model {
         retVal.putIfAbsent(WORKOUTS, this.getUserWorkoutsMap());
         retVal.putIfAbsent(EXERCISES, this.getUserExercisesMap());
         retVal.putIfAbsent(FRIENDS, this.getFriendsMap());
-        retVal.putIfAbsent(FRIENDS_OF, this.friendsOf);
+        retVal.putIfAbsent(FRIEND_REQUESTS, this.friendRequests);
         retVal.putIfAbsent(RECEIVED_WORKOUTS, this.receivedWorkouts);
         retVal.putIfAbsent(UPDATE_DEFAULT_WEIGHT_ON_SAVE, this.updateDefaultWeightOnSave);
         retVal.putIfAbsent(UPDATE_DEFAULT_WEIGHT_ON_RESTART, this.updateDefaultWeightOnRestart);

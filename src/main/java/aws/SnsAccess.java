@@ -83,7 +83,7 @@ public class SnsAccess {
         );
 
         final String jsonNotification = JsonHelper
-            .serializeObject(ImmutableMap.of("GCM", notification));
+            .serializeMap(ImmutableMap.of("GCM", notification));
 
         final PublishRequest publishRequest = new PublishRequest()
             .withTargetArn(arn)
@@ -135,7 +135,7 @@ public class SnsAccess {
         );
 
         final String jsonNotification = JsonHelper
-            .serializeObject(ImmutableMap.of("GCM", notification));
+            .serializeMap(ImmutableMap.of("GCM", notification));
 
         final PublishRequest publishRequest = new PublishRequest()
             .withTargetArn(arn)

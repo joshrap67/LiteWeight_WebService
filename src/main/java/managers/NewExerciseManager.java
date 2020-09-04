@@ -63,7 +63,7 @@ public class NewExerciseManager {
                     this.databaseAccess.updateUser(user.getUsername(), updateItemSpec);
 
                     resultStatus = ResultStatus
-                        .successful(JsonHelper.serializeObject(
+                        .successful(JsonHelper.serializeMap(
                             new ExerciseUserResponse(exerciseId, exerciseUser).asMap()));
                 } else {
                     this.metrics.log("Input error on exercise" + errorMessage);

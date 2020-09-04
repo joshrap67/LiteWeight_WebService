@@ -92,7 +92,7 @@ public class DeleteWorkoutManager {
                 resultStatus = ResultStatus
                     .successful(
                         JsonHelper
-                            .serializeObject(new UserWithWorkout(user, nextWorkout).asMap()));
+                            .serializeMap(new UserWithWorkout(user, nextWorkout).asMap()));
             } else {
                 this.metrics.log("Active user does not exist");
                 resultStatus = ResultStatus.failureBadEntity("User does not exist.");

@@ -96,7 +96,7 @@ public class CopyWorkoutManager {
                     .add(new TransactWriteItem().withUpdate(updateOldWorkoutItemData.asUpdate()));
 
                 this.databaseAccess.executeWriteTransaction(actions);
-                resultStatus = ResultStatus.successful(JsonHelper.serializeObject(
+                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(
                     new UserWithWorkout(user, newWorkout).asMap()));
             } else {
                 this.metrics
