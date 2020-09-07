@@ -16,13 +16,13 @@ import models.Workout;
 import models.WorkoutUser;
 import responses.UserWithWorkout;
 
-public class DeleteWorkoutManager {
+public class PopWorkoutManager {
 
     private final DatabaseAccess databaseAccess;
     private final Metrics metrics;
 
     @Inject
-    public DeleteWorkoutManager(DatabaseAccess databaseAccess, Metrics metrics) {
+    public PopWorkoutManager(DatabaseAccess databaseAccess, Metrics metrics) {
         this.databaseAccess = databaseAccess;
         this.metrics = metrics;
     }

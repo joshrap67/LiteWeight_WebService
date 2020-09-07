@@ -10,14 +10,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import managers.DeleteWorkoutManager;
+import managers.PopWorkoutManager;
 import models.Workout;
 import modules.Injector;
 
-public class DeleteWorkoutController implements ApiRequestController {
+public class PopWorkoutController implements ApiRequestController {
 
     @Inject
-    public DeleteWorkoutManager deleteWorkoutManager;
+    public PopWorkoutManager popWorkoutManager;
 
     @Override
     public ResultStatus<String> processApiRequest(Map<String, Object> json,
@@ -35,7 +35,7 @@ public class DeleteWorkoutController implements ApiRequestController {
                 final String workoutId = (String) json.get(Workout.WORKOUT_ID);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.deleteWorkoutManager
+                resultStatus = this.popWorkoutManager
                     .execute(activeUser, workoutId);
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
