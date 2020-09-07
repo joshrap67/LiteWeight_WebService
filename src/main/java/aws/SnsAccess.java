@@ -19,10 +19,11 @@ import helpers.Config;
 import helpers.JsonHelper;
 import java.security.InvalidParameterException;
 import java.util.Map;
-import models.SmsMetadata;
+import models.NotificationData;
 
 public class SnsAccess {
 
+    public static final String friendRequestAction = "friendRequest";
     private final AmazonSNSClient client;
 
     public SnsAccess() {
@@ -64,78 +65,25 @@ public class SnsAccess {
     }
 
     /**
-     * This method is used to send a message to a user such that the notification will not pop up
-     * for that user.
+     * This method is used to send a message to a front end device. Note that the frontend is
+     * responsible for creating the push notification itself, this messages sent only contains the
+     * data the frontend requires.
      *
-     * @param arn      The arn of the target of this message.
-     * @param metadata This contains the action and payload information to be used by the front
-     *                 end.
+     * @param arn              The arn of the target of this message.
+     * @param notificationData This contains the action and payload information to be used by the
+     *                         front end.
      */
-    //to allow the notification to get sent without popping up, just don't add the notification
-    public PublishResult sendMutedMessage(final String arn, final SmsMetadata metadata)
+    public PublishResult sendMessage(final String arn, final NotificationData notificationData)
         throws JsonProcessingException {
         Map<String, Object> notification = ImmutableMap.of(
             "data", ImmutableMap.of(
-                "click_action", "FLUTTER_NOTIFICATION_CLICK",
                 "default", "default message",
-                "metadata", metadata.asMap()
+                "metadata", notificationData.asMap()
             )
         );
 
         final String jsonNotification = JsonHelper
-            .serializeMap(ImmutableMap.of("GCM", notification));
-
-        final PublishRequest publishRequest = new PublishRequest()
-            .withTargetArn(arn)
-            .withMessage(jsonNotification);
-        publishRequest.setMessageStructure("json");
-
-        PublishResult publishResult;
-        try {
-            publishResult = this.client.publish(publishRequest);
-        } catch (final EndpointDisabledException ede) {
-            //this isn't an error on our end, read more about this exception here:
-            //https://forums.aws.amazon.com/thread.jspa?threadID=174551
-            publishResult = new PublishResult();
-        }
-
-        return publishResult;
-    }
-
-    /**
-     * This method is used to send a message to a user such that they will see a notification.
-     *
-     * @param arn      The arn of the target of this message.
-     * @param title    The title of the notification.
-     * @param body     The body of the notification.
-     * @param tag      The tag to be attached to the notification. The tag stops multiple messages
-     *                 about the same subject from appearing on the user's device. For example, a
-     *                 second message about a specific event will replace the first message.
-     * @param metadata This contains the action and payload information to be used by the front
-     *                 end.
-     */
-    public PublishResult sendMessage(final String arn, final String title, final String body,
-        final String tag, final SmsMetadata metadata, final String channelId)
-        throws JsonProcessingException {
-        final Map<String, Object> notification = ImmutableMap.of(
-            "notification", ImmutableMap.of(
-                "title", title,
-                "body", body,
-                "tag", tag
-            ),
-            "android", ImmutableMap.of(
-                "notification", ImmutableMap.of("channel_id", channelId)
-            ),
-            // delivered into the intent of the android activity
-            "data", ImmutableMap.of(
-                "click_action", "FLUTTER_NOTIFICATION_CLICK",
-                "default", "default message",
-                "metadata", metadata.asMap()
-            )
-        );
-
-        final String jsonNotification = JsonHelper
-            .serializeMap(ImmutableMap.of("GCM", notification));
+            .serializeMap(ImmutableMap.of("GCM", JsonHelper.serializeMap(notification)));
 
         final PublishRequest publishRequest = new PublishRequest()
             .withTargetArn(arn)

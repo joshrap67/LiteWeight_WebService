@@ -18,6 +18,11 @@ public class Friend implements Model {
         this.confirmed = (boolean) json.get(CONFIRMED);
     }
 
+    public Friend(User user) {
+        this.icon = user.getIcon();
+        this.confirmed = false;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();

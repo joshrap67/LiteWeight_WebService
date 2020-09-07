@@ -52,7 +52,7 @@ public class User implements Model {
     @Setter(AccessLevel.NONE)
     private Map<String, Friend> friends;
     @Setter(AccessLevel.NONE)
-    private Map<String, Friend> friendRequests;
+    private Map<String, FriendRequest> friendRequests;
     @Setter(AccessLevel.NONE)
     private Map<String, String> receivedWorkouts;
 
@@ -113,7 +113,8 @@ public class User implements Model {
         } else {
             this.friendRequests = new HashMap<>();
             for (String username : json.keySet()) {
-                this.friendRequests.putIfAbsent(username, (Friend) json.get(username));
+                this.friendRequests.putIfAbsent(username, new FriendRequest(
+                    (Map<String, Object>) json.get(username)));
             }
         }
     }
@@ -141,6 +142,18 @@ public class User implements Model {
         }
     }
 
+    private Map<String, Map<String, Object>> getFriendRequestsMap() {
+        if (this.friendRequests == null) {
+            return null;
+        }
+
+        Map<String, Map<String, Object>> retVal = new HashMap<>();
+        for (String username : this.friendRequests.keySet()) {
+            retVal.putIfAbsent(username, this.friendRequests.get(username).asMap());
+        }
+        return retVal;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> retVal = new HashMap<>();
@@ -155,7 +168,7 @@ public class User implements Model {
         retVal.putIfAbsent(WORKOUTS, this.getUserWorkoutsMap());
         retVal.putIfAbsent(EXERCISES, this.getUserExercisesMap());
         retVal.putIfAbsent(FRIENDS, this.getFriendsMap());
-        retVal.putIfAbsent(FRIEND_REQUESTS, this.friendRequests);
+        retVal.putIfAbsent(FRIEND_REQUESTS, this.getFriendRequestsMap());
         retVal.putIfAbsent(RECEIVED_WORKOUTS, this.receivedWorkouts);
         retVal.putIfAbsent(UPDATE_DEFAULT_WEIGHT_ON_SAVE, this.updateDefaultWeightOnSave);
         retVal.putIfAbsent(UPDATE_DEFAULT_WEIGHT_ON_RESTART, this.updateDefaultWeightOnRestart);
