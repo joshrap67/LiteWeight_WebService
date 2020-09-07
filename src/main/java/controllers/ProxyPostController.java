@@ -44,6 +44,7 @@ public class ProxyPostController implements
             .put("updateEndpointId", RegisterEndpointTokenController.class)
             .put("removeEndpointId", RemoveEndpointTokenController.class)
             .put("sendFriendRequest", SendFriendRequestController.class)
+            .put("cancelFriendRequest", CancelFriendRequestController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,

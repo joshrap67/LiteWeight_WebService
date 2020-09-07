@@ -1,5 +1,6 @@
 package modules;
 
+import controllers.CancelFriendRequestController;
 import controllers.CopyWorkoutController;
 import controllers.DeleteExerciseController;
 import controllers.DeleteWorkoutController;
@@ -66,4 +67,6 @@ public interface LiteWeightComponent {
     void inject(RemoveEndpointTokenController removeEndpointTokenController);
 
     void inject(SendFriendRequestController sendFriendRequestController);
+
+    void inject(CancelFriendRequestController cancelFriendRequestController);
 }

@@ -24,6 +24,7 @@ import models.NotificationData;
 public class SnsAccess {
 
     public static final String friendRequestAction = "friendRequest";
+    public static final String canceledFriendRequestAction = "canceledFriendRequest";
     private final AmazonSNSClient client;
 
     public SnsAccess() {

@@ -24,9 +24,9 @@ import responses.FriendResponse;
 
 public class SendFriendRequestManager {
 
-    public final SnsAccess snsAccess;
-    public final DatabaseAccess databaseAccess;
-    public final Metrics metrics;
+    private final SnsAccess snsAccess;
+    private final DatabaseAccess databaseAccess;
+    private final Metrics metrics;
 
     @Inject
     public SendFriendRequestManager(final SnsAccess snsAccess, final DatabaseAccess databaseAccess,
