@@ -142,7 +142,7 @@ public class User implements Model {
         }
     }
 
-    private Map<String, Map<String, Object>> getFriendRequestsMap() {
+    public Map<String, Map<String, Object>> getFriendRequestsMap() {
         if (this.friendRequests == null) {
             return null;
         }
