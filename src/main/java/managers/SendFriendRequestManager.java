@@ -56,7 +56,7 @@ public class SendFriendRequestManager {
                     User userToAdd = this.databaseAccess.getUser(usernameToAdd);
                     if (userToAdd != null) {
                         // user that the active user is attempting to add is indeed a real user
-                        if (!userToAdd.isPrivateAccount()) {
+                        if (!userToAdd.getUserPreferences().isPrivateAccount()) {
                             // user is not private so go ahead and proceed with the request
                             // first add the unconfirmed user to the active user friend's list
                             Friend friendToAdd = new Friend(userToAdd);

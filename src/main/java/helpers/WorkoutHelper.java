@@ -17,7 +17,7 @@ public class WorkoutHelper {
         final String workoutName) {
         // updates the list of exercises on the user object to include this new workout in all contained exercises
 
-        boolean updateDefaultWeight = user.isUpdateDefaultWeightOnSave();
+        boolean updateDefaultWeight = user.getUserPreferences().isUpdateDefaultWeightOnSave();
         // get a list of all exercises (by id, not name of course)
         Set<String> exercises = new HashSet<>();
         for (int week = 0; week < routine.size(); week++) {
@@ -51,7 +51,7 @@ public class WorkoutHelper {
         final String workoutName) {
         // updates the list of exercises on the user object to include this new workout in all contained exercises
 
-        boolean updateDefaultWeight = user.isUpdateDefaultWeightOnSave();
+        boolean updateDefaultWeight = user.getUserPreferences().isUpdateDefaultWeightOnSave();
         // get a list of all new exercises (by id)
         Set<String> newExercises = new HashSet<>();
         for (int week = 0; week < newRoutine.size(); week++) {

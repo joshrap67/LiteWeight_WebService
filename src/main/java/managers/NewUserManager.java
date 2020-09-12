@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import javax.inject.Inject;
 import models.User;
+import models.UserPreferences;
 
 public class NewUserManager {
 
@@ -44,6 +45,12 @@ public class NewUserManager {
             final String fileName = uuid.toString() + "." + S3Access.JPG_TYPE;
             s3Access.uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
 
+            UserPreferences userPreferences = new UserPreferences();
+            userPreferences.setMetricUnits(false);
+            userPreferences.setPrivateAccount(false);
+            userPreferences.setUpdateDefaultWeightOnRestart(true);
+            userPreferences.setUpdateDefaultWeightOnSave(true);
+
             Item user = new Item()
                 .withString(User.USERNAME, username)
                 .withNull(User.PREMIUM_TOKEN)
@@ -52,11 +59,7 @@ public class NewUserManager {
                 .withMap(User.WORKOUTS, new HashMap<>())
                 .withNull(User.PUSH_ENDPOINT_ARN)
                 .withInt(User.WORKOUTS_SENT, 0)
-                .withBoolean(User.PRIVATE_ACCOUNT, false)
-                .withBoolean(User.UPDATE_DEFAULT_WEIGHT_ON_RESTART, true)
-                .withBoolean(User.UPDATE_DEFAULT_WEIGHT_ON_SAVE, true)
-                .withInt(User.NOTIFICATION_PREFERENCES,
-                    0) // TODO make this a front end responsibility?
+                .withMap(User.USER_PREFERENCES, userPreferences.asMap())
                 .withMap(User.FRIENDS, new HashMap<>())
                 .withMap(User.FRIEND_REQUESTS, new HashMap<>())
                 .withMap(User.RECEIVED_WORKOUTS, new HashMap<>())

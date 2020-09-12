@@ -121,7 +121,7 @@ public class RestartWorkoutManager {
                                 workoutMeta.getTotalExercisesSum(), 1));
                         exerciseRoutine.setCompleted(false);
 
-                        if (user.isUpdateDefaultWeightOnRestart()) {
+                        if (user.getUserPreferences().isUpdateDefaultWeightOnRestart()) {
                             // automatically update default weight with this weight if its higher than previous
                             String exerciseId = exerciseRoutine.getExerciseId();
                             ExerciseUser exerciseUser = user.getUserExercises().get(exerciseId);
