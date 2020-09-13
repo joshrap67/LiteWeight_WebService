@@ -13,6 +13,7 @@ import controllers.NewUserController;
 import controllers.NewWorkoutController;
 import controllers.RegisterEndpointTokenController;
 import controllers.RemoveEndpointTokenController;
+import controllers.RemoveFriendController;
 import controllers.RenameWorkoutController;
 import controllers.ResetWorkoutStatisticsController;
 import controllers.RestartWorkoutController;
@@ -78,4 +79,6 @@ public interface LiteWeightComponent {
     void inject(UpdateUserPreferencesController updateUserPreferencesController);
 
     void inject(AcceptFriendRequestController acceptFriendRequestController);
+
+    void inject(RemoveFriendController removeFriendController);
 }
