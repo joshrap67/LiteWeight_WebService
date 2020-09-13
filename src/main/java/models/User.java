@@ -30,6 +30,7 @@ public class User implements Model {
     public static final String FRIEND_REQUESTS = "friendRequests";
     public static final String RECEIVED_WORKOUTS = "receivedWorkouts";
     public static final String USER_PREFERENCES = "preferences";
+    public static final String BLOCKED = "blocked";
 
     private String username;
     private String icon;
@@ -39,6 +40,8 @@ public class User implements Model {
     private Integer workoutsSent;
     private UserPreferences userPreferences;
 
+    @Setter(AccessLevel.NONE)
+    private Map<String, String> blocked;
     @Setter(AccessLevel.NONE)
     private Map<String, WorkoutUser> userWorkouts;
     @Setter(AccessLevel.NONE)
@@ -70,6 +73,7 @@ public class User implements Model {
         this.setFriends((Map<String, Object>) json.get(FRIENDS));
         this.setFriendRequests((Map<String, Object>) json.get(FRIEND_REQUESTS));
         this.setReceivedWorkouts((Map<String, Object>) json.get(RECEIVED_WORKOUTS));
+        this.setBlocked((Map<String, Object>) json.get(BLOCKED));
     }
 
     // Setters
@@ -82,6 +86,17 @@ public class User implements Model {
                 this.userExercises
                     .putIfAbsent(exerciseId,
                         new ExerciseUser((Map<String, Object>) json.get(exerciseId)));
+            }
+        }
+    }
+
+    private void setBlocked(Map<String, Object> json) {
+        if (json == null) {
+            this.blocked = null;
+        } else {
+            this.blocked = new HashMap<>();
+            for (String username : json.keySet()) {
+                this.blocked.put(username, (String) json.get(ICON));
             }
         }
     }
@@ -154,7 +169,7 @@ public class User implements Model {
         retVal.putIfAbsent(PREMIUM_TOKEN, this.premiumToken);
         retVal.putIfAbsent(CURRENT_WORKOUT, this.currentWorkout);
         retVal.putIfAbsent(WORKOUTS_SENT, this.workoutsSent);
-
+        retVal.putIfAbsent(BLOCKED, this.blocked);
         retVal.putIfAbsent(WORKOUTS, this.getUserWorkoutsMap());
         retVal.putIfAbsent(EXERCISES, this.getUserExercisesMap());
         retVal.putIfAbsent(FRIENDS, this.getFriendsMap());

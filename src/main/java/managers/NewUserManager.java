@@ -61,6 +61,7 @@ public class NewUserManager {
                 .withInt(User.WORKOUTS_SENT, 0)
                 .withMap(User.USER_PREFERENCES, userPreferences.asMap())
                 .withMap(User.FRIENDS, new HashMap<>())
+                .withMap(User.BLOCKED, new HashMap<>())
                 .withMap(User.FRIEND_REQUESTS, new HashMap<>())
                 .withMap(User.RECEIVED_WORKOUTS, new HashMap<>())
                 .withMap(User.EXERCISES, FileReader.getDefaultExercises());

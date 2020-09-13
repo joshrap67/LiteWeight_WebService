@@ -23,6 +23,11 @@ public class Friend implements Model {
         this.confirmed = false;
     }
 
+    public Friend(User user, boolean confirmed) {
+        this.icon = user.getIcon();
+        this.confirmed = confirmed;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();
