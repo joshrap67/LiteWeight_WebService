@@ -3,6 +3,7 @@ package modules;
 import controllers.AcceptFriendRequestController;
 import controllers.CancelFriendRequestController;
 import controllers.CopyWorkoutController;
+import controllers.DeclineFriendRequestController;
 import controllers.DeleteExerciseController;
 import controllers.PopWorkoutController;
 import controllers.EditWorkoutController;
@@ -81,4 +82,6 @@ public interface LiteWeightComponent {
     void inject(AcceptFriendRequestController acceptFriendRequestController);
 
     void inject(RemoveFriendController removeFriendController);
+
+    void inject(DeclineFriendRequestController declineFriendRequestController);
 }

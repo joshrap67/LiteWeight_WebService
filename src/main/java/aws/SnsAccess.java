@@ -26,7 +26,7 @@ public class SnsAccess {
     public static final String friendRequestAction = "friendRequest";
     public static final String canceledFriendRequestAction = "canceledFriendRequest";
     public static final String acceptedFriendRequestAction = "acceptedFriendRequest";
-    public static final String declineFriendRequestAction = "declineFriendRequest";
+    public static final String declinedFriendRequestAction = "declinedFriendRequest";
     public static final String removeFriendAction = "removeFriend";
     public static final String blockUserAction = "blockUser";
     private final AmazonSNSClient client;

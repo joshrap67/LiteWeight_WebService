@@ -49,6 +49,7 @@ public class ProxyPostController implements
             .put("updateUserPreferences", UpdateUserPreferencesController.class)
             .put("acceptFriendRequest", AcceptFriendRequestController.class)
             .put("removeFriend", RemoveFriendController.class)
+            .put("declineFriendRequest", DeclineFriendRequestController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
@@ -61,7 +62,7 @@ public class ProxyPostController implements
         ResultStatus<String> resultStatus;
 
         try {
-            String action = request.getPath(); // this should be of the form '/action'
+            String action = request.getPath(); // in the form '/action'
             String[] splitAction = action.split("/"); // remove the prefixed slash
 
             if (splitAction.length == 2) {
@@ -77,12 +78,12 @@ public class ProxyPostController implements
                         jsonMap.put(RequestFields.ACTIVE_USER,
                             TokenHelper.getActiveUserFromRequest(request, context));
 
-                        final Class<? extends ApiRequestController> manager = ACTIONS_TO_CONTROLLERS
+                        final Class<? extends ApiRequestController> controller = ACTIONS_TO_CONTROLLERS
                             .get(action);
-                        final Constructor c = manager.getConstructor();
-                        final ApiRequestController apiRequestManager = (ApiRequestController) c
+                        final Constructor c = controller.getConstructor();
+                        final ApiRequestController apiRequestController = (ApiRequestController) c
                             .newInstance();
-                        resultStatus = apiRequestManager.processApiRequest(jsonMap, metrics);
+                        resultStatus = apiRequestController.processApiRequest(jsonMap, metrics);
                     } else {
                         resultStatus = ResultStatus
                             .failureBadRequest("Bad request body. Missing active user.");
