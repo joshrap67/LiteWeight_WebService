@@ -96,7 +96,7 @@ public class User implements Model {
         } else {
             this.blocked = new HashMap<>();
             for (String username : json.keySet()) {
-                this.blocked.put(username, (String) json.get(ICON));
+                this.blocked.put(username, (String) json.get(username));
             }
         }
     }

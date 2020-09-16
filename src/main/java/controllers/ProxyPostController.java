@@ -50,6 +50,8 @@ public class ProxyPostController implements
             .put("acceptFriendRequest", AcceptFriendRequestController.class)
             .put("removeFriend", RemoveFriendController.class)
             .put("declineFriendRequest", DeclineFriendRequestController.class)
+            .put("blockUser", BlockUserController.class)
+            .put("unblockUser", UnblockUserController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,

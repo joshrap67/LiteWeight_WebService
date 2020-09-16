@@ -57,65 +57,71 @@ public class SendFriendRequestManager {
                     if (userToAdd != null) {
                         // user that the active user is attempting to add is indeed a real user
                         if (!userToAdd.getUserPreferences().isPrivateAccount()) {
-                            // user is not private so go ahead and proceed with the request
-                            // first add the unconfirmed user to the active user friend's list
-                            Friend friendToAdd = new Friend(userToAdd);
-                            activeUserObject.getFriends().putIfAbsent(usernameToAdd, friendToAdd);
+                            // LAST CHECK I SWEAR :)
+                            if (!userToAdd.getBlocked().containsKey(activeUser)) {
+                                Friend friendToAdd = new Friend(userToAdd,
+                                    false); // added to active user's friends mapping
+                                FriendRequest friendRequest = new FriendRequest(activeUserObject,
+                                    Instant.now().toString());
+                                if (userToAdd.getFriendRequests().size()
+                                    < Globals.MAX_FRIEND_REQUESTS) {
+                                    userToAdd.getFriendRequests()
+                                        .putIfAbsent(activeUser, friendRequest);
+                                    // go ahead and just add friend request, user hasn't reached limit yet
+                                } else {
+                                    // todo sort and remove oldest
+                                    userToAdd.getFriendRequests()
+                                        .putIfAbsent(activeUser, friendRequest);
+                                }
+                                // both friend and added friend are ready to be updated in DB
+                                final UpdateItemData updateFriendData = new UpdateItemData(
+                                    usernameToAdd, DatabaseAccess.USERS_TABLE_NAME)
+                                    .withUpdateExpression(
+                                        "set " +
+                                            User.FRIEND_REQUESTS + ".#username= :"
+                                            + User.FRIEND_REQUESTS)
+                                    .withValueMap(
+                                        new ValueMap()
+                                            .withMap(":" + User.FRIEND_REQUESTS,
+                                                friendRequest.asMap()))
+                                    .withNameMap(new NameMap()
+                                        .with("#username", activeUser));
+                                final UpdateItemData updateActiveUserData = new UpdateItemData(
+                                    activeUser, DatabaseAccess.USERS_TABLE_NAME)
+                                    .withUpdateExpression(
+                                        "set " +
+                                            User.FRIENDS + ".#username= :"
+                                            + User.FRIENDS)
+                                    .withValueMap(
+                                        new ValueMap()
+                                            .withMap(":" + User.FRIENDS,
+                                                friendToAdd.asMap()))
+                                    .withNameMap(new NameMap()
+                                        .with("#username", usernameToAdd));
 
-                            // now, add a request to the added friend
-                            FriendRequest friendRequest = new FriendRequest(activeUserObject,
-                                Instant.now().toString());
-                            if (userToAdd.getFriendRequests().size()
-                                < Globals.MAX_FRIEND_REQUESTS) {
-                                userToAdd.getFriendRequests()
-                                    .putIfAbsent(activeUser, friendRequest);
-                                // go ahead and just add friend request, user hasn't reached limit yet
+                                // want a transaction since more than one object is being updated at once
+                                final List<TransactWriteItem> actions = new ArrayList<>();
+                                actions.add(new TransactWriteItem()
+                                    .withUpdate(updateFriendData.asUpdate()));
+                                actions.add(new TransactWriteItem()
+                                    .withUpdate(updateActiveUserData.asUpdate()));
+
+                                this.databaseAccess.executeWriteTransaction(actions);
+                                // if this succeeds, go ahead and send a notification to the added user
+                                this.snsAccess.sendMessage(userToAdd.getPushEndpointArn(),
+                                    new NotificationData(SnsAccess.friendRequestAction,
+                                        new FriendRequestResponse(friendRequest, activeUser)
+                                            .asMap()));
+                                resultStatus = ResultStatus
+                                    .successful(JsonHelper.serializeMap(
+                                        new FriendResponse(friendToAdd, usernameToAdd).asMap()));
                             } else {
-                                // todo sort and remove oldest
-                                userToAdd.getFriendRequests()
-                                    .putIfAbsent(activeUser, friendRequest);
+                                this.metrics.log(String
+                                    .format("User %s has this account blocked", usernameToAdd));
+                                resultStatus = ResultStatus
+                                    .failureBadEntity(
+                                        String.format("Unable to add %s", usernameToAdd));
                             }
-                            // both friend and added friend are ready to be updated in DB
-                            final UpdateItemData updateFriendData = new UpdateItemData(
-                                usernameToAdd, DatabaseAccess.USERS_TABLE_NAME)
-                                .withUpdateExpression(
-                                    "set " +
-                                        User.FRIEND_REQUESTS + ".#username= :"
-                                        + User.FRIEND_REQUESTS)
-                                .withValueMap(
-                                    new ValueMap()
-                                        .withMap(":" + User.FRIEND_REQUESTS,
-                                            friendRequest.asMap()))
-                                .withNameMap(new NameMap()
-                                    .with("#username", activeUser));
-                            final UpdateItemData updateActiveUserData = new UpdateItemData(
-                                activeUser, DatabaseAccess.USERS_TABLE_NAME)
-                                .withUpdateExpression(
-                                    "set " +
-                                        User.FRIENDS + ".#username= :"
-                                        + User.FRIENDS)
-                                .withValueMap(
-                                    new ValueMap()
-                                        .withMap(":" + User.FRIENDS,
-                                            friendToAdd.asMap()))
-                                .withNameMap(new NameMap()
-                                    .with("#username", usernameToAdd));
-
-                            // want a transaction since more than one object is being updated at once
-                            final List<TransactWriteItem> actions = new ArrayList<>();
-                            actions.add(new TransactWriteItem()
-                                .withUpdate(updateFriendData.asUpdate()));
-                            actions.add(new TransactWriteItem()
-                                .withUpdate(updateActiveUserData.asUpdate()));
-
-                            this.databaseAccess.executeWriteTransaction(actions);
-                            // if this succeeds, go ahead and send a notification to the added user
-                            this.snsAccess.sendMessage(userToAdd.getPushEndpointArn(),
-                                new NotificationData(SnsAccess.friendRequestAction,
-                                    new FriendRequestResponse(friendRequest, activeUser).asMap()));
-                            resultStatus = ResultStatus
-                                .successful(JsonHelper.serializeMap(
-                                    new FriendResponse(friendToAdd, usernameToAdd).asMap()));
                         } else {
                             this.metrics.log(String.format("User %s is private", usernameToAdd));
                             resultStatus = ResultStatus

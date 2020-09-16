@@ -35,10 +35,10 @@ public class WarmingManager {
 
         try {
             this.dbAccessManager.describeTables();
-            this.s3Access.imageBucketExists();
+//            this.s3Access.imageBucketExists(); this is eating up a lot of requests...
             this.snsAccess.getPlatformAttributes(Config.PUSH_SNS_PLATFORM_ARN_DEV);
 
-            resultStatus = ResultStatus.successful("Endpoints warmed.");
+            resultStatus = ResultStatus.successful("Endpoints successfully warmed.");
         } catch (Exception e) {
             this.metrics.log(new ErrorMessage(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
