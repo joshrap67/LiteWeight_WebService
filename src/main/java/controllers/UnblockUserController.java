@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import managers.BlockUserManager;
 import managers.UnblockUserManager;
 import models.User;
 import modules.Injector;
