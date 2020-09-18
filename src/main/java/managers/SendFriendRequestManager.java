@@ -12,8 +12,6 @@ import helpers.Metrics;
 import helpers.ResultStatus;
 import helpers.UpdateItemData;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;

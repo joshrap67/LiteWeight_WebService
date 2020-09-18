@@ -2,6 +2,7 @@ package managers;
 
 import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.google.common.collect.ImmutableMap;
 import helpers.ErrorMessage;
@@ -74,9 +75,10 @@ public class BlockUserManager {
                             // go ahead and block the user
                             UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                                 .withUpdateExpression(
-                                    "set " + User.BLOCKED + " =:blockedUserMap")
-                                .withValueMap(new ValueMap().withMap(":blockedUserMap",
-                                    ImmutableMap.of(userToBlock, userToBlockObject.getIcon())));
+                                    "set " + User.BLOCKED + ".#username =:blockedUserIcon")
+                                .withValueMap(new ValueMap().withString(":blockedUserIcon",
+                                    userToBlockObject.getIcon()))
+                                .withNameMap(new NameMap().with("#username", userToBlock));
                             this.databaseAccess.updateUser(activeUser, updateItemSpec);
                             // return the icon in case user doesn't already have the icon to display in the blocked list
                             resultStatus = ResultStatus.successful(JsonHelper

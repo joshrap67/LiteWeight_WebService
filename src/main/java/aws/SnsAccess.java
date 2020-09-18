@@ -28,7 +28,6 @@ public class SnsAccess {
     public static final String acceptedFriendRequestAction = "acceptedFriendRequest";
     public static final String declinedFriendRequestAction = "declinedFriendRequest";
     public static final String removeFriendAction = "removeFriend";
-    public static final String blockUserAction = "blockUser";
     private final AmazonSNSClient client;
 
     public SnsAccess() {
@@ -80,6 +79,9 @@ public class SnsAccess {
      */
     public PublishResult sendMessage(final String arn, final NotificationData notificationData)
         throws JsonProcessingException {
+        if (arn == null) {
+            return null;
+        }
         Map<String, Object> notification = ImmutableMap.of(
             "data", ImmutableMap.of(
                 "default", "default message",

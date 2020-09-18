@@ -3,6 +3,7 @@ package managers;
 import aws.DatabaseAccess;
 import aws.SnsAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.sns.model.DeleteEndpointRequest;
 import helpers.ErrorMessage;
 import helpers.Metrics;
@@ -42,9 +43,9 @@ public class RemoveEndpointTokenManager {
             final User user = this.databaseAccess.getUser(activeUser);
 
             if (user.getPushEndpointArn() != null) {
-                // todo just change it to null?
                 final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-                    .withUpdateExpression("remove " + User.PUSH_ENDPOINT_ARN);
+                    .withUpdateExpression("set " + User.PUSH_ENDPOINT_ARN + " =:value")
+                    .withValueMap(new ValueMap().withNull(":value"));
 
                 this.databaseAccess.updateUser(activeUser, updateItemSpec);
 
@@ -60,7 +61,7 @@ public class RemoveEndpointTokenManager {
                 resultStatus = ResultStatus.successful("No endpoint to unregister.");
             }
         } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
+            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 

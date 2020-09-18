@@ -47,10 +47,10 @@ public class UnblockUserManager {
                     .successful("User successfully unblocked.");
             } else {
                 this.metrics
-                    .log(String.format("Cannot block user %s", usernameToUnblock));
+                    .log(String.format("Cannot unblock user %s", usernameToUnblock));
                 resultStatus = ResultStatus
                     .failureBadEntity(
-                        String.format("Unable to block %s", usernameToUnblock));
+                        String.format("Unable to unblock %s", usernameToUnblock));
             }
 
         } catch (Exception e) {
