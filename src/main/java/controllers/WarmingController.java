@@ -15,15 +15,16 @@ public class WarmingController implements ApiRequestController {
     @Inject
     public WarmingManager warmingManager;
 
-    public ResultStatus processApiRequest(final Map<String, Object> jsonMap, final Metrics metrics)
+    public ResultStatus<String> processApiRequest(final Map<String, Object> jsonMap, final Metrics metrics)
         throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
-        ResultStatus resultStatus;
+        ResultStatus<String> resultStatus;
 
         try {
             Injector.getInjector(metrics).inject(this);
-            resultStatus = this.warmingManager.execute();
+            this.warmingManager.execute();
+            resultStatus = ResultStatus.successful("Endpoints successfully warmed.");
         } catch (final Exception e) {
             metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
             resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

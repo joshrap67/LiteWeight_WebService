@@ -2,7 +2,10 @@ package controllers;
 
 import com.google.common.collect.ImmutableList;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
+import exceptions.WorkoutNotFoundException;
 import helpers.ErrorMessage;
+import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.RequestFields;
 import helpers.ResultStatus;
@@ -12,6 +15,7 @@ import javax.inject.Inject;
 import managers.GetUserWorkoutManager;
 import models.User;
 import modules.Injector;
+import responses.UserWithWorkout;
 
 public class GetUserWorkoutController implements ApiRequestController {
 
@@ -30,16 +34,25 @@ public class GetUserWorkoutController implements ApiRequestController {
 
             if (jsonMap.containsKey(User.USERNAME)) {
                 final String username = (String) jsonMap.get(User.USERNAME);
-                resultStatus = this.getUserWorkoutManager.execute(username);
+                final UserWithWorkout userWithWorkout = this.getUserWorkoutManager
+                    .execute(username);
+                resultStatus = ResultStatus
+                    .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
             } else if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
-                resultStatus = this.getUserWorkoutManager.execute(activeUser);
+                final UserWithWorkout userWithWorkout = this.getUserWorkoutManager
+                    .execute(activeUser);
+                resultStatus = ResultStatus
+                    .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
             } else {
                 throw new MissingApiRequestKeyException(
                     ImmutableList.of(RequestFields.ACTIVE_USER));
             }
         } catch (final MissingApiRequestKeyException e) {
             throw e;
+        } catch (UserNotFoundException | WorkoutNotFoundException exception) {
+            metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
+            resultStatus = ResultStatus.failureBadEntity(exception.getMessage());
         } catch (final Exception e) {
             metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
             resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

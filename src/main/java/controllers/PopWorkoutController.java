@@ -1,7 +1,10 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
+import exceptions.WorkoutNotFoundException;
 import helpers.ErrorMessage;
+import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.RequestFields;
 import helpers.ResultStatus;
@@ -13,6 +16,7 @@ import javax.inject.Inject;
 import managers.PopWorkoutManager;
 import models.Workout;
 import modules.Injector;
+import responses.UserWithWorkout;
 
 public class PopWorkoutController implements ApiRequestController {
 
@@ -35,8 +39,12 @@ public class PopWorkoutController implements ApiRequestController {
                 final String workoutId = (String) json.get(Workout.WORKOUT_ID);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.popWorkoutManager
+                final UserWithWorkout result = this.popWorkoutManager
                     .execute(activeUser, workoutId);
+                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
+            } catch (UserNotFoundException | WorkoutNotFoundException exception) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
+                resultStatus = ResultStatus.failureBadEntity(exception.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

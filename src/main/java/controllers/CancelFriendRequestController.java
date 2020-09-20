@@ -1,6 +1,7 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.RequestFields;
@@ -35,7 +36,11 @@ public class CancelFriendRequestController implements ApiRequestController {
                 final String userToCancel = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.cancelFriendRequestManager.execute(activeUser, userToCancel);
+                this.cancelFriendRequestManager.execute(activeUser, userToCancel);
+                resultStatus = ResultStatus.successful("Request successfully canceled.");
+            } catch (UserNotFoundException unfe) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

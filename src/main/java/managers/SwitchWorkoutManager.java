@@ -4,18 +4,11 @@ import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
-import exceptions.UserNotFoundException;
-import exceptions.WorkoutNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
 import helpers.Metrics;
-import helpers.ResultStatus;
 import helpers.UpdateItemData;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import javax.inject.Inject;
 import models.User;
 import models.Workout;
@@ -37,22 +30,15 @@ public class SwitchWorkoutManager {
      * @param activeUser Username of new user to be inserted
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser, final String newWorkoutId,
-        final Workout oldWorkout) {
+    public UserWithWorkout execute(final String activeUser, final String newWorkoutId,
+        final Workout oldWorkout) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
             String oldWorkoutId = oldWorkout.getWorkoutId();
-            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
-            final Workout newWorkout = Optional
-                .ofNullable(this.databaseAccess.getWorkout(newWorkoutId))
-                .orElseThrow(
-                    () -> new WorkoutNotFoundException(
-                        String.format("Workout with ID %s not found", newWorkoutId)));
+            final User user = this.databaseAccess.getUser(activeUser);
+            final Workout newWorkout = this.databaseAccess.getWorkout(newWorkoutId);
 
             final String creationTimeNew = Instant.now().toString();
             final WorkoutUser workoutMetaNew = user.getUserWorkouts().get(newWorkoutId);
@@ -88,17 +74,11 @@ public class SwitchWorkoutManager {
             actions.add(new TransactWriteItem().withUpdate(updateOldWorkoutItemData.asUpdate()));
             this.databaseAccess.executeWriteTransaction(actions);
 
-            resultStatus = ResultStatus.successful(JsonHelper.serializeMap(
-                new UserWithWorkout(user, newWorkout).asMap()));
-        } catch (WorkoutNotFoundException | UserNotFoundException exception) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
-            resultStatus = ResultStatus.failureBadEntity(exception.getMessage());
+            this.metrics.commonClose(true);
+            return new UserWithWorkout(user, newWorkout);
         } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
+            this.metrics.commonClose(false);
+            throw e;
         }
-
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
     }
 }

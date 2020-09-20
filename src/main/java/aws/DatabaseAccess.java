@@ -16,9 +16,12 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsRequest;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsResult;
 import exceptions.InvalidAttributeException;
+import exceptions.UserNotFoundException;
+import exceptions.WorkoutNotFoundException;
 import helpers.Config;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import models.User;
 import models.Workout;
 
@@ -57,9 +60,12 @@ public class DatabaseAccess {
     }
 
     public Workout getWorkout(String currentWorkoutId)
-        throws NullPointerException, InvalidAttributeException {
-        return new Workout(
-            this.workoutTable.getItem(new PrimaryKey(WORKOUT_TABLE_KEY, currentWorkoutId)));
+        throws NullPointerException, InvalidAttributeException, WorkoutNotFoundException {
+        final Item workoutItem = Optional.ofNullable(this.getWorkoutItem(currentWorkoutId))
+            .orElseThrow(
+                () -> new WorkoutNotFoundException(
+                    String.format("Workout with ID: %s not found", currentWorkoutId)));
+        return new Workout(workoutItem);
     }
 
     public UpdateItemOutcome updateWorkout(final String workoutId,
@@ -74,8 +80,11 @@ public class DatabaseAccess {
     }
 
     public User getUser(final String username)
-        throws NullPointerException, InvalidAttributeException {
-        return new User(this.usersTable.getItem(new PrimaryKey(USERS_PRIMARY_KEY, username)));
+        throws NullPointerException, InvalidAttributeException, UserNotFoundException {
+        final Item userItem = Optional.ofNullable(this.getUserItem(username))
+            .orElseThrow(
+                () -> new UserNotFoundException(String.format("%s not found", username)));
+        return new User(userItem);
     }
 
     public Item getUserItem(final String username) throws NullPointerException {

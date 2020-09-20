@@ -1,6 +1,8 @@
 package controllers;
 
+import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.RequestFields;
@@ -35,7 +37,14 @@ public class AcceptFriendRequestController implements ApiRequestController {
                 final String userToAccept = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.acceptFriendRequestManager.execute(activeUser, userToAccept);
+                this.acceptFriendRequestManager.execute(activeUser, userToAccept);
+                resultStatus = ResultStatus.successful("Friend successfully added.");
+            } catch (ManagerExecutionException meu) {
+                metrics.log("Input error: " + meu.getMessage());
+                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+            } catch (UserNotFoundException unfe) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

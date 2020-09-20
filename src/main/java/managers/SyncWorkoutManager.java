@@ -25,11 +25,10 @@ public class SyncWorkoutManager {
      * @param workout Workout that is to be synced.
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final Workout workout) {
+    public boolean execute(final Workout workout) {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
             String workoutId = workout.getWorkoutId();
             rectifyCurrentDayAndWeek(workout);
@@ -46,14 +45,13 @@ public class SyncWorkoutManager {
                     .withNumber(":currentWeekVal", workout.getCurrentWeek())
                     .withMap(":routineMap", workout.getRoutine().asMap()));
             this.databaseAccess.updateWorkout(workoutId, updateItemSpec);
-            resultStatus = ResultStatus.successful("Workout synced successfully");
-        } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
-        }
 
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
+            this.metrics.commonClose(true);
+            return true;
+        } catch (Exception e) {
+            this.metrics.commonClose(false);
+            throw e;
+        }
     }
 
     private void rectifyCurrentDayAndWeek(final Workout workout) {

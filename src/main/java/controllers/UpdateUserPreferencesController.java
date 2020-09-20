@@ -36,8 +36,8 @@ public class UpdateUserPreferencesController implements ApiRequestController {
                 final UserPreferences userPreferences = new UserPreferences(
                     (Map<String, Object>) jsonBody.get(User.USER_PREFERENCES));
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.updateUserPreferencesManager
-                    .execute(activeUser, userPreferences);
+                this.updateUserPreferencesManager.execute(activeUser, userPreferences);
+                resultStatus = ResultStatus.successful("User prefs updated successfully.");
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

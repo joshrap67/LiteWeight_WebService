@@ -1,6 +1,8 @@
 package controllers;
 
+import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.RequestFields;
@@ -15,6 +17,7 @@ import models.User;
 import modules.Injector;
 
 public class DeclineFriendRequestController implements ApiRequestController {
+
     @Inject
     public DeclineFriendRequestManager declineFriendRequestManager;
 
@@ -34,7 +37,14 @@ public class DeclineFriendRequestController implements ApiRequestController {
                 final String declinedUser = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.declineFriendRequestManager.execute(activeUser, declinedUser);
+                this.declineFriendRequestManager.execute(activeUser, declinedUser);
+                resultStatus = ResultStatus.successful("Request successfully declined.");
+            } catch (ManagerExecutionException meu) {
+                metrics.log("Input error: " + meu.getMessage());
+                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+            } catch (UserNotFoundException unfe) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

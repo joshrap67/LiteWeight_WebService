@@ -59,7 +59,7 @@ public class Metrics {
     public void commonClose(boolean status) {
         this.addBooleanMetric(status);
         this.finalizeTimeMetric(Metrics.TIME);
-        this.removeFunctionName();
+//        this.removeFunctionName();
     }
 
     private void ensureFunctionKeyExists(Map input) {

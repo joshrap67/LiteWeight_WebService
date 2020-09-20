@@ -5,12 +5,9 @@ import aws.SnsAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.sns.model.DeleteEndpointRequest;
+import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
 import helpers.Metrics;
-import helpers.ResultStatus;
-import java.util.Map;
-import java.util.Optional;
 import javax.inject.Inject;
 import models.User;
 
@@ -35,41 +32,30 @@ public class RemoveEndpointTokenManager {
      * @param activeUser The user making the api request whose push endpoint is being registered.
      * @return Standard result status object giving insight on whether the request was successful.
      */
-    public ResultStatus<String> execute(final String activeUser) {
+    public boolean execute(final String activeUser)
+        throws InvalidAttributeException, UserNotFoundException {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
-            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
+            final User user = this.databaseAccess.getUser(activeUser);
 
             if (user.getPushEndpointArn() != null) {
                 final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                     .withUpdateExpression("set " + User.PUSH_ENDPOINT_ARN + " =:arn")
                     .withValueMap(new ValueMap().withNull(":arn"));
-
                 this.databaseAccess.updateUser(activeUser, updateItemSpec);
 
                 // arn is no longer in DB. Now try and delete the ARN from SNS
                 final DeleteEndpointRequest deleteEndpointRequest = new DeleteEndpointRequest()
                     .withEndpointArn(user.getPushEndpointArn());
                 this.snsAccess.unregisterPlatformEndpoint(deleteEndpointRequest);
-
-                resultStatus = ResultStatus.successful("Endpoint unregistered.");
-            } else {
-                resultStatus = ResultStatus.successful("No endpoint to unregister.");
             }
-        } catch (UserNotFoundException unfe) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+            this.metrics.commonClose(true);
+            return true;
         } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
+            this.metrics.commonClose(false);
+            throw e;
         }
-
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
     }
 }

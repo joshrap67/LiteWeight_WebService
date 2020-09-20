@@ -4,11 +4,10 @@ import aws.DatabaseAccess;
 import aws.S3Access;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
-import helpers.ErrorMessage;
+import exceptions.InvalidAttributeException;
 import helpers.FileReader;
-import helpers.JsonHelper;
 import helpers.Metrics;
-import helpers.ResultStatus;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -33,11 +32,10 @@ public class NewUserManager {
      * @param username Username of new user to be inserted
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String username) {
+    public User execute(final String username) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
             // whenever a user is created, give them a unique UUID file path that will always get updated
             final UUID uuid = UUID.randomUUID();
@@ -66,14 +64,11 @@ public class NewUserManager {
                 .withMap(User.EXERCISES, FileReader.getDefaultExercises());
 
             PutItemOutcome outcome = this.databaseAccess.putUser(user);
-            resultStatus = ResultStatus
-                .successful(JsonHelper.serializeMap(outcome.getItem().asMap()));
+            this.metrics.commonClose(true);
+            return new User(outcome.getItem().asMap());
         } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
+            this.metrics.commonClose(false);
+            throw e;
         }
-
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
     }
 }

@@ -1,7 +1,10 @@
 package controllers;
 
+import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
+import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.RequestFields;
 import helpers.ResultStatus;
@@ -13,6 +16,7 @@ import javax.inject.Inject;
 import managers.SendFriendRequestManager;
 import models.User;
 import modules.Injector;
+import responses.FriendResponse;
 
 public class SendFriendRequestController implements ApiRequestController {
 
@@ -35,7 +39,16 @@ public class SendFriendRequestController implements ApiRequestController {
                 final String userToAdd = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.sendFriendRequestManager.execute(activeUser, userToAdd);
+                final FriendResponse friendResponse = this.sendFriendRequestManager
+                    .execute(activeUser, userToAdd);
+                resultStatus = ResultStatus
+                    .successful(JsonHelper.serializeMap(friendResponse.asMap()));
+            } catch (ManagerExecutionException meu) {
+                metrics.log("Input error: " + meu.getMessage());
+                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+            } catch (UserNotFoundException unfe) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

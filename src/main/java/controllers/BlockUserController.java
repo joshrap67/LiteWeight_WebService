@@ -1,7 +1,11 @@
 package controllers;
 
+import com.google.common.collect.ImmutableMap;
+import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
+import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.RequestFields;
 import helpers.ResultStatus;
@@ -35,7 +39,16 @@ public class BlockUserController implements ApiRequestController {
                 final String userToBlock = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.blockUserManager.execute(activeUser, userToBlock);
+                final String result = this.blockUserManager.execute(activeUser, userToBlock);
+                resultStatus = ResultStatus.successful(JsonHelper
+                    .serializeMap(ImmutableMap.of(User.ICON, result)));
+
+            } catch (ManagerExecutionException meu) {
+                metrics.log("Input error: " + meu.getMessage());
+                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+            } catch (UserNotFoundException unfe) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

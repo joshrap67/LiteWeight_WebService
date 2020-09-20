@@ -3,6 +3,7 @@ package controllers;
 import com.google.common.collect.ImmutableList;
 import exceptions.MissingApiRequestKeyException;
 import helpers.ErrorMessage;
+import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.RequestFields;
 import helpers.ResultStatus;
@@ -24,13 +25,13 @@ public class NewUserController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         try {
             Injector.getInjector(metrics).inject(this);
 
             if (json.containsKey(User.USERNAME)) {
                 final String username = (String) json.get(User.USERNAME);
-                resultStatus = this.newUserManager.execute(username);
+                final User result = this.newUserManager.execute(username);
+                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
             } else {
                 throw new MissingApiRequestKeyException(
                     ImmutableList.of(RequestFields.ACTIVE_USER));
@@ -38,7 +39,7 @@ public class NewUserController implements ApiRequestController {
         } catch (final MissingApiRequestKeyException e) {
             throw e;
         } catch (final Exception e) {
-            metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
+            metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
         }
 

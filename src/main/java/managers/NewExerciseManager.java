@@ -4,6 +4,8 @@ import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import exceptions.InvalidAttributeException;
+import exceptions.ManagerExecutionException;
 import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.JsonHelper;
@@ -34,50 +36,39 @@ public class NewExerciseManager {
      * @param exerciseName TODO
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser, final String exerciseName,
-        final List<String> focuses) {
+    public ExerciseUserResponse execute(final String activeUser, final String exerciseName,
+        final List<String> focuses) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
-            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
+            final User user = this.databaseAccess.getUser(activeUser);
 
             List<String> focusList = new ArrayList<>(focuses);
             final String errorMessage = Validator.validNewExercise(user, exerciseName, focusList);
 
-            if (errorMessage.isEmpty()) {
-                // all input is valid so go ahead and make the new exercise
-                ExerciseUser exerciseUser = new ExerciseUser(exerciseName,
-                    ExerciseUser.defaultVideoValue, focusList, false);
-                String exerciseId = UUID.randomUUID().toString();
-
-                final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-                    .withUpdateExpression("set " + User.EXERCISES + ".#exerciseId= :exerciseMap")
-                    .withNameMap(new NameMap().with("#exerciseId", exerciseId))
-                    .withValueMap(new ValueMap().withMap(":exerciseMap", exerciseUser.asMap()));
-                this.databaseAccess.updateUser(user.getUsername(), updateItemSpec);
-
-                resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(
-                        new ExerciseUserResponse(exerciseId, exerciseUser).asMap()));
-            } else {
-                this.metrics.log("Input error on creating new exercise:" + errorMessage);
-                resultStatus = ResultStatus
-                    .failureBadEntity("Input error on creating new exercise.");
+            if (!errorMessage.isEmpty()) {
+                this.metrics.commonClose(false);
+                throw new ManagerExecutionException(errorMessage);
             }
-        } catch (UserNotFoundException unfe) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
-        } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod + ". " + e);
-        }
 
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
+            // all input is valid so go ahead and make the new exercise
+            ExerciseUser exerciseUser = new ExerciseUser(exerciseName,
+                ExerciseUser.defaultVideoValue, focusList, false);
+            String exerciseId = UUID.randomUUID().toString();
+
+            final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+                .withUpdateExpression("set " + User.EXERCISES + ".#exerciseId= :exerciseMap")
+                .withNameMap(new NameMap().with("#exerciseId", exerciseId))
+                .withValueMap(new ValueMap().withMap(":exerciseMap", exerciseUser.asMap()));
+            this.databaseAccess.updateUser(user.getUsername(), updateItemSpec);
+
+            this.metrics.commonClose(true);
+            return new ExerciseUserResponse(exerciseId, exerciseUser);
+        } catch (Exception e) {
+            this.metrics.commonClose(false);
+            throw e;
+        }
     }
 
 }

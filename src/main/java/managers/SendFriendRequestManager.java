@@ -5,17 +5,13 @@ import aws.SnsAccess;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
-import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
+import exceptions.ManagerExecutionException;
 import helpers.Globals;
-import helpers.JsonHelper;
 import helpers.Metrics;
-import helpers.ResultStatus;
 import helpers.UpdateItemData;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 import models.Friend;
 import models.FriendRequest;
@@ -45,68 +41,55 @@ public class SendFriendRequestManager {
      * @param activeUser The user that made the api request, trying to get data about themselves.
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser, final String usernameToAdd) {
+    public FriendResponse execute(final String activeUser, final String usernameToAdd)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
-            final User activeUserObject = Optional
-                .ofNullable(this.databaseAccess.getUser(activeUser))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
-            final User userToAdd = Optional.ofNullable(this.databaseAccess.getUser(usernameToAdd))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found", usernameToAdd)));
+            final User activeUserObject = this.databaseAccess.getUser(activeUser);
+            final User userToAdd = this.databaseAccess.getUser(usernameToAdd);
 
             String errorMessage = validConditions(activeUserObject, userToAdd);
-            if (errorMessage.isEmpty()) {
-                Friend friendToAdd = new Friend(userToAdd, false);
-                FriendRequest friendRequest = new FriendRequest(activeUserObject,
-                    Instant.now().toString());
-
-                // the active user needs to have this (unconfirmed) friend added to its friends list
-                final UpdateItemData updateFriendData = new UpdateItemData(
-                    usernameToAdd, DatabaseAccess.USERS_TABLE_NAME)
-                    .withUpdateExpression(
-                        "set " + User.FRIEND_REQUESTS + ".#username= :" + User.FRIEND_REQUESTS)
-                    .withValueMap(
-                        new ValueMap().withMap(":" + User.FRIEND_REQUESTS, friendRequest.asMap()))
-                    .withNameMap(new NameMap().with("#username", activeUser));
-                // friend to add needs to have the friend request added to its friend request list
-                final UpdateItemData updateActiveUserData = new UpdateItemData(
-                    activeUser, DatabaseAccess.USERS_TABLE_NAME)
-                    .withUpdateExpression(
-                        "set " + User.FRIENDS + ".#username= :" + User.FRIENDS)
-                    .withValueMap(new ValueMap().withMap(":" + User.FRIENDS, friendToAdd.asMap()))
-                    .withNameMap(new NameMap().with("#username", usernameToAdd));
-
-                // want a transaction since more than one object is being updated at once
-                final List<TransactWriteItem> actions = new ArrayList<>();
-                actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
-                actions.add(new TransactWriteItem().withUpdate(updateActiveUserData.asUpdate()));
-
-                this.databaseAccess.executeWriteTransaction(actions);
-                // if this succeeds, go ahead and send a notification to the added user
-                this.snsAccess.sendMessage(userToAdd.getPushEndpointArn(),
-                    new NotificationData(SnsAccess.friendRequestAction,
-                        new FriendRequestResponse(friendRequest, activeUser).asMap()));
-                resultStatus = ResultStatus.successful(JsonHelper
-                    .serializeMap(new FriendResponse(friendToAdd, usernameToAdd).asMap()));
-            } else {
-                this.metrics.log(errorMessage);
-                resultStatus = ResultStatus.failureBadEntity(errorMessage);
+            if (!errorMessage.isEmpty()) {
+                this.metrics.commonClose(false);
+                throw new ManagerExecutionException(errorMessage);
             }
-        } catch (UserNotFoundException unfe) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
-        } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
-        }
 
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
+            Friend friendToAdd = new Friend(userToAdd, false);
+            FriendRequest friendRequest = new FriendRequest(activeUserObject,
+                Instant.now().toString());
+
+            // the active user needs to have this (unconfirmed) friend added to its friends list
+            final UpdateItemData updateFriendData = new UpdateItemData(
+                usernameToAdd, DatabaseAccess.USERS_TABLE_NAME)
+                .withUpdateExpression(
+                    "set " + User.FRIEND_REQUESTS + ".#username= :" + User.FRIEND_REQUESTS)
+                .withValueMap(
+                    new ValueMap().withMap(":" + User.FRIEND_REQUESTS, friendRequest.asMap()))
+                .withNameMap(new NameMap().with("#username", activeUser));
+            // friend to add needs to have the friend request added to its friend request list
+            final UpdateItemData updateActiveUserData = new UpdateItemData(
+                activeUser, DatabaseAccess.USERS_TABLE_NAME)
+                .withUpdateExpression("set " + User.FRIENDS + ".#username= :" + User.FRIENDS)
+                .withValueMap(new ValueMap().withMap(":" + User.FRIENDS, friendToAdd.asMap()))
+                .withNameMap(new NameMap().with("#username", usernameToAdd));
+
+            // want a transaction since more than one object is being updated at once
+            final List<TransactWriteItem> actions = new ArrayList<>();
+            actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
+            actions.add(new TransactWriteItem().withUpdate(updateActiveUserData.asUpdate()));
+
+            this.databaseAccess.executeWriteTransaction(actions);
+            // if this succeeds, go ahead and send a notification to the added user
+            this.snsAccess.sendMessage(userToAdd.getPushEndpointArn(),
+                new NotificationData(SnsAccess.friendRequestAction,
+                    new FriendRequestResponse(friendRequest, activeUser).asMap()));
+            return new FriendResponse(friendToAdd, usernameToAdd);
+        } catch (Exception e) {
+            this.metrics.commonClose(false);
+            throw e;
+        }
     }
 
     private String validConditions(final User activeUser, final User otherUser) {
@@ -137,7 +120,10 @@ public class SendFriendRequestManager {
                 .append("\n");
         }
         if (otherUser.getFriendRequests().containsKey(activeUserUsername)) {
-            stringBuilder.append("This user has already sent you a friend request.");
+            stringBuilder.append("This user has already sent you a friend request.\n");
+        }
+        if (activeUserUsername.equals(otherUserUsername)) {
+            stringBuilder.append("Cannot add yourself.\n");
         }
         return stringBuilder.toString().trim();
     }

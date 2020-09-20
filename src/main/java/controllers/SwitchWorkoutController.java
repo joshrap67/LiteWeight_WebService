@@ -1,7 +1,10 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
+import exceptions.WorkoutNotFoundException;
 import helpers.ErrorMessage;
+import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.RequestFields;
 import helpers.ResultStatus;
@@ -13,6 +16,7 @@ import javax.inject.Inject;
 import managers.SwitchWorkoutManager;
 import models.Workout;
 import modules.Injector;
+import responses.UserWithWorkout;
 
 public class SwitchWorkoutController implements ApiRequestController {
 
@@ -38,8 +42,12 @@ public class SwitchWorkoutController implements ApiRequestController {
                 final Workout oldWorkout = new Workout(oldWorkoutMap);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.switchWorkoutManager
+                final UserWithWorkout result = this.switchWorkoutManager
                     .execute(activeUser, newWorkoutId, oldWorkout);
+                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
+            } catch (WorkoutNotFoundException | UserNotFoundException exception) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
+                resultStatus = ResultStatus.failureBadEntity(exception.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

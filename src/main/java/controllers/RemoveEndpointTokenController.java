@@ -1,6 +1,7 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.RequestFields;
@@ -32,7 +33,11 @@ public class RemoveEndpointTokenController implements ApiRequestController {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.removeEndpointTokenManager.execute(activeUser);
+                this.removeEndpointTokenManager.execute(activeUser);
+                resultStatus = ResultStatus.successful("Endpoint successfully unregistered.");
+            } catch (UserNotFoundException unfe) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

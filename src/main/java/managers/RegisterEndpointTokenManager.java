@@ -8,10 +8,11 @@ import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
 import com.amazonaws.services.sns.model.DeleteEndpointRequest;
 import com.amazonaws.services.sns.model.InvalidParameterException;
+import exceptions.InvalidAttributeException;
+import exceptions.ManagerExecutionException;
+import exceptions.UserNotFoundException;
 import helpers.Config;
-import helpers.ErrorMessage;
 import helpers.Metrics;
-import helpers.ResultStatus;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,57 +47,50 @@ public class RegisterEndpointTokenManager {
      *                    endpoint.
      * @return Standard result status object giving insight on whether the request was successful.
      */
-    public ResultStatus<String> execute(final String activeUser, final String deviceToken) {
+    public boolean execute(final String activeUser, final String deviceToken)
+        throws ManagerExecutionException, InvalidAttributeException, UserNotFoundException {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
             this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
-            resultStatus = ResultStatus.successful("User push arn set successfully.");
+            this.metrics.commonClose(true);
+            return true;
         } catch (final InvalidParameterException ipe) {
             //The error handling here is obtained from aws doc: https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html#mobile-platform-endpoint-sdk-examples
             final String message = ipe.getErrorMessage();
             final Pattern p = Pattern
                 .compile(".*Endpoint (arn:aws:sns[^ ]+) already exists with the same [Tt]oken.*");
             final Matcher m = p.matcher(message);
-            if (m.matches()) {
-                // The platform endpoint already exists for this token
+            if (!m.matches()) {
+                this.metrics.commonClose(false);
+                throw new ManagerExecutionException("Error registering endpoint.");
+            }
 
-                // We have to get the current user associated with the arn and unsubscribe them then we have to subscribe the new user
-                final String endpointArn = m.group(1);
+            // Get the current user associated with the arn and unsubscribe them then subscribe the new user
+            final String endpointArn = m.group(1);
 
-                final Map<String, String> endpointAttributes = this.snsAccess
-                    .getEndpointAttributes(endpointArn);
+            final Map<String, String> endpointAttributes = this.snsAccess
+                .getEndpointAttributes(endpointArn);
 
-                final String oldUsername = endpointAttributes.get(USER_DATA_KEY);
+            final String oldUsername = endpointAttributes.get(USER_DATA_KEY);
 
-                if (this.removeEndpointTokenManager.execute(oldUsername).success) {
-                    // by the chance the user that owned this had their mapping removed but the endpoint still existed, we do this for sanity
-                    this.snsAccess
-                        .unregisterPlatformEndpoint(
-                            new DeleteEndpointRequest().withEndpointArn(endpointArn));
+            if (this.removeEndpointTokenManager.execute(oldUsername)) {
+                // the user that owned this had their mapping removed but the endpoint still existed, we do this for sanity
+                this.snsAccess.unregisterPlatformEndpoint(
+                    new DeleteEndpointRequest().withEndpointArn(endpointArn));
 
-                    this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
-                    resultStatus = ResultStatus.successful("User push arn set successfully.");
-                } else {
-                    this.metrics.logWithBody(new ErrorMessage<>(classMethod,
-                        "Unable to unregister endpoint from other user."));
-                    resultStatus = ResultStatus
-                        .failureBadEntity("Unable to unregister endpoint from other user.");
-                }
+                this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
+                this.metrics.commonClose(true);
+                return true;
             } else {
-                this.metrics.logWithBody(new ErrorMessage<>(classMethod, ipe));
-                resultStatus = ResultStatus
-                    .failureBadEntity("InvalidParameterException in " + classMethod);
+                this.metrics.commonClose(false);
+                throw new ManagerExecutionException("Error registering endpoint.");
             }
         } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
+            this.metrics.commonClose(false);
+            throw e;
         }
-
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
     }
 
     private void attemptToRegisterUserEndpoint(final String activeUser,

@@ -2,10 +2,7 @@ package managers;
 
 import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.Item;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
 import helpers.Metrics;
-import helpers.ResultStatus;
 import javax.inject.Inject;
 import models.User;
 import models.Workout;
@@ -32,17 +29,18 @@ public class GetUserWorkoutManager {
      * @param activeUser The user that made the api request, trying to get data about themselves.
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser) {
+    public UserWithWorkout execute(final String activeUser) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
             Item userItem = this.databaseAccess.getUserItem(activeUser);
+            UserWithWorkout userWithWorkout;
+
             if (userItem != null) {
+                // user is indeed in DB, so fetch the current workout if it exists
                 final User user = new User(userItem);
-                String currentWorkoutId = user.getCurrentWorkout();
-                UserWithWorkout userWithWorkout;
+                final String currentWorkoutId = user.getCurrentWorkout();
 
                 if (currentWorkoutId == null) {
                     // user has no workouts
@@ -53,28 +51,16 @@ public class GetUserWorkoutManager {
                         this.databaseAccess.getWorkoutItem(currentWorkoutId));
                     userWithWorkout = new UserWithWorkout(user, workout);
                 }
-
-                resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
             } else {
                 // this will be reached if the user just created an account or it somehow got deleted in DB, so put user in DB
-                final ResultStatus<String> result = this.newUserManager.execute(activeUser);
-                if (result.responseCode == ResultStatus.SUCCESS_CODE) {
-                    UserWithWorkout userWithWorkout = new UserWithWorkout(
-                        new User(JsonHelper.deserialize(result.resultMessage)), null);
-                    resultStatus = ResultStatus
-                        .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
-                } else {
-                    this.metrics.log(result.resultMessage);
-                    resultStatus = ResultStatus.failureBadEntity(result.resultMessage);
-                }
+                final User result = this.newUserManager.execute(activeUser);
+                userWithWorkout = new UserWithWorkout(result, null);
             }
-        } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
+            return userWithWorkout;
         }
-
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
+        catch (Exception e) {
+            this.metrics.commonClose(false);
+            throw e;
+        }
     }
 }

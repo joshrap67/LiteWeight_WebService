@@ -1,6 +1,7 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.JsonHelper;
 import helpers.Metrics;
@@ -35,9 +36,18 @@ public class UpdateIconController implements ApiRequestController {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
                 final String imageData = (String) jsonBody.get(User.ICON);
                 byte[] imageBytes = JsonHelper.deserializeByteList(imageData);
+
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.updateIconManager
+                boolean success = this.updateIconManager
                     .execute(activeUser, imageBytes);
+                if (success) {
+                    resultStatus = ResultStatus.successful("Picture updated successfully.");
+                } else {
+                    resultStatus = ResultStatus.failureBadEntity("Picture failed to update.");
+                }
+            } catch (UserNotFoundException unfe) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

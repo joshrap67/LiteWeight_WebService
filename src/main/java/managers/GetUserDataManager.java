@@ -2,13 +2,12 @@ package managers;
 
 import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
 import java.util.Optional;
 import javax.inject.Inject;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
 import helpers.Metrics;
-import helpers.ResultStatus;
+import models.User;
 import responses.UserResponse;
 
 public class GetUserDataManager {
@@ -31,28 +30,19 @@ public class GetUserDataManager {
      * @param username The user that made the api request, trying to get data about themselves.
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> getUserData(final String username) {
+    public UserResponse getUserData(final String username)
+        throws UserNotFoundException, InvalidAttributeException {
         final String classMethod = this.getClass().getSimpleName() + ".getUserData";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
-            UserResponse userResponse;
-            Item user = Optional.ofNullable(this.databaseAccess.getUserItem(username))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found.", username)));
-            userResponse = new UserResponse(user);
-            resultStatus = ResultStatus.successful(JsonHelper.serializeMap(userResponse.asMap()));
-        } catch (UserNotFoundException unfe) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+            Item user = Optional.ofNullable(this.databaseAccess.getUserItem(username)).orElseThrow(
+                () -> new UserNotFoundException(String.format("%s not found.", username)));
+            return new UserResponse(user);
         } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
+            this.metrics.commonClose(false);
+            throw e;
         }
-
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
     }
 
     /**
@@ -62,38 +52,26 @@ public class GetUserDataManager {
      * @param activeUser The user that made the api request, trying to get data about themselves.
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> getActiveUserData(final String activeUser) {
+    public UserResponse getActiveUserData(final String activeUser) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".getActiveUserData";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
             UserResponse userResponse;
             Item user = this.databaseAccess.getUserItem(activeUser);
             if (user == null) {
-                // user has not been added yet in the DB, so add them
-                ResultStatus<String> userResultStatus = this.newUserManager.execute(activeUser);
-                if (userResultStatus.responseCode == ResultStatus.SUCCESS_CODE) {
-                    userResponse = new UserResponse(
-                        JsonHelper.deserialize(userResultStatus.resultMessage));
-                    resultStatus = ResultStatus
-                        .successful(JsonHelper.serializeMap(userResponse.asMap()));
-                } else {
-                    this.metrics.log("Error creating new user.");
-                    resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
-                }
+                // user has not been added yet in the DB, so create an entry for them
+                User userResult = this.newUserManager.execute(activeUser);
+                userResponse = new UserResponse(userResult.asMap());
             } else {
-                // user already exists in DB so just return its data
+                // user already exists in DB so just return their data
                 userResponse = new UserResponse(user);
-                resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(userResponse.asMap()));
             }
+            return userResponse;
         } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
+            this.metrics.commonClose(false);
+            throw e;
         }
 
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
     }
 }

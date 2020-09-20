@@ -1,6 +1,8 @@
 package controllers;
 
+import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.RequestFields;
@@ -35,8 +37,14 @@ public class RegisterEndpointTokenController implements ApiRequestController {
                 final String token = (String) json.get(User.PUSH_ENDPOINT_ARN);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.registerEndpointTokenManager
-                    .execute(activeUser, token);
+                this.registerEndpointTokenManager.execute(activeUser, token);
+                resultStatus = ResultStatus.successful("Endpoint registered successfully.");
+            } catch (ManagerExecutionException meu) {
+                metrics.log("Input error: " + meu.getMessage());
+                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+            } catch (UserNotFoundException unfe) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

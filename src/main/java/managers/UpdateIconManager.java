@@ -2,11 +2,9 @@ package managers;
 
 import aws.DatabaseAccess;
 import aws.S3Access;
+import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
 import helpers.Metrics;
-import helpers.ResultStatus;
-import java.util.Optional;
 import javax.inject.Inject;
 import models.User;
 
@@ -28,33 +26,22 @@ public class UpdateIconManager {
      * @param activeUser Username of new user to be inserted
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser, final byte[] imageData) {
+    public boolean execute(final String activeUser, final byte[] imageData)
+        throws InvalidAttributeException, UserNotFoundException {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
-
         try {
-            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
+            final User user = this.databaseAccess.getUser(activeUser);
             // same filename is always used. Content is just overwritten
             String fileName = user.getIcon();
             boolean success = this.s3Access.uploadImage(imageData, fileName, this.metrics);
-            if (success) {
-                resultStatus = ResultStatus.successful("Picture updated successfully.");
-            } else {
-                resultStatus = ResultStatus.failureBadEntity("Picture failed to update.");
-            }
-        } catch (UserNotFoundException unfe) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
-        } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
-        }
 
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
+            this.metrics.commonClose(success);
+            return success;
+        } catch (Exception e) {
+            this.metrics.commonClose(false);
+            throw e;
+        }
     }
 }

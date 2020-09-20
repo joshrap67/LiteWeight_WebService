@@ -33,15 +33,13 @@ public class PopWorkoutManager {
      * @param workoutId TODO
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser, final String workoutId) {
+    public UserWithWorkout execute(final String activeUser, final String workoutId)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
-            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
+            final User user = this.databaseAccess.getUser(activeUser);
 
             // remove the workout everywhere in the user object
             for (String exerciseId : user.getUserExercises().keySet()) {
@@ -52,6 +50,7 @@ public class PopWorkoutManager {
             // need to find the next workout now that the user deleted the current
             List<WorkoutUser> workoutUsers = new ArrayList<>(user.getUserWorkouts().values());
             // for now user can only sort workouts by last date
+            // todo don't think this sort is working...
             workoutUsers.sort((o1, o2) -> o2.getDateLast().compareTo(o1.getDateLast()));
             String nextWorkoutId = null; // workout that user is now on after deleting the current one
             if (!workoutUsers.isEmpty()) {
@@ -89,17 +88,10 @@ public class PopWorkoutManager {
             actions.add(new TransactWriteItem().withDelete(updateWorkoutItemData.asDelete()));
             this.databaseAccess.executeWriteTransaction(actions);
 
-            resultStatus = ResultStatus.successful(JsonHelper
-                .serializeMap(new UserWithWorkout(user, nextWorkout).asMap()));
-        } catch (UserNotFoundException unfe) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+            return new UserWithWorkout(user, nextWorkout);
         } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod + ". " + e);
+            this.metrics.commonClose(false);
+            throw e;
         }
-
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
     }
 }

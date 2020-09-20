@@ -1,6 +1,8 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
+import exceptions.WorkoutNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.RequestFields;
@@ -34,8 +36,11 @@ public class DeleteExerciseController implements ApiRequestController {
                 final String exerciseId = (String) jsonBody.get(RequestFields.EXERCISE_ID);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.deleteExerciseManager
-                    .execute(activeUser, exerciseId);
+                this.deleteExerciseManager.execute(activeUser, exerciseId);
+                resultStatus = ResultStatus.successful("Exercise deleted successfully.");
+            } catch (WorkoutNotFoundException | UserNotFoundException exception) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
+                resultStatus = ResultStatus.failureBadEntity(exception.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

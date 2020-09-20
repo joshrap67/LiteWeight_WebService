@@ -1,7 +1,9 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
+import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.RequestFields;
 import helpers.ResultStatus;
@@ -14,6 +16,7 @@ import managers.RestartWorkoutManager;
 import managers.SyncWorkoutManager;
 import models.Workout;
 import modules.Injector;
+import responses.UserWithWorkout;
 
 public class RestartWorkoutController implements ApiRequestController {
 
@@ -38,7 +41,12 @@ public class RestartWorkoutController implements ApiRequestController {
                 final Workout workout = new Workout(workoutMap);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.restartWorkoutManager.execute(activeUser, workout);
+                final UserWithWorkout result = this.restartWorkoutManager
+                    .execute(activeUser, workout);
+                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
+            } catch (UserNotFoundException unfe) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

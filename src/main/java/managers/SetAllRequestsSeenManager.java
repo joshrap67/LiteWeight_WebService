@@ -3,11 +3,9 @@ package managers;
 import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
 import helpers.Metrics;
-import helpers.ResultStatus;
-import java.util.Optional;
 import javax.inject.Inject;
 import models.User;
 
@@ -29,16 +27,13 @@ public class SetAllRequestsSeenManager {
      * @param activeUser The user that made the api request, trying to get data about themselves.
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser) {
+    public boolean execute(final String activeUser)
+        throws InvalidAttributeException, UserNotFoundException {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
-
         try {
-            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
+            final User user = this.databaseAccess.getUser(activeUser);
 
             for (String username : user.getFriendRequests().keySet()) {
                 user.getFriendRequests().get(username).setSeen(true);
@@ -50,17 +45,11 @@ public class SetAllRequestsSeenManager {
                     new ValueMap().withMap(":friendRequestsVal", user.getFriendRequestsMap()));
             this.databaseAccess.updateUser(activeUser, updateActiveUserData);
 
-            resultStatus = ResultStatus.successful("All requests set to seen.");
-
-        } catch (UserNotFoundException unfe) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+            this.metrics.commonClose(false);
+            return true;
         } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
+            this.metrics.commonClose(false);
+            throw e;
         }
-
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
     }
 }

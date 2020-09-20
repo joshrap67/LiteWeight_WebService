@@ -4,15 +4,10 @@ import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
-import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
 import helpers.Metrics;
-import helpers.ResultStatus;
 import helpers.UpdateItemData;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 import models.ExerciseRoutine;
 import models.ExerciseUser;
@@ -36,16 +31,13 @@ public class RestartWorkoutManager {
      * @param activeUser Username of new user to be inserted
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser,
-        final Workout workout) {
+    public UserWithWorkout execute(final String activeUser,
+        final Workout workout) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
-            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
-                .orElseThrow(
-                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
+            final User user = this.databaseAccess.getUser(activeUser);
 
             final String workoutId = workout.getWorkoutId();
             final WorkoutUser workoutMeta = user.getUserWorkouts().get(workoutId);
@@ -84,18 +76,12 @@ public class RestartWorkoutManager {
             actions.add(new TransactWriteItem().withUpdate(updateWorkoutData.asUpdate()));
             this.databaseAccess.executeWriteTransaction(actions);
 
-            resultStatus = ResultStatus.successful(
-                JsonHelper.serializeMap(new UserWithWorkout(user, workout).asMap()));
-        } catch (UserNotFoundException unfe) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
-        } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
+            this.metrics.commonClose(true);
+            return new UserWithWorkout(user, workout);
+        }  catch (Exception e) {
+            this.metrics.commonClose(false);
+            throw e;
         }
-
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
     }
 
     private void restartWorkout(final Workout workout, final WorkoutUser workoutMeta,

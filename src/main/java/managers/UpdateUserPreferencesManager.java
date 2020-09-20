@@ -29,25 +29,23 @@ public class UpdateUserPreferencesManager {
      * @param activeUser Username of new user to be inserted
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser,
+    public boolean execute(final String activeUser,
         final UserPreferences userPreferences) {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<String> resultStatus;
         try {
             // right now just overwrite values in DB with these new ones
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec().withUpdateExpression(
                 "set " + User.USER_PREFERENCES + " =:userPrefsVal")
                 .withValueMap(new ValueMap().withMap(":userPrefsVal", userPreferences.asMap()));
             this.databaseAccess.updateUser(activeUser, updateItemSpec);
-            resultStatus = ResultStatus.successful("Preferences updated.");
-        } catch (Exception e) {
-            this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-            resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
-        }
 
-        this.metrics.commonClose(resultStatus.success);
-        return resultStatus;
+            this.metrics.commonClose(true);
+            return true;
+        } catch (Exception e) {
+            this.metrics.commonClose(false);
+            throw e;
+        }
     }
 }
