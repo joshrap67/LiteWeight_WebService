@@ -6,11 +6,12 @@ import helpers.Metrics;
 import helpers.RequestFields;
 import helpers.ResultStatus;
 import interfaces.ApiRequestController;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.SyncWorkoutManager;
+import models.Workout;
 import modules.Injector;
 
 public class SyncWorkoutController implements ApiRequestController {
@@ -25,18 +26,17 @@ public class SyncWorkoutController implements ApiRequestController {
 
         ResultStatus<String> resultStatus;
 
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, RequestFields.WORKOUT);
+        final List<String> requiredKeys = Collections.singletonList(RequestFields.WORKOUT);
 
         if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {
-                final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
-                final Map<String, Object> workout = (Map<String, Object>) jsonBody
+                final Map<String, Object> workoutMap = (Map<String, Object>) jsonBody
                     .get(RequestFields.WORKOUT);
+                final Workout workout = new Workout(workoutMap);
 
                 Injector.getInjector(metrics).inject(this);
                 resultStatus = this.syncWorkoutManager
-                    .execute(activeUser, workout);
+                    .execute(workout);
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

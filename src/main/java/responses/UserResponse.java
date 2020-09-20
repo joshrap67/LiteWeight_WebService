@@ -12,8 +12,13 @@ public class UserResponse extends User implements Model {
         super(user);
     }
 
+    public UserResponse(Map<String, Object> json) throws InvalidAttributeException {
+        super(json);
+    }
+
     @Override
     public Map<String, Object> asMap() {
+        // todo remove push arn, received workouts map
         return super.asMap();
     }
 }

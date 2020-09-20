@@ -51,10 +51,9 @@ public class RegisterEndpointTokenManager {
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;
-
         try {
             this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
-            resultStatus = ResultStatus.successful("User push arn set successfully");
+            resultStatus = ResultStatus.successful("User push arn set successfully.");
         } catch (final InvalidParameterException ipe) {
             //The error handling here is obtained from aws doc: https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html#mobile-platform-endpoint-sdk-examples
             final String message = ipe.getErrorMessage();
@@ -62,10 +61,9 @@ public class RegisterEndpointTokenManager {
                 .compile(".*Endpoint (arn:aws:sns[^ ]+) already exists with the same [Tt]oken.*");
             final Matcher m = p.matcher(message);
             if (m.matches()) {
-                //The platform endpoint already exists for this token
+                // The platform endpoint already exists for this token
 
-                //We have to get the current user associated with the arn and unsubscribe them
-                //Then we have to subscribe the new user
+                // We have to get the current user associated with the arn and unsubscribe them then we have to subscribe the new user
                 final String endpointArn = m.group(1);
 
                 final Map<String, String> endpointAttributes = this.snsAccess
@@ -73,21 +71,19 @@ public class RegisterEndpointTokenManager {
 
                 final String oldUsername = endpointAttributes.get(USER_DATA_KEY);
 
-                if (this.removeEndpointTokenManager.execute(oldUsername).responseCode
-                    == ResultStatus.SUCCESS_CODE) {
-                    //by the chance the user that owned this had their mapping removed but the endpoint still existed, we do this for sanity
+                if (this.removeEndpointTokenManager.execute(oldUsername).success) {
+                    // by the chance the user that owned this had their mapping removed but the endpoint still existed, we do this for sanity
                     this.snsAccess
                         .unregisterPlatformEndpoint(
                             new DeleteEndpointRequest().withEndpointArn(endpointArn));
 
                     this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
-                    resultStatus = ResultStatus.successful("User push arn set successfully");
+                    resultStatus = ResultStatus.successful("User push arn set successfully.");
                 } else {
-                    this.metrics.logWithBody(
-                        new ErrorMessage<>(classMethod,
-                            "Unable to unregister endpoint from other user"));
+                    this.metrics.logWithBody(new ErrorMessage<>(classMethod,
+                        "Unable to unregister endpoint from other user."));
                     resultStatus = ResultStatus
-                        .failureBadEntity("Unable to unregister endpoint from other user");
+                        .failureBadEntity("Unable to unregister endpoint from other user.");
                 }
             } else {
                 this.metrics.logWithBody(new ErrorMessage<>(classMethod, ipe));
@@ -99,13 +95,13 @@ public class RegisterEndpointTokenManager {
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.responseCode);
+        this.metrics.commonClose(resultStatus.success);
         return resultStatus;
     }
 
     private void attemptToRegisterUserEndpoint(final String activeUser,
         final String deviceToken) throws InvalidParameterException {
-        //first thing to do is register the device token with SNS
+        // first thing to do is register the device token with SNS
         final CreatePlatformEndpointRequest createPlatformEndpointRequest =
             new CreatePlatformEndpointRequest()
                 .withPlatformApplicationArn(Config.PUSH_SNS_PLATFORM_ARN_DEV)
@@ -114,10 +110,10 @@ public class RegisterEndpointTokenManager {
         final CreatePlatformEndpointResult createPlatformEndpointResult = this.snsAccess
             .registerPlatformEndpoint(createPlatformEndpointRequest);
 
-        //this creation will give us a new ARN for the sns endpoint associated with the device token
+        // this creation will give a new ARN for the sns endpoint associated with the device token
         final String userEndpointArn = createPlatformEndpointResult.getEndpointArn();
 
-        //we need to register the ARN for the user's device on the user item
+        // need to register the ARN for the user's device on the user item
         final String updateExpression = "set " + User.PUSH_ENDPOINT_ARN + " = :userEndpointArn";
         final ValueMap valueMap = new ValueMap().withString(":userEndpointArn", userEndpointArn);
         final UpdateItemSpec updateItemSpec = new UpdateItemSpec()

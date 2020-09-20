@@ -5,10 +5,12 @@ import aws.SnsAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.sns.model.DeleteEndpointRequest;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.ResultStatus;
 import java.util.Map;
+import java.util.Optional;
 import javax.inject.Inject;
 import models.User;
 
@@ -38,20 +40,19 @@ public class RemoveEndpointTokenManager {
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;
-
         try {
-            final User user = this.databaseAccess.getUser(activeUser);
+            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
+                .orElseThrow(
+                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
 
             if (user.getPushEndpointArn() != null) {
                 final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-                    .withUpdateExpression("set " + User.PUSH_ENDPOINT_ARN + " =:value")
-                    .withValueMap(new ValueMap().withNull(":value"));
+                    .withUpdateExpression("set " + User.PUSH_ENDPOINT_ARN + " =:arn")
+                    .withValueMap(new ValueMap().withNull(":arn"));
 
                 this.databaseAccess.updateUser(activeUser, updateItemSpec);
 
-                //we've made it here without exception which means the user doesn't have record of the
-                //endpoint anymore, now we try to actually delete the arn. If the following fails we're
-                //still safe as there's no reference to the arn in the db anymore
+                // arn is no longer in DB. Now try and delete the ARN from SNS
                 final DeleteEndpointRequest deleteEndpointRequest = new DeleteEndpointRequest()
                     .withEndpointArn(user.getPushEndpointArn());
                 this.snsAccess.unregisterPlatformEndpoint(deleteEndpointRequest);
@@ -60,12 +61,15 @@ public class RemoveEndpointTokenManager {
             } else {
                 resultStatus = ResultStatus.successful("No endpoint to unregister.");
             }
+        } catch (UserNotFoundException unfe) {
+            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.responseCode);
+        this.metrics.commonClose(resultStatus.success);
         return resultStatus;
     }
 }

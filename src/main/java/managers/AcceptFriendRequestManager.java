@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Globals;
 import helpers.Metrics;
@@ -14,6 +15,7 @@ import helpers.ResultStatus;
 import helpers.UpdateItemData;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 import models.Friend;
 import models.NotificationData;
@@ -46,87 +48,71 @@ public class AcceptFriendRequestManager {
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;
-
         try {
-            User activeUserObject = this.databaseAccess.getUser(activeUser);
-            if (activeUserObject != null) {
-                if (activeUserObject.getFriendRequests().containsKey(usernameToAccept)) {
-                    // sanity check to make sure that the request is still there
-                    if (activeUserObject.getFriends().size() < Globals.MAX_NUMBER_FRIENDS) {
-                        User userToAccept = this.databaseAccess.getUser(usernameToAccept);
-                        if (userToAccept != null) {
-                            // remove request from active user
-                            Friend newFriend = new Friend(userToAccept, true);
-                            activeUserObject.getFriends()
-                                .putIfAbsent(usernameToAccept, newFriend);
-                            activeUserObject.getFriendRequests().remove(usernameToAccept);
-                            final UpdateItemData activeUserData = new UpdateItemData(
-                                activeUser, DatabaseAccess.USERS_TABLE_NAME)
-                                .withUpdateExpression(
-                                    "set " + User.FRIENDS + ".#username = :friendVal " +
-                                        "remove " + User.FRIEND_REQUESTS + ".#username")
-                                .withNameMap(new NameMap().with("#username", usernameToAccept))
-                                .withValueMap(
-                                    new ValueMap().withMap(":friendVal", newFriend.asMap()));
+            final User activeUserObject = Optional
+                .ofNullable(this.databaseAccess.getUser(activeUser))
+                .orElseThrow(
+                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
+            final User userToAccept = Optional
+                .ofNullable(this.databaseAccess.getUser(usernameToAccept))
+                .orElseThrow(() -> new UserNotFoundException(
+                    String.format("%s not found", usernameToAccept)));
 
-                            // update the active user to be confirmed in the newly accepted friends mapping
-                            final UpdateItemData updateFriendData = new UpdateItemData(
-                                usernameToAccept, DatabaseAccess.USERS_TABLE_NAME)
-                                .withUpdateExpression(
-                                    "set " + User.FRIENDS + ".#username." + Friend.CONFIRMED
-                                        + " = :confirmedVal")
-                                .withNameMap(new NameMap().with("#username", activeUser))
-                                .withValueMap(
-                                    new ValueMap().withBoolean(":confirmedVal", true));
+            if (activeUserObject.getFriendRequests().containsKey(usernameToAccept)) {
+                // sanity check to make sure that the request is still there
+                if (activeUserObject.getFriends().size() < Globals.MAX_NUMBER_FRIENDS) {
 
-                            // want a transaction since more than one object is being updated at once
-                            final List<TransactWriteItem> actions = new ArrayList<>();
-                            actions
-                                .add(new TransactWriteItem().withUpdate(activeUserData.asUpdate()));
+                    // remove request from active user and add the new friend
+                    Friend newFriend = new Friend(userToAccept, true);
+                    final UpdateItemData activeUserData = new UpdateItemData(
+                        activeUser, DatabaseAccess.USERS_TABLE_NAME)
+                        .withUpdateExpression(
+                            "set " + User.FRIENDS + ".#username = :friendVal " +
+                                "remove " + User.FRIEND_REQUESTS + ".#username")
+                        .withNameMap(new NameMap().with("#username", usernameToAccept))
+                        .withValueMap(new ValueMap().withMap(":friendVal", newFriend.asMap()));
 
-                            actions.add(
-                                new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
+                    // update the active user to be confirmed in the newly accepted friends mapping
+                    final UpdateItemData updateFriendData = new UpdateItemData(
+                        usernameToAccept, DatabaseAccess.USERS_TABLE_NAME)
+                        .withUpdateExpression(
+                            "set " + User.FRIENDS + ".#username." + Friend.CONFIRMED
+                                + " = :confirmedVal")
+                        .withNameMap(new NameMap().with("#username", activeUser))
+                        .withValueMap(new ValueMap().withBoolean(":confirmedVal", true));
 
-                            this.databaseAccess.executeWriteTransaction(actions);
-                            // if this succeeds, go ahead and send a notification to the accepted user (only need to send username)
-                            this.snsAccess.sendMessage(userToAccept.getPushEndpointArn(),
-                                new NotificationData(SnsAccess.acceptedFriendRequestAction,
-                                    Maps.newHashMap(ImmutableMap.<String, String>builder()
-                                        .put(User.USERNAME, activeUser)
-                                        .build())));
-                            resultStatus = ResultStatus
-                                .successful("Friend request successfully accepted.");
-                        } else {
-                            this.metrics
-                                .log(String.format("User %s does not exist", usernameToAccept));
-                            resultStatus = ResultStatus
-                                .failureBadEntity(
-                                    String.format("Unable to add %s", usernameToAccept));
-                        }
-                    } else {
-                        this.metrics.log("Max number of friends reached.");
-                        resultStatus = ResultStatus
-                            .failureBadEntity("Max number of friends reached.");
-                    }
+                    // want a transaction since more than one object is being updated at once
+                    final List<TransactWriteItem> actions = new ArrayList<>();
+                    actions.add(new TransactWriteItem().withUpdate(activeUserData.asUpdate()));
+                    actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
+                    this.databaseAccess.executeWriteTransaction(actions);
+
+                    // if this succeeds, go ahead and send a notification to the accepted user (only need to send username)
+                    this.snsAccess.sendMessage(userToAccept.getPushEndpointArn(),
+                        new NotificationData(SnsAccess.acceptedFriendRequestAction,
+                            Maps.newHashMap(ImmutableMap.<String, String>builder()
+                                .put(User.USERNAME, activeUser).build())));
+                    resultStatus = ResultStatus.successful("Friend request successfully accepted.");
                 } else {
-                    this.metrics
-                        .log(String.format("User %s no longer has this friend request.",
-                            usernameToAccept));
+                    this.metrics.log("Max number of friends reached.");
                     resultStatus = ResultStatus
-                        .failureBadEntity(
-                            String.format("Unable to add %s", usernameToAccept));
+                        .failureBadEntity("Max number of friends reached.");
                 }
             } else {
-                this.metrics.log(String.format("User %s does not exist", activeUser));
+                this.metrics.log(
+                    String.format("User %s no longer has this friend request.", usernameToAccept));
                 resultStatus = ResultStatus
-                    .failureBadEntity(String.format("Unable to add %s", activeUser));
+                    .failureBadEntity(String.format("Unable to add %s", usernameToAccept));
             }
+        } catch (UserNotFoundException unfe) {
+            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.responseCode);
+        this.metrics.commonClose(resultStatus.success);
         return resultStatus;
     }
 }

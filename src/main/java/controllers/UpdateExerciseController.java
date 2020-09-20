@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.UpdateExerciseManager;
+import models.ExerciseUser;
 import modules.Injector;
 
 public class UpdateExerciseController implements ApiRequestController {
@@ -33,8 +34,9 @@ public class UpdateExerciseController implements ApiRequestController {
             try {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
                 final String exerciseId = (String) jsonBody.get(RequestFields.EXERCISE_ID);
-                final Map<String, Object> exerciseUser = (Map<String, Object>) jsonBody
+                final Map<String, Object> exerciseUserMap = (Map<String, Object>) jsonBody
                     .get(RequestFields.EXERCISE);
+                final ExerciseUser exerciseUser = new ExerciseUser(exerciseUserMap);
 
                 Injector.getInjector(metrics).inject(this);
                 resultStatus = this.updateExerciseManager

@@ -1,6 +1,5 @@
 package controllers;
 
-import com.amazonaws.services.dynamodbv2.document.Item;
 import com.google.common.collect.ImmutableList;
 import exceptions.MissingApiRequestKeyException;
 import helpers.ErrorMessage;
@@ -20,11 +19,11 @@ public class NewUserController implements ApiRequestController {
     public NewUserManager newUserManager;
 
     @Override
-    public ResultStatus<Item> processApiRequest(Map<String, Object> json,
+    public ResultStatus<String> processApiRequest(Map<String, Object> json,
         Metrics metrics) throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
-        ResultStatus<Item> resultStatus;
+        ResultStatus<String> resultStatus;
 
         try {
             Injector.getInjector(metrics).inject(this);

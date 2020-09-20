@@ -4,6 +4,7 @@ import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.JsonHelper;
 import helpers.Metrics;
@@ -11,6 +12,7 @@ import helpers.ResultStatus;
 import helpers.Validator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.inject.Inject;
 import models.ExerciseUser;
@@ -23,7 +25,7 @@ public class NewExerciseManager {
     private final Metrics metrics;
 
     @Inject
-    public NewExerciseManager(DatabaseAccess databaseAccess, Metrics metrics) {
+    public NewExerciseManager(final DatabaseAccess databaseAccess, final Metrics metrics) {
         this.databaseAccess = databaseAccess;
         this.metrics = metrics;
     }
@@ -38,47 +40,43 @@ public class NewExerciseManager {
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;
-
         try {
-            User user = this.databaseAccess.getUser(activeUser);
+            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
+                .orElseThrow(
+                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
 
-            if (user != null) {
-                List<String> focusList = new ArrayList<>(focuses);
-                String errorMessage = Validator.validNewExercise(user, exerciseName);
+            List<String> focusList = new ArrayList<>(focuses);
+            final String errorMessage = Validator.validNewExercise(user, exerciseName, focusList);
 
-                if (!focusList.isEmpty() && errorMessage == null) {
-                    // all input is valid so go ahead and make the new exercise
-                    ExerciseUser exerciseUser = new ExerciseUser(exerciseName,
-                        ExerciseUser.defaultVideoValue, focusList, false);
-                    String exerciseId = UUID.randomUUID().toString();
+            if (errorMessage.isEmpty()) {
+                // all input is valid so go ahead and make the new exercise
+                ExerciseUser exerciseUser = new ExerciseUser(exerciseName,
+                    ExerciseUser.defaultVideoValue, focusList, false);
+                String exerciseId = UUID.randomUUID().toString();
 
-                    final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-                        .withUpdateExpression(
-                            "set " +
-                                User.EXERCISES + ".#exerciseId= :" + User.EXERCISES)
-                        .withNameMap(new NameMap().with("#exerciseId", exerciseId))
-                        .withValueMap(
-                            new ValueMap()
-                                .withMap(":" + User.EXERCISES, exerciseUser.asMap()));
-                    this.databaseAccess.updateUser(user.getUsername(), updateItemSpec);
+                final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+                    .withUpdateExpression("set " + User.EXERCISES + ".#exerciseId= :exerciseMap")
+                    .withNameMap(new NameMap().with("#exerciseId", exerciseId))
+                    .withValueMap(new ValueMap().withMap(":exerciseMap", exerciseUser.asMap()));
+                this.databaseAccess.updateUser(user.getUsername(), updateItemSpec);
 
-                    resultStatus = ResultStatus
-                        .successful(JsonHelper.serializeMap(
-                            new ExerciseUserResponse(exerciseId, exerciseUser).asMap()));
-                } else {
-                    this.metrics.log("Input error on exercise" + errorMessage);
-                    resultStatus = ResultStatus.failureBadEntity("Input error on exercise.");
-                }
+                resultStatus = ResultStatus
+                    .successful(JsonHelper.serializeMap(
+                        new ExerciseUserResponse(exerciseId, exerciseUser).asMap()));
             } else {
-                this.metrics.log("Active user does not exist");
-                resultStatus = ResultStatus.failureBadEntity("User does not exist.");
+                this.metrics.log("Input error on creating new exercise:" + errorMessage);
+                resultStatus = ResultStatus
+                    .failureBadEntity("Input error on creating new exercise.");
             }
+        } catch (UserNotFoundException unfe) {
+            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod + ". " + e);
         }
 
-        this.metrics.commonClose(resultStatus.responseCode);
+        this.metrics.commonClose(resultStatus.success);
         return resultStatus;
     }
 

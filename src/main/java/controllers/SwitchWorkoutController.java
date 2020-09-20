@@ -33,8 +33,9 @@ public class SwitchWorkoutController implements ApiRequestController {
             try {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
                 final String newWorkoutId = (String) jsonBody.get(Workout.WORKOUT_ID);
-                final Map<String, Object> oldWorkout = (Map<String, Object>) jsonBody
+                final Map<String, Object> oldWorkoutMap = (Map<String, Object>) jsonBody
                     .get(RequestFields.WORKOUT);
+                final Workout oldWorkout = new Workout(oldWorkoutMap);
 
                 Injector.getInjector(metrics).inject(this);
                 resultStatus = this.switchWorkoutManager

@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import managers.RestartWorkoutManager;
 import managers.SyncWorkoutManager;
+import models.Workout;
 import modules.Injector;
 
 public class RestartWorkoutController implements ApiRequestController {
@@ -32,8 +33,9 @@ public class RestartWorkoutController implements ApiRequestController {
         if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
-                final Map<String, Object> workout = (Map<String, Object>) jsonBody
+                final Map<String, Object> workoutMap = (Map<String, Object>) jsonBody
                     .get(RequestFields.WORKOUT);
+                final Workout workout = new Workout(workoutMap);
 
                 Injector.getInjector(metrics).inject(this);
                 resultStatus = this.restartWorkoutManager.execute(activeUser, workout);

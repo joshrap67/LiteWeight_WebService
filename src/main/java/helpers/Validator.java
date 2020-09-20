@@ -42,7 +42,7 @@ public class Validator {
             }
         }
 
-        return ((error.length() == 0) ? null : error.toString().trim());
+        return error.toString().trim();
     }
 
     public static String validEditWorkoutInput(Routine routine) {
@@ -68,7 +68,7 @@ public class Validator {
             error.append("Workout has a day without any exercises.");
         }
 
-        return ((error.length() == 0) ? null : error.toString().trim());
+        return error.toString().trim();
     }
 
     public static String validWorkoutName(final String workoutName, final User user) {
@@ -116,10 +116,11 @@ public class Validator {
             error.append("Exercise name too long.");
         }
 
-        return ((error.length() == 0) ? null : error.toString().trim());
+        return error.toString().trim();
     }
 
-    public static String validNewExercise(User activeUser, String exerciseName) {
+    public static String validNewExercise(User activeUser, String exerciseName,
+        List<String> focusList) {
         StringBuilder error = new StringBuilder();
         List<String> exerciseNames = new ArrayList<>();
         int customCount = 0;
@@ -129,21 +130,24 @@ public class Validator {
             }
             exerciseNames.add(activeUser.getUserExercises().get(_exerciseId).getExerciseName());
         }
+        if (focusList.isEmpty()) {
+            error.append("Must have at least one focus.\n");
+        }
         if (exerciseNames.contains(exerciseName)) {
-            error.append("Exercise name already exists.");
+            error.append("Exercise name already exists.\n");
         }
         if (exerciseName.length() > MAX_EXERCISE_NAME) {
-            error.append("Exercise length is too long.");
+            error.append("Exercise length is too long.\n");
         }
 
         if (activeUser.getPremiumToken() == null && customCount >= MAX_FREE_CUSTOM_EXERCISES) {
-            error.append("Max free custom exercise limit reached.");
+            error.append("Max free custom exercise limit reached.\n");
         } else if (activeUser.getPremiumToken() != null
             && customCount >= MAX_PREMIUM_CUSTOM_EXERCISES) {
-            error.append("Max custom exercise limit reached.");
+            error.append("Max custom exercise limit reached.\n");
         }
 
-        return ((error.length() == 0) ? null : error.toString().trim());
+        return error.toString().trim();
 
     }
 }

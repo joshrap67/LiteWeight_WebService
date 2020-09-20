@@ -34,8 +34,9 @@ public class CopyWorkoutController implements ApiRequestController {
             try {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
                 final String newWorkoutName = (String) jsonBody.get(Workout.WORKOUT_NAME);
-                final Map<String, Object> oldWorkout = (Map<String, Object>) jsonBody
+                final Map<String, Object> oldWorkoutMap = (Map<String, Object>) jsonBody
                     .get(RequestFields.WORKOUT);
+                final Workout oldWorkout = new Workout(oldWorkoutMap);
 
                 Injector.getInjector(metrics).inject(this);
                 resultStatus = this.copyWorkoutManager

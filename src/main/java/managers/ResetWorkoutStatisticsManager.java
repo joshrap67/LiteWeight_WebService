@@ -1,16 +1,15 @@
 package managers;
 
 import aws.DatabaseAccess;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
-import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.JsonHelper;
 import helpers.Metrics;
 import helpers.ResultStatus;
-import helpers.UpdateItemData;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 import models.User;
 import models.WorkoutUser;
@@ -21,7 +20,8 @@ public class ResetWorkoutStatisticsManager {
     private final Metrics metrics;
 
     @Inject
-    public ResetWorkoutStatisticsManager(DatabaseAccess databaseAccess, Metrics metrics) {
+    public ResetWorkoutStatisticsManager(final DatabaseAccess databaseAccess,
+        final Metrics metrics) {
         this.databaseAccess = databaseAccess;
         this.metrics = metrics;
     }
@@ -35,47 +35,32 @@ public class ResetWorkoutStatisticsManager {
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;
-
         try {
-            User user = this.databaseAccess.getUser(activeUser);
-            if (user != null) {
-                WorkoutUser workoutUser = user.getUserWorkouts().get(workoutId);
-                workoutUser.setAverageExercisesCompleted(0.0);
-                workoutUser.setTimesCompleted(0);
-                workoutUser.setTotalExercisesSum(0);
+            final User user = Optional.ofNullable(this.databaseAccess.getUser(activeUser))
+                .orElseThrow(
+                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
 
-                final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
-                    DatabaseAccess.USERS_TABLE_NAME)
-                    .withUpdateExpression(
-                        "set " +
-                            User.WORKOUTS + ".#workoutId= :" + User.WORKOUTS)
-                    .withValueMap(
-                        new ValueMap()
-                            .withMap(":" + User.WORKOUTS, workoutUser.asMap()))
-                    .withNameMap(new NameMap().with("#workoutId", workoutId));
+            final WorkoutUser workoutUser = user.getUserWorkouts().get(workoutId);
+            workoutUser.setAverageExercisesCompleted(0.0);
+            workoutUser.setTimesCompleted(0);
+            workoutUser.setTotalExercisesSum(0);
 
-                // TODO if I do advanced statistics this is where I'd reset it
+            final UpdateItemSpec updateUserItemData = new UpdateItemSpec()
+                .withUpdateExpression("set " + User.WORKOUTS + ".#workoutId= :workoutsMap")
+                .withValueMap(new ValueMap().withMap(":workoutsMap", workoutUser.asMap()))
+                .withNameMap(new NameMap().with("#workoutId", workoutId));
+            this.databaseAccess.updateUser(activeUser, updateUserItemData);
 
-                // want a transaction since more than one object is being updated at once
-                final List<TransactWriteItem> actions = new ArrayList<>();
-                actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
-
-                this.databaseAccess.executeWriteTransaction(actions);
-
-                resultStatus = ResultStatus
-                    .successful(
-                        JsonHelper
-                            .serializeMap(user.asMap()));
-            } else {
-                this.metrics.log("Active user does not exist");
-                resultStatus = ResultStatus.failureBadEntity("User does not exist.");
-            }
+            resultStatus = ResultStatus.successful(JsonHelper.serializeMap(user.asMap()));
+        } catch (UserNotFoundException unfe) {
+            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod + ". " + e);
         }
 
-        this.metrics.commonClose(resultStatus.responseCode);
+        this.metrics.commonClose(resultStatus.success);
         return resultStatus;
     }
 }

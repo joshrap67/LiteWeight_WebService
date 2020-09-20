@@ -7,7 +7,6 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.ResultStatus;
-import java.util.Map;
 import javax.inject.Inject;
 import models.Workout;
 
@@ -17,49 +16,59 @@ public class SyncWorkoutManager {
     public final Metrics metrics;
 
     @Inject
-    public SyncWorkoutManager(DatabaseAccess databaseAccess, Metrics metrics) {
+    public SyncWorkoutManager(final DatabaseAccess databaseAccess, final Metrics metrics) {
         this.databaseAccess = databaseAccess;
         this.metrics = metrics;
     }
 
     /**
-     * @param activeUser Username of new user to be inserted
+     * @param workout Workout that is to be synced.
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<String> execute(final String activeUser,
-        final Map<String, Object> workoutJson) {
+    public ResultStatus<String> execute(final Workout workout) {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;
-
         try {
-            Workout workout = new Workout(workoutJson);
             String workoutId = workout.getWorkoutId();
-            // TODO should i do validation to make sure day/week is valid?
+            rectifyCurrentDayAndWeek(workout);
 
             // persist the current workout (routine and current day/week)
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-                .withUpdateExpression(
-                    "set " +
-                        Workout.CURRENT_DAY + " =:" + Workout.CURRENT_DAY + ", " +
-                        Workout.CURRENT_WEEK + " =:" + Workout.CURRENT_WEEK + ", " +
-                        "#routine =:" + Workout.ROUTINE)
+                .withUpdateExpression("set " +
+                    Workout.CURRENT_DAY + " =:currentDayVal, " +
+                    Workout.CURRENT_WEEK + " =:currentWeekVal, " +
+                    "#routine =:routineMap")
                 .withNameMap(new NameMap().with("#routine", Workout.ROUTINE))
-                .withValueMap(
-                    new ValueMap()
-                        .withNumber(":" + Workout.CURRENT_DAY, workout.getCurrentDay())
-                        .withNumber(":" + Workout.CURRENT_WEEK, workout.getCurrentWeek())
-                        .withMap(":" + Workout.ROUTINE, workout.getRoutine().asMap()));
+                .withValueMap(new ValueMap()
+                    .withNumber(":currentDayVal", workout.getCurrentDay())
+                    .withNumber(":currentWeekVal", workout.getCurrentWeek())
+                    .withMap(":routineMap", workout.getRoutine().asMap()));
             this.databaseAccess.updateWorkout(workoutId, updateItemSpec);
-            resultStatus = ResultStatus
-                .successful("Workout synced successfully"); // todo return workout??
+            resultStatus = ResultStatus.successful("Workout synced successfully");
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.responseCode);
+        this.metrics.commonClose(resultStatus.success);
         return resultStatus;
+    }
+
+    private void rectifyCurrentDayAndWeek(final Workout workout) {
+        // make sure that the current week according to the frontend is actually valid
+        int currentDay = workout.getCurrentDay();
+        int currentWeek = workout.getCurrentWeek();
+        if (currentWeek >= 0 && currentWeek >= workout.getRoutine().size()) {
+            // frontend incorrectly set the current week, so just set it to 0
+            workout.setCurrentWeek(0);
+        }
+
+        if (currentDay >= 0 && currentDay >= workout.getRoutine().getWeek(currentWeek)
+            .size()) {
+            // frontend incorrectly set the current day, so just set it to 0
+            workout.setCurrentDay(0);
+        }
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.EditWorkoutManager;
+import models.Workout;
 import modules.Injector;
 
 public class EditWorkoutController implements ApiRequestController {
@@ -31,12 +32,12 @@ public class EditWorkoutController implements ApiRequestController {
         if (json.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
-                final Map<String, Object> workout = (Map<String, Object>) json
+                final Map<String, Object> workoutMap = (Map<String, Object>) json
                     .get(RequestFields.WORKOUT);
+                final Workout workout = new Workout(workoutMap);
 
                 Injector.getInjector(metrics).inject(this);
-                resultStatus = this.editWorkoutManager
-                    .execute(activeUser, workout);
+                resultStatus = this.editWorkoutManager.execute(activeUser, workout);
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.NewWorkoutManager;
+import models.Routine;
 import models.Workout;
 import modules.Injector;
 
@@ -33,11 +34,13 @@ public class NewWorkoutController implements ApiRequestController {
             try {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
                 final String workoutName = (String) json.get(Workout.WORKOUT_NAME);
-                final Map<String, Object> routine = (Map<String, Object>) json.get(Workout.ROUTINE);
+                final Map<String, Object> routineMap = (Map<String, Object>) json
+                    .get(Workout.ROUTINE);
+                final Routine routine = new Routine(routineMap);
 
                 Injector.getInjector(metrics).inject(this);
                 resultStatus = this.newWorkoutManager
-                    .execute(workoutName, activeUser, routine);
+                    .execute(activeUser, workoutName, routine);
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

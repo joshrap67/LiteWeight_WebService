@@ -119,7 +119,7 @@ public class ProxyPostController implements
                 .failureBadRequest("Exception occurred." + request.getBody() + " " + e.toString());
         }
 
-        metrics.commonClose(resultStatus.responseCode);
+        metrics.commonClose(resultStatus.success);
         metrics.logMetrics();
 
         return new APIGatewayProxyResponseEvent()

@@ -3,6 +3,7 @@ package managers;
 import aws.DatabaseAccess;
 import aws.S3Access;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import helpers.ErrorMessage;
 import helpers.FileReader;
 import helpers.JsonHelper;
@@ -32,20 +33,18 @@ public class NewUserManager {
      * @param username Username of new user to be inserted
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public ResultStatus<Item> execute(final String username) {
+    public ResultStatus<String> execute(final String username) {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
-        ResultStatus<Item> resultStatus;
-
+        ResultStatus<String> resultStatus;
         try {
             // whenever a user is created, give them a unique UUID file path that will always get updated
-
             final UUID uuid = UUID.randomUUID();
             final String fileName = uuid.toString() + "." + S3Access.JPG_TYPE;
             s3Access.uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
 
-            UserPreferences userPreferences = new UserPreferences();
+            final UserPreferences userPreferences = new UserPreferences();
             userPreferences.setMetricUnits(false);
             userPreferences.setPrivateAccount(false);
             userPreferences.setUpdateDefaultWeightOnRestart(true);
@@ -66,14 +65,15 @@ public class NewUserManager {
                 .withMap(User.RECEIVED_WORKOUTS, new HashMap<>())
                 .withMap(User.EXERCISES, FileReader.getDefaultExercises());
 
-            this.databaseAccess.putUser(user);
-            resultStatus = ResultStatus.successful(JsonHelper.serializeMap(user.asMap()), user);
+            PutItemOutcome outcome = this.databaseAccess.putUser(user);
+            resultStatus = ResultStatus
+                .successful(JsonHelper.serializeMap(outcome.getItem().asMap()));
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.responseCode);
+        this.metrics.commonClose(resultStatus.success);
         return resultStatus;
     }
 }

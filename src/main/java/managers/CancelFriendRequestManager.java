@@ -6,12 +6,14 @@ import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.ResultStatus;
 import helpers.UpdateItemData;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
 import models.NotificationData;
 import models.User;
@@ -43,58 +45,55 @@ public class CancelFriendRequestManager {
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;
-
         try {
-            User activeUserObject = this.databaseAccess.getUser(activeUser);
-            if (activeUserObject != null) {
-                User userToCancel = this.databaseAccess.getUser(usernameToCancel);
-                if (userToCancel != null) {
-                    // user that the active user is attempting to cancel is indeed a real user
-                    userToCancel.getFriendRequests().remove(activeUser);
-                    activeUserObject.getFriendRequests().remove(usernameToCancel);
+            final User activeUserObject = Optional
+                .ofNullable(this.databaseAccess.getUser(activeUser))
+                .orElseThrow(
+                    () -> new UserNotFoundException(String.format("%s not found", activeUser)));
+            final User userToCancel = Optional
+                .ofNullable(this.databaseAccess.getUser(usernameToCancel))
+                .orElseThrow(() -> new UserNotFoundException(
+                    String.format("%s not found", usernameToCancel)));
 
-                    // both user and canceled friend request are ready to be updated in DB
-                    final UpdateItemData updateFriendData = new UpdateItemData(
-                        usernameToCancel, DatabaseAccess.USERS_TABLE_NAME)
-                        .withUpdateExpression(
-                            "remove " + User.FRIEND_REQUESTS + ".#username")
-                        .withNameMap(new NameMap().with("#username", activeUser));
-                    final UpdateItemData updateActiveUserData = new UpdateItemData(
-                        activeUser, DatabaseAccess.USERS_TABLE_NAME)
-                        .withUpdateExpression(
-                            "remove " + User.FRIENDS + ".#username")
-                        .withNameMap(new NameMap().with("#username", usernameToCancel));
+            // user that the active user is attempting to cancel is indeed a real user
+            userToCancel.getFriendRequests().remove(activeUser);
+            activeUserObject.getFriendRequests().remove(usernameToCancel);
 
-                    // want a transaction since more than one object is being updated at once
-                    final List<TransactWriteItem> actions = new ArrayList<>();
-                    actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
-                    actions
-                        .add(new TransactWriteItem().withUpdate(updateActiveUserData.asUpdate()));
+            // both user and canceled friend request are ready to be updated in DB
+            final UpdateItemData updateFriendData = new UpdateItemData(
+                usernameToCancel, DatabaseAccess.USERS_TABLE_NAME)
+                .withUpdateExpression(
+                    "remove " + User.FRIEND_REQUESTS + ".#username")
+                .withNameMap(new NameMap().with("#username", activeUser));
+            final UpdateItemData updateActiveUserData = new UpdateItemData(
+                activeUser, DatabaseAccess.USERS_TABLE_NAME)
+                .withUpdateExpression(
+                    "remove " + User.FRIENDS + ".#username")
+                .withNameMap(new NameMap().with("#username", usernameToCancel));
 
-                    this.databaseAccess.executeWriteTransaction(actions);
-                    // if this succeeds, go ahead and send a notification to the canceled user (only need to send username)
-                    this.snsAccess.sendMessage(userToCancel.getPushEndpointArn(),
-                        new NotificationData(SnsAccess.canceledFriendRequestAction,
-                            Maps.newHashMap(ImmutableMap.<String, String>builder()
-                                .put(User.USERNAME, activeUser)
-                                .build())));
-                    resultStatus = ResultStatus.successful("Friend request successfully canceled.");
-                } else {
-                    this.metrics.log(String.format("User %s does not exist", usernameToCancel));
-                    resultStatus = ResultStatus
-                        .failureBadEntity(String.format("Unable to add %s", usernameToCancel));
-                }
-            } else {
-                this.metrics.log(String.format("User %s does not exist", activeUser));
-                resultStatus = ResultStatus
-                    .failureBadEntity(String.format("Unable to add %s", activeUser));
-            }
+            // want a transaction since more than one object is being updated at once
+            final List<TransactWriteItem> actions = new ArrayList<>();
+            actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
+            actions
+                .add(new TransactWriteItem().withUpdate(updateActiveUserData.asUpdate()));
+
+            this.databaseAccess.executeWriteTransaction(actions);
+            // if this succeeds, go ahead and send a notification to the canceled user (only need to send username)
+            this.snsAccess.sendMessage(userToCancel.getPushEndpointArn(),
+                new NotificationData(SnsAccess.canceledFriendRequestAction,
+                    Maps.newHashMap(ImmutableMap.<String, String>builder()
+                        .put(User.USERNAME, activeUser)
+                        .build())));
+            resultStatus = ResultStatus.successful("Friend request successfully canceled.");
+        } catch (UserNotFoundException unfe) {
+            this.metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
+            resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
         } catch (Exception e) {
             this.metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.responseCode);
+        this.metrics.commonClose(resultStatus.success);
         return resultStatus;
     }
 }

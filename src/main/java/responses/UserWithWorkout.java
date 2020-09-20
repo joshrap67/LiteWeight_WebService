@@ -1,5 +1,6 @@
 package responses;
 
+import exceptions.InvalidAttributeException;
 import helpers.RequestFields;
 import interfaces.Model;
 import java.util.HashMap;
@@ -17,6 +18,11 @@ public class UserWithWorkout implements Model {
     public UserWithWorkout(User user, Workout workout) {
         this.user = user;
         this.workout = workout;
+    }
+
+    public UserWithWorkout(Map<String, Object> json) throws InvalidAttributeException {
+        this.user = new User((Map<String, Object>) json.get(RequestFields.USER));
+        this.workout = new Workout((Map<String, Object>) json.get(RequestFields.WORKOUT));
     }
 
     @Override

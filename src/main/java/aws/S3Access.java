@@ -14,8 +14,6 @@ import java.io.InputStream;
 public class S3Access {
 
     private final String JPG_MIME = "image/jpeg";
-    private final String PNG_TYPE = "png";
-    private final String PNG_MIME = "image/png";
 
     private final AmazonS3 s3Client;
     private static final String S3_IMAGE_BUCKET = "liteweight-images";
@@ -54,12 +52,7 @@ public class S3Access {
             metrics.log("Error" + e);
         }
 
-        metrics
-            .commonClose(fileName != null ? ResultStatus.SUCCESS_CODE : ResultStatus.BAD_REQUEST);
+        metrics.commonClose(fileName != null);
         return success;
-    }
-
-    public Boolean imageBucketExists() {
-        return this.s3Client.doesBucketExistV2(S3_IMAGE_BUCKET);
     }
 }

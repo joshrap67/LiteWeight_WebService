@@ -5,6 +5,8 @@ import aws.SnsAccess;
 import dagger.Module;
 import dagger.Provides;
 
+import daos.UserDAO;
+import daos.WorkoutDAO;
 import javax.inject.Singleton;
 import lombok.RequiredArgsConstructor;
 import aws.DatabaseAccess;
@@ -20,6 +22,18 @@ public class LiteWeightModule {
     @Singleton
     public DatabaseAccess provideDbAccessManager() {
         return new DatabaseAccess();
+    }
+
+    @Provides
+    @Singleton
+    public UserDAO provideUserDAO() {
+        return new UserDAO();
+    }
+
+    @Provides
+    @Singleton
+    public WorkoutDAO provideWorkoutDAO() {
+        return new WorkoutDAO();
     }
 
     @Provides

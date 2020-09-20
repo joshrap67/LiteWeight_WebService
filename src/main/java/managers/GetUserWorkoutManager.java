@@ -15,13 +15,14 @@ public class GetUserWorkoutManager {
 
     private final DatabaseAccess databaseAccess;
     private final Metrics metrics;
-    @Inject
-    public NewUserManager newUserManager;
+    private final NewUserManager newUserManager;
 
     @Inject
-    public GetUserWorkoutManager(DatabaseAccess databaseAccess, Metrics metrics) {
+    public GetUserWorkoutManager(final DatabaseAccess databaseAccess, final Metrics metrics,
+        final NewUserManager newUserManager) {
         this.databaseAccess = databaseAccess;
         this.metrics = metrics;
+        this.newUserManager = newUserManager;
     }
 
     /**
@@ -36,12 +37,10 @@ public class GetUserWorkoutManager {
         this.metrics.commonSetup(classMethod);
 
         ResultStatus<String> resultStatus;
-
         try {
             Item userItem = this.databaseAccess.getUserItem(activeUser);
-
             if (userItem != null) {
-                User user = new User(userItem);
+                final User user = new User(userItem);
                 String currentWorkoutId = user.getCurrentWorkout();
                 UserWithWorkout userWithWorkout;
 
@@ -50,7 +49,7 @@ public class GetUserWorkoutManager {
                     userWithWorkout = new UserWithWorkout(user, null);
                 } else {
                     // user has a workout so try and fetch it from the DB
-                    Workout workout = new Workout(
+                    final Workout workout = new Workout(
                         this.databaseAccess.getWorkoutItem(currentWorkoutId));
                     userWithWorkout = new UserWithWorkout(user, workout);
                 }
@@ -59,15 +58,15 @@ public class GetUserWorkoutManager {
                     .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
             } else {
                 // this will be reached if the user just created an account or it somehow got deleted in DB, so put user in DB
-                ResultStatus<Item> userResultStatus = this.newUserManager.execute(activeUser);
-                if (userResultStatus.responseCode == ResultStatus.SUCCESS_CODE) {
+                final ResultStatus<String> result = this.newUserManager.execute(activeUser);
+                if (result.responseCode == ResultStatus.SUCCESS_CODE) {
                     UserWithWorkout userWithWorkout = new UserWithWorkout(
-                        new User(userResultStatus.data), null);
+                        new User(JsonHelper.deserialize(result.resultMessage)), null);
                     resultStatus = ResultStatus
                         .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
                 } else {
-                    this.metrics.log(userResultStatus.resultMessage);
-                    resultStatus = ResultStatus.failureBadEntity(userResultStatus.resultMessage);
+                    this.metrics.log(result.resultMessage);
+                    resultStatus = ResultStatus.failureBadEntity(result.resultMessage);
                 }
             }
         } catch (Exception e) {
@@ -75,7 +74,7 @@ public class GetUserWorkoutManager {
             resultStatus = ResultStatus.failureBadEntity("Exception in " + classMethod);
         }
 
-        this.metrics.commonClose(resultStatus.responseCode);
+        this.metrics.commonClose(resultStatus.success);
         return resultStatus;
     }
 }
