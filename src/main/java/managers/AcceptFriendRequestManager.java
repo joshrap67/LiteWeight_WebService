@@ -64,7 +64,7 @@ public class AcceptFriendRequestManager {
             Friend newFriend = new Friend(userToAccept, true);
             final UpdateItemData activeUserData = new UpdateItemData(
                 activeUser, DatabaseAccess.USERS_TABLE_NAME)
-                .withUpdateExpression("set " + User.FRIENDS + ".#username = :friendVal, " +
+                .withUpdateExpression("set " + User.FRIENDS + ".#username = :friendVal " +
                     "remove " + User.FRIEND_REQUESTS + ".#username")
                 .withNameMap(new NameMap().with("#username", usernameToAccept))
                 .withValueMap(new ValueMap().withMap(":friendVal", newFriend.asMap()));
