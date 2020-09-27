@@ -41,7 +41,7 @@ public class EditWorkoutController implements ApiRequestController {
                     .get(RequestFields.WORKOUT));
 
                 Injector.getInjector(metrics).inject(this);
-                UserWithWorkout result = this.editWorkoutManager.execute(activeUser, workout);
+                UserWithWorkout result = this.editWorkoutManager.editWorkout(activeUser, workout);
                 resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

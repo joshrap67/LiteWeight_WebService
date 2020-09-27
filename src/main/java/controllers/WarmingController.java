@@ -23,7 +23,7 @@ public class WarmingController implements ApiRequestController {
 
         try {
             Injector.getInjector(metrics).inject(this);
-            this.warmingManager.execute();
+            this.warmingManager.warmEndpoints();
             resultStatus = ResultStatus.successful("Endpoints successfully warmed.");
         } catch (final Exception e) {
             metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));

@@ -44,7 +44,7 @@ public class UpdateExerciseController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 final User result = this.updateExerciseManager
-                    .execute(activeUser, exerciseId, exerciseUser);
+                    .updateExercise(activeUser, exerciseId, exerciseUser);
                 resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

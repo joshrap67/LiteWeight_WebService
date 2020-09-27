@@ -37,7 +37,7 @@ public class DeclineFriendRequestController implements ApiRequestController {
                 final String declinedUser = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                this.declineFriendRequestManager.execute(activeUser, declinedUser);
+                this.declineFriendRequestManager.declineRequest(activeUser, declinedUser);
                 resultStatus = ResultStatus.successful("Request successfully declined.");
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

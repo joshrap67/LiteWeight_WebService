@@ -1,7 +1,7 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
 import java.util.Optional;
@@ -12,23 +12,24 @@ import responses.UserResponse;
 
 public class GetUserDataManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final Metrics metrics;
     private final NewUserManager newUserManager;
 
     @Inject
-    public GetUserDataManager(final DatabaseAccess dbAccessManager, final Metrics metrics,
+    public GetUserDataManager(final UserDAO userDAO, final Metrics metrics,
         final NewUserManager newUserManager) {
-        this.databaseAccess = dbAccessManager;
+        this.userDAO = userDAO;
         this.metrics = metrics;
         this.newUserManager = newUserManager;
     }
 
     /**
-     * This method gets the data of another user.
+     * Returns the data of a given user from the user table.
      *
-     * @param username The user that made the api request, trying to get data about themselves.
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * @param username Username of user that the client is requesting data for.
+     * @return UserResponse of the user's active data (certain fields omitted for client
+     * consumption)
      */
     public UserResponse getUserData(final String username)
         throws UserNotFoundException, InvalidAttributeException {
@@ -36,7 +37,7 @@ public class GetUserDataManager {
         this.metrics.commonSetup(classMethod);
 
         try {
-            Item user = Optional.ofNullable(this.databaseAccess.getUserItem(username)).orElseThrow(
+            Item user = Optional.ofNullable(this.userDAO.getUserItem(username)).orElseThrow(
                 () -> new UserNotFoundException(String.format("%s not found.", username)));
             return new UserResponse(user);
         } catch (Exception e) {
@@ -46,11 +47,12 @@ public class GetUserDataManager {
     }
 
     /**
-     * This method gets the active user's data. If the active user's data does not exist, we assume
-     * this is their first login and we enter a new user object in the db.
+     * Returns the active user's data from the user table. If the active user's data does not exist,
+     * it is assumed this is their first login and they are created into the user table.
      *
      * @param activeUser The user that made the api request, trying to get data about themselves.
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * @return UserResponse of the user's active data (certain fields omitted for client
+     * consumption)
      */
     public UserResponse getActiveUserData(final String activeUser) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".getActiveUserData";
@@ -58,10 +60,10 @@ public class GetUserDataManager {
 
         try {
             UserResponse userResponse;
-            Item user = this.databaseAccess.getUserItem(activeUser);
+            Item user = this.userDAO.getUserItem(activeUser);
             if (user == null) {
                 // user has not been added yet in the DB, so create an entry for them
-                User userResult = this.newUserManager.execute(activeUser);
+                User userResult = this.newUserManager.createNewUser(activeUser);
                 userResponse = new UserResponse(userResult.asMap());
             } else {
                 // user already exists in DB so just return their data

@@ -1,9 +1,10 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
+import daos.UserDAO;
+import daos.WorkoutDAO;
 import helpers.Metrics;
 import helpers.UpdateItemData;
 import java.util.ArrayList;
@@ -18,26 +19,33 @@ import responses.UserWithWorkout;
 
 public class RestartWorkoutManager {
 
-    public final DatabaseAccess databaseAccess;
+    public final UserDAO userDAO;
     public final Metrics metrics;
 
     @Inject
-    public RestartWorkoutManager(final DatabaseAccess databaseAccess, final Metrics metrics) {
-        this.databaseAccess = databaseAccess;
+    public RestartWorkoutManager(final UserDAO userDAO, final Metrics metrics) {
+        this.userDAO = userDAO;
         this.metrics = metrics;
     }
 
     /**
-     * @param activeUser Username of new user to be inserted
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * Resets all exercises in a workout to be not completed and sets the current day and current
+     * week to the first day/week of the workout. Also updates the statistics of this workout given
+     * the workout before it was restarted.
+     *
+     * @param activeUser user that is restarting their workout.
+     * @param workout    the workout that is to be restarted.
+     * @return UserWithWorkout with the workout being reset and the updated statistics added to the
+     * user object.
+     * @throws Exception if the user or workout does not exist.
      */
-    public UserWithWorkout execute(final String activeUser,
-        final Workout workout) throws Exception {
+    public UserWithWorkout restartWorkout(final String activeUser, final Workout workout)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User user = this.databaseAccess.getUser(activeUser);
+            final User user = this.userDAO.getUser(activeUser);
 
             final String workoutId = workout.getWorkoutId();
             final WorkoutUser workoutMeta = user.getUserWorkouts().get(workoutId);
@@ -49,7 +57,7 @@ public class RestartWorkoutManager {
 
             // update the newly restarted workout (routine and current day/week)
             final UpdateItemData updateWorkoutData = new UpdateItemData(workoutId,
-                DatabaseAccess.WORKOUT_TABLE_NAME)
+                WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " +
                     Workout.CURRENT_DAY + " =:currentDay, " +
                     Workout.CURRENT_WEEK + " =:currentWeek, " +
@@ -61,7 +69,7 @@ public class RestartWorkoutManager {
                 .withNameMap(new NameMap().with("#routine", Workout.ROUTINE));
 
             final UpdateItemData updateUserData = new UpdateItemData(activeUser,
-                DatabaseAccess.USERS_TABLE_NAME)
+                UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.WORKOUTS + ".#workoutId= :userWorkoutsMap, " +
                     User.EXERCISES + " = :exercisesMap")
@@ -74,11 +82,11 @@ public class RestartWorkoutManager {
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateWorkoutData.asUpdate()));
-            this.databaseAccess.executeWriteTransaction(actions);
+            this.userDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);
             return new UserWithWorkout(user, workout);
-        }  catch (Exception e) {
+        } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;
         }
@@ -112,6 +120,7 @@ public class RestartWorkoutManager {
                             increaseAverage(workoutMeta.getAverageExercisesCompleted(),
                                 workoutMeta.getTotalExercisesSum(), 0));
                     }
+                    // todo handle this overflowing lmao
                     workoutMeta.setTotalExercisesSum(workoutMeta.getTotalExercisesSum() + 1);
                 }
             }

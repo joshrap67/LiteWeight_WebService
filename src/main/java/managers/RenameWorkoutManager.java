@@ -1,9 +1,10 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
+import daos.UserDAO;
+import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
 import helpers.Metrics;
 import helpers.UpdateItemData;
@@ -17,26 +18,35 @@ import models.WorkoutUser;
 
 public class RenameWorkoutManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
+    private final WorkoutDAO workoutDAO;
     private final Metrics metrics;
 
     @Inject
-    public RenameWorkoutManager(final DatabaseAccess databaseAccess, final Metrics metrics) {
-        this.databaseAccess = databaseAccess;
+    public RenameWorkoutManager(final UserDAO userDAO, final WorkoutDAO workoutDAO,
+        final Metrics metrics) {
+        this.workoutDAO = workoutDAO;
+        this.userDAO = userDAO;
         this.metrics = metrics;
     }
 
     /**
-     * @param workoutId TODO
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * Renames a given workout and loops through all owned exercises to update their workout mapping
+     * to have this new name,
+     *
+     * @param activeUser     user that is renaming the workout.
+     * @param workoutId      id of the workout that is to be renamed.
+     * @param newWorkoutName new name of the workout.
+     * @return User the updated user with the updated workout meta and exercise mapping.
+     * @throws Exception if there is input error.
      */
-    public User execute(final String activeUser, final String workoutId,
+    public User renameWorkout(final String activeUser, final String workoutId,
         final String newWorkoutName) throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".renameWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User user = this.databaseAccess.getUser(activeUser);
+            final User user = this.userDAO.getUser(activeUser);
 
             final String errorMessage = Validator.validWorkoutName(newWorkoutName, user);
             if (!errorMessage.isEmpty()) {
@@ -45,7 +55,7 @@ public class RenameWorkoutManager {
             }
 
             // no error, so go ahead and try and rename the workout
-            Workout workout = this.databaseAccess.getWorkout(workoutId);
+            final Workout workout = this.workoutDAO.getWorkout(workoutId);
             workout.setWorkoutName(newWorkoutName);
             // update all the exercises that are apart of this newly renamed workout
             updateUserExercises(user, workoutId, newWorkoutName);
@@ -53,7 +63,7 @@ public class RenameWorkoutManager {
             workoutUser.setWorkoutName(newWorkoutName);
 
             final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
-                DatabaseAccess.USERS_TABLE_NAME)
+                UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.WORKOUTS + ".#workoutId = :workoutsMap, " +
                     User.EXERCISES + "= :exercisesMap")
@@ -63,14 +73,14 @@ public class RenameWorkoutManager {
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 
             final UpdateItemData updateWorkoutItemData = new UpdateItemData(workoutId,
-                DatabaseAccess.WORKOUT_TABLE_NAME)
+                WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " + Workout.WORKOUT_NAME + "= :workoutNameVal")
                 .withValueMap(new ValueMap().withString(":workoutNameVal", newWorkoutName));
             // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateWorkoutItemData.asUpdate()));
-            this.databaseAccess.executeWriteTransaction(actions);
+            this.userDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);
             return user;

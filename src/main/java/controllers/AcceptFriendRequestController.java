@@ -37,7 +37,7 @@ public class AcceptFriendRequestController implements ApiRequestController {
                 final String userToAccept = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                this.acceptFriendRequestManager.execute(activeUser, userToAccept);
+                this.acceptFriendRequestManager.acceptRequest(activeUser, userToAccept);
                 resultStatus = ResultStatus.successful("Friend successfully added.");
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

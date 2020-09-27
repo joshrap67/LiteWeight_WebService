@@ -35,4 +35,9 @@ public class Friend implements Model {
         retVal.putIfAbsent(CONFIRMED, this.confirmed);
         return retVal;
     }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
+    }
 }

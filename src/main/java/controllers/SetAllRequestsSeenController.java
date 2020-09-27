@@ -33,7 +33,7 @@ public class SetAllRequestsSeenController implements ApiRequestController {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
 
                 Injector.getInjector(metrics).inject(this);
-                this.setAllRequestsSeenManager.execute(activeUser);
+                this.setAllRequestsSeenManager.setAllRequestsSeen(activeUser);
                 resultStatus = ResultStatus.successful("All requests set to seen successfully.");
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));

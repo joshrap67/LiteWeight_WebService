@@ -1,9 +1,9 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import daos.UserDAO;
 import exceptions.ManagerExecutionException;
 import helpers.Globals;
 import helpers.Metrics;
@@ -12,18 +12,18 @@ import models.User;
 
 public class BlockUserManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final Metrics metrics;
     private final RemoveFriendManager removeFriendManager;
     private final DeclineFriendRequestManager declineFriendRequestManager;
     private final CancelFriendRequestManager cancelFriendRequestManager;
 
     @Inject
-    public BlockUserManager(final DatabaseAccess databaseAccess, final Metrics metrics,
+    public BlockUserManager(final UserDAO userDAO, final Metrics metrics,
         final RemoveFriendManager removeFriendManager,
         final DeclineFriendRequestManager declineFriendRequestManager,
         final CancelFriendRequestManager cancelFriendRequestManager) {
-        this.databaseAccess = databaseAccess;
+        this.userDAO = userDAO;
         this.metrics = metrics;
         this.removeFriendManager = removeFriendManager;
         this.declineFriendRequestManager = declineFriendRequestManager;
@@ -31,19 +31,24 @@ public class BlockUserManager {
     }
 
     /**
-     * This method gets the active user's data. If the active user's data does not exist, we assume
-     * this is their first login and we enter a new user object in the db.
+     * Attempts to block a given user if the active user has not reached the max amount of blocked
+     * users. Appropriate actions are taken if the active user has a pending friend request for the
+     * pending blocked user, or has sent a friend request to the blocked user, or is friends with
+     * the blocked user. Appropriate data notifications are sent if any of the above mentioned
+     * conditions exist.
      *
-     * @param activeUser The user that made the api request, trying to get data about themselves.
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * @param activeUser  username of the user who is blocking the user to block.
+     * @param userToBlock username of the user who is about to be blocked by the active user.
+     * @return the icon url of the user that is being blocked.
+     * @throws Exception if either user is not found or if there are input errors.
      */
-    public String execute(final String activeUser, final String userToBlock) throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+    public String blockUser(final String activeUser, final String userToBlock) throws Exception {
+        final String classMethod = this.getClass().getSimpleName() + ".blockUser";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User activeUserObject = this.databaseAccess.getUser(activeUser);
-            final User userToBlockObject = this.databaseAccess.getUser(userToBlock);
+            final User activeUserObject = this.userDAO.getUser(activeUser);
+            final User userToBlockObject = this.userDAO.getUser(userToBlock);
 
             if (activeUserObject.getBlocked().size() >= Globals.MAX_BLOCKED) {
                 this.metrics.commonClose(false);
@@ -53,17 +58,17 @@ public class BlockUserManager {
 
             if (activeUserObject.getFriendRequests().containsKey(userToBlock)) {
                 // to-be-blocked user sent the active user a friend request. decline the request
-                declineFriendRequestManager.execute(activeUser, userToBlock);
+                declineFriendRequestManager.declineRequest(activeUser, userToBlock);
             } else if (activeUserObject.getFriends().containsKey(userToBlock)
                 && activeUserObject.getFriends().get(userToBlock).isConfirmed()) {
                 // both the active user and to-be-blocked user are friends. Remove them both as friends
-                removeFriendManager.execute(activeUser, userToBlock);
+                removeFriendManager.removeFriend(activeUser, userToBlock);
             } else if (activeUserObject.getFriends().containsKey(userToBlock)
                 && !activeUserObject.getFriends().get(userToBlock).isConfirmed()) {
                 // active user is sending a friend request to the to-be-blocked user. cancel the request
-                cancelFriendRequestManager.execute(activeUser, userToBlock);
+                cancelFriendRequestManager.cancelRequest(activeUser, userToBlock);
             }
-            // note that any notifications are taken care of by the managers above, an exception would have been thrown if something went rong
+            // note that any notifications are taken care of by the managers above, an exception would have been thrown if something went wrong
 
             // go ahead and block the user
             UpdateItemSpec updateItemSpec = new UpdateItemSpec()
@@ -72,7 +77,7 @@ public class BlockUserManager {
                 .withValueMap(new ValueMap()
                     .withString(":blockedUserIcon", userToBlockObject.getIcon()))
                 .withNameMap(new NameMap().with("#username", userToBlock));
-            this.databaseAccess.updateUser(activeUser, updateItemSpec);
+            this.userDAO.updateUser(activeUser, updateItemSpec);
 
             // return the icon in case user doesn't already have the icon to display in the blocked list
             this.metrics.commonClose(true);

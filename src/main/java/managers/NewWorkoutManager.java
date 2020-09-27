@@ -1,10 +1,11 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.Put;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
+import daos.UserDAO;
+import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
 import helpers.AttributeValueHelper;
 import helpers.Metrics;
@@ -24,26 +25,36 @@ import responses.UserWithWorkout;
 
 public class NewWorkoutManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final WorkoutDAO workoutDAO;
+    private final UserDAO userDAO;
     private final Metrics metrics;
 
     @Inject
-    public NewWorkoutManager(final DatabaseAccess databaseAccess, final Metrics metrics) {
-        this.databaseAccess = databaseAccess;
+    public NewWorkoutManager(final WorkoutDAO workoutDAO, final UserDAO userDAO,
+        final Metrics metrics) {
+        this.userDAO = userDAO;
+        this.workoutDAO = workoutDAO;
         this.metrics = metrics;
     }
 
     /**
-     * @param workoutName TODO
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * Creates a new workout if all input is valid and if the user has not already reached the max
+     * number of workouts allowed. Updates all exercises that are apart of the newly created workout
+     * to have this workout listed in their workout maps.
+     *
+     * @param activeUser  user that is creating this new workout.
+     * @param workoutName name of the workout that is to be created.
+     * @param routine     the routine of the workout to be created.
+     * @return UserWithWorkout the newly created workout and updated user object.
+     * @throws Exception thrown if there exists input validation.
      */
-    public UserWithWorkout execute(final String activeUser, final String workoutName,
+    public UserWithWorkout createNewWorkout(final String activeUser, final String workoutName,
         final Routine routine) throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".createNewWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User user = this.databaseAccess.getUser(activeUser);
+            final User user = this.userDAO.getUser(activeUser);
 
             final String workoutId = UUID.randomUUID().toString();
             final String creationTime = Instant.now().toString();
@@ -53,6 +64,7 @@ public class NewWorkoutManager {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(errorMessage);
             }
+            // todo restrict number of exercises per day to something reasonable like 30?
             // no error, so go ahead and try and insert this new workout along with updating active user
             final Workout newWorkout = new Workout();
             newWorkout.setCreationDate(creationTime);
@@ -77,7 +89,7 @@ public class NewWorkoutManager {
             WorkoutHelper.updateUserExercises(user, routine, workoutId, workoutName);
 
             final UpdateItemData updateItemData = new UpdateItemData(activeUser,
-                DatabaseAccess.USERS_TABLE_NAME)
+                UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
                     User.WORKOUTS + ".#workoutId= :workoutUserMap, " +
@@ -92,9 +104,9 @@ public class NewWorkoutManager {
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateItemData.asUpdate()));
             actions.add(new TransactWriteItem()
-                .withPut(new Put().withTableName(DatabaseAccess.WORKOUT_TABLE_NAME).withItem(
+                .withPut(new Put().withTableName(WorkoutDAO.WORKOUT_TABLE_NAME).withItem(
                     AttributeValueHelper.convertMapToAttributeValueMap(newWorkout.asMap()))));
-            this.databaseAccess.executeWriteTransaction(actions);
+            this.workoutDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);
             return new UserWithWorkout(user, newWorkout);

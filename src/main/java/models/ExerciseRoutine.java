@@ -45,4 +45,9 @@ public class ExerciseRoutine implements Model {
         retVal.putIfAbsent(DETAILS, this.details);
         return retVal;
     }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
+    }
 }

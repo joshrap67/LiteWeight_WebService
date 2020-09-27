@@ -1,11 +1,11 @@
 package managers;
 
-import aws.DatabaseAccess;
 import aws.SnsAccess;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import daos.UserDAO;
 import exceptions.ManagerExecutionException;
 import helpers.Metrics;
 import helpers.UpdateItemData;
@@ -18,15 +18,14 @@ import models.User;
 public class DeclineFriendRequestManager {
 
     private final SnsAccess snsAccess;
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final Metrics metrics;
 
     @Inject
-    public DeclineFriendRequestManager(final SnsAccess snsAccess,
-        final DatabaseAccess databaseAccess,
+    public DeclineFriendRequestManager(final SnsAccess snsAccess, final UserDAO userDAO,
         final Metrics metrics) {
         this.snsAccess = snsAccess;
-        this.databaseAccess = databaseAccess;
+        this.userDAO = userDAO;
         this.metrics = metrics;
     }
 
@@ -35,15 +34,14 @@ public class DeclineFriendRequestManager {
      * this is their first login and we enter a new user object in the db.
      *
      * @param activeUser The user that made the api request, trying to get data about themselves.
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public boolean execute(final String activeUser, final String declinedUser) throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+    public void declineRequest(final String activeUser, final String declinedUser) throws Exception {
+        final String classMethod = this.getClass().getSimpleName() + ".declineRequest";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User activeUserObject = this.databaseAccess.getUser(activeUser);
-            final User declinedUserObject = this.databaseAccess.getUser(declinedUser);
+            final User activeUserObject = this.userDAO.getUser(activeUser);
+            final User declinedUserObject = this.userDAO.getUser(declinedUser);
 
             if (!activeUserObject.getFriendRequests().containsKey(declinedUser)) {
                 // sanity check to make sure that the friend request is still there
@@ -54,13 +52,13 @@ public class DeclineFriendRequestManager {
 
             // remove friend from active user
             final UpdateItemData activeUserData = new UpdateItemData(
-                activeUser, DatabaseAccess.USERS_TABLE_NAME)
+                activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIEND_REQUESTS + ".#username")
                 .withNameMap(new NameMap().with("#username", declinedUser));
 
             // remove the (unconfirmed) active user from friend's mapping
             final UpdateItemData updateFriendData = new UpdateItemData(
-                declinedUser, DatabaseAccess.USERS_TABLE_NAME)
+                declinedUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", activeUser));
 
@@ -69,7 +67,7 @@ public class DeclineFriendRequestManager {
             actions.add(new TransactWriteItem().withUpdate(activeUserData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
 
-            this.databaseAccess.executeWriteTransaction(actions);
+            this.userDAO.executeWriteTransaction(actions);
             // if this succeeds, go ahead and send a notification to the declined user (only need to send username)
             this.snsAccess.sendMessage(declinedUserObject.getPushEndpointArn(),
                 new NotificationData(SnsAccess.declinedFriendRequestAction,
@@ -78,7 +76,6 @@ public class DeclineFriendRequestManager {
                             .build())));
 
             this.metrics.commonClose(true);
-            return true;
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

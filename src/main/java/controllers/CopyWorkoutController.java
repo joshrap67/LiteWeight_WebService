@@ -44,7 +44,7 @@ public class CopyWorkoutController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 final UserWithWorkout result = this.copyWorkoutManager
-                    .execute(activeUser, newWorkoutName, oldWorkout);
+                    .copyWorkout(activeUser, newWorkoutName, oldWorkout);
                 resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

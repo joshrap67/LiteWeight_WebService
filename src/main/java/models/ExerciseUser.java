@@ -34,7 +34,6 @@ public class ExerciseUser implements Model {
     private Integer defaultReps;
     private String defaultDetails;
     private String videoUrl;
-    //    @Setter(AccessLevel.NONE)
     private List<String> focuses;
     @Setter(AccessLevel.NONE)
     private Map<String, String> workouts; // id to workout name that this exercise is apart of
@@ -90,5 +89,10 @@ public class ExerciseUser implements Model {
         retVal.putIfAbsent(FOCUSES, this.focuses);
         retVal.putIfAbsent(User.WORKOUTS, this.workouts);
         return retVal;
+    }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
     }
 }

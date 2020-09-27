@@ -36,4 +36,9 @@ public class FriendRequest implements Model {
         retVal.putIfAbsent(REQUEST_TIME_STAMP, this.getRequestTimeStamp());
         return retVal;
     }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
+    }
 }

@@ -37,4 +37,9 @@ public class UserWithWorkout implements Model {
         }
         return retVal;
     }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
+    }
 }

@@ -1,9 +1,9 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
 import helpers.Metrics;
@@ -13,27 +13,32 @@ import models.WorkoutUser;
 
 public class ResetWorkoutStatisticsManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final Metrics metrics;
 
     @Inject
-    public ResetWorkoutStatisticsManager(final DatabaseAccess databaseAccess,
+    public ResetWorkoutStatisticsManager(final UserDAO userDAO,
         final Metrics metrics) {
-        this.databaseAccess = databaseAccess;
+        this.userDAO = userDAO;
         this.metrics = metrics;
     }
 
     /**
-     * @param workoutId TODO
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * Resets the statistics of a given workout by updating the workout meta in the user's mapping.
+     *
+     * @param activeUser user that is resetting the workout statistics.
+     * @param workoutId  id of the workout whose statistics are to be reset.
+     * @return User user with updated workout meta mapping.
+     * @throws InvalidAttributeException
+     * @throws UserNotFoundException
      */
-    public User execute(final String activeUser, final String workoutId)
+    public User resetStatistics(final String activeUser, final String workoutId)
         throws InvalidAttributeException, UserNotFoundException {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User user = this.databaseAccess.getUser(activeUser);
+            final User user = this.userDAO.getUser(activeUser);
 
             final WorkoutUser workoutUser = user.getUserWorkouts().get(workoutId);
             workoutUser.setAverageExercisesCompleted(0.0);
@@ -44,7 +49,7 @@ public class ResetWorkoutStatisticsManager {
                 .withUpdateExpression("set " + User.WORKOUTS + ".#workoutId= :workoutsMap")
                 .withValueMap(new ValueMap().withMap(":workoutsMap", workoutUser.asMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
-            this.databaseAccess.updateUser(activeUser, updateUserItemData);
+            this.userDAO.updateUser(activeUser, updateUserItemData);
 
             this.metrics.commonClose(true);
             return user;

@@ -1,12 +1,12 @@
 package helpers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.Delete;
 import com.amazonaws.services.dynamodbv2.model.Update;
+import daos.Database;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
@@ -43,7 +43,7 @@ public class UpdateItemData {
 
     public UpdateItemSpec asUpdateItemSpec() throws Exception {
         final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-            .withPrimaryKey(DatabaseAccess.getKeyIndex(this.tableName), this.keyValue)
+            .withPrimaryKey(Database.getKeyIndex(this.tableName), this.keyValue)
             .withUpdateExpression(this.updateExpression);
 
         if (this.valueMap != null) {
@@ -83,7 +83,7 @@ public class UpdateItemData {
     }
 
     private Map<String, AttributeValue> getKeyMap() throws Exception {
-        final String keyIndex = DatabaseAccess.getKeyIndex(this.tableName);
+        final String keyIndex = Database.getKeyIndex(this.tableName);
         return new HashMap<String, AttributeValue>() {{
             put(keyIndex, new AttributeValue().withS(UpdateItemData.this.keyValue));
         }};

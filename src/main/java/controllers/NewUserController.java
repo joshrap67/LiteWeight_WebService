@@ -30,7 +30,7 @@ public class NewUserController implements ApiRequestController {
 
             if (json.containsKey(User.USERNAME)) {
                 final String username = (String) json.get(User.USERNAME);
-                final User result = this.newUserManager.execute(username);
+                final User result = this.newUserManager.createNewUser(username);
                 resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
             } else {
                 throw new MissingApiRequestKeyException(

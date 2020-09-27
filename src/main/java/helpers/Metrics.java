@@ -25,12 +25,12 @@ public class Metrics {
     private boolean printMetrics;
 
     public Metrics(final String requestId, final LambdaLogger lambdaLogger) {
-        this.functionNames = new LinkedList<String>();
+        this.functionNames = new LinkedList<>();
 
         this.requestId = requestId;
         this.lambdaLogger = lambdaLogger;
-        this.countMetrics = new HashMap<String, Map<String, Integer>>();
-        this.timeMetrics = new HashMap<String, Map<String, Long>>();
+        this.countMetrics = new HashMap<>();
+        this.timeMetrics = new HashMap<>();
         this.printMetrics = true;
     }
 

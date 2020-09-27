@@ -1,6 +1,5 @@
 package managers;
 
-import aws.DatabaseAccess;
 import aws.SnsAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
@@ -8,6 +7,7 @@ import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
 import com.amazonaws.services.sns.model.DeleteEndpointRequest;
 import com.amazonaws.services.sns.model.InvalidParameterException;
+import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.ManagerExecutionException;
 import exceptions.UserNotFoundException;
@@ -23,16 +23,15 @@ public class RegisterEndpointTokenManager {
 
     private static final String USER_DATA_KEY = "CustomUserData";
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final SnsAccess snsAccess;
     private final RemoveEndpointTokenManager removeEndpointTokenManager;
     private final Metrics metrics;
 
     @Inject
-    public RegisterEndpointTokenManager(final DatabaseAccess databaseAccess,
-        final SnsAccess snsAccess,
+    public RegisterEndpointTokenManager(final UserDAO userDAO, final SnsAccess snsAccess,
         final RemoveEndpointTokenManager removeEndpointTokenManager, final Metrics metrics) {
-        this.databaseAccess = databaseAccess;
+        this.userDAO = userDAO;
         this.snsAccess = snsAccess;
         this.removeEndpointTokenManager = removeEndpointTokenManager;
         this.metrics = metrics;
@@ -45,19 +44,17 @@ public class RegisterEndpointTokenManager {
      * @param activeUser  The user making the api request whos push endpoint is being registered.
      * @param deviceToken This is the GCM token for the user's device that is used to register the
      *                    endpoint.
-     * @return Standard result status object giving insight on whether the request was successful.
      */
-    public boolean execute(final String activeUser, final String deviceToken)
+    public void registerDevice(final String activeUser, final String deviceToken)
         throws ManagerExecutionException, InvalidAttributeException, UserNotFoundException {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".registerDevice";
         this.metrics.commonSetup(classMethod);
 
         try {
             this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
             this.metrics.commonClose(true);
-            return true;
         } catch (final InvalidParameterException ipe) {
-            //The error handling here is obtained from aws doc: https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html#mobile-platform-endpoint-sdk-examples
+            // The error handling here is obtained from aws doc: https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html#mobile-platform-endpoint-sdk-examples
             final String message = ipe.getErrorMessage();
             final Pattern p = Pattern
                 .compile(".*Endpoint (arn:aws:sns[^ ]+) already exists with the same [Tt]oken.*");
@@ -75,18 +72,14 @@ public class RegisterEndpointTokenManager {
 
             final String oldUsername = endpointAttributes.get(USER_DATA_KEY);
 
-            if (this.removeEndpointTokenManager.execute(oldUsername)) {
-                // the user that owned this had their mapping removed but the endpoint still existed, we do this for sanity
-                this.snsAccess.unregisterPlatformEndpoint(
-                    new DeleteEndpointRequest().withEndpointArn(endpointArn));
+            this.removeEndpointTokenManager.unregisterDevice(oldUsername);
+            // the user that owned this had their mapping removed but the endpoint still existed, we do this for sanity
+            this.snsAccess.unregisterPlatformEndpoint(
+                new DeleteEndpointRequest().withEndpointArn(endpointArn));
 
-                this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
-                this.metrics.commonClose(true);
-                return true;
-            } else {
-                this.metrics.commonClose(false);
-                throw new ManagerExecutionException("Error registering endpoint.");
-            }
+            this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
+            this.metrics.commonClose(true);
+
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;
@@ -114,6 +107,6 @@ public class RegisterEndpointTokenManager {
             .withUpdateExpression(updateExpression)
             .withValueMap(valueMap);
 
-        this.databaseAccess.updateUser(activeUser, updateItemSpec);
+        this.userDAO.updateUser(activeUser, updateItemSpec);
     }
 }

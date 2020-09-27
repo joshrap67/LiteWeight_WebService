@@ -1,8 +1,8 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
 import helpers.Metrics;
@@ -11,29 +11,29 @@ import models.User;
 
 public class SetAllRequestsSeenManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final Metrics metrics;
 
     @Inject
-    public SetAllRequestsSeenManager(final DatabaseAccess databaseAccess, final Metrics metrics) {
-        this.databaseAccess = databaseAccess;
+    public SetAllRequestsSeenManager(final UserDAO userDAO, final Metrics metrics) {
+        this.userDAO = userDAO;
         this.metrics = metrics;
     }
 
     /**
-     * This method gets the active user's data. If the active user's data does not exist, we assume
-     * this is their first login and we enter a new user object in the db.
+     * Loops through all the friend requests of a user and sets them to seen.
      *
-     * @param activeUser The user that made the api request, trying to get data about themselves.
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * @param activeUser user whose requests are being set to seen.
+     * @throws InvalidAttributeException if error with user item.
+     * @throws UserNotFoundException     if active user is not found.
      */
-    public boolean execute(final String activeUser)
+    public void setAllRequestsSeen(final String activeUser)
         throws InvalidAttributeException, UserNotFoundException {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".setAllRequestsSeen";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User user = this.databaseAccess.getUser(activeUser);
+            final User user = this.userDAO.getUser(activeUser);
 
             for (String username : user.getFriendRequests().keySet()) {
                 user.getFriendRequests().get(username).setSeen(true);
@@ -43,10 +43,9 @@ public class SetAllRequestsSeenManager {
                 .withUpdateExpression("set " + User.FRIEND_REQUESTS + "=:friendRequestsVal")
                 .withValueMap(
                     new ValueMap().withMap(":friendRequestsVal", user.getFriendRequestsMap()));
-            this.databaseAccess.updateUser(activeUser, updateActiveUserData);
+            this.userDAO.updateUser(activeUser, updateActiveUserData);
 
             this.metrics.commonClose(false);
-            return true;
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

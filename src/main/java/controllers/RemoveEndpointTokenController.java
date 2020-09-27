@@ -33,7 +33,7 @@ public class RemoveEndpointTokenController implements ApiRequestController {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
 
                 Injector.getInjector(metrics).inject(this);
-                this.removeEndpointTokenManager.execute(activeUser);
+                this.removeEndpointTokenManager.unregisterDevice(activeUser);
                 resultStatus = ResultStatus.successful("Endpoint successfully unregistered.");
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));

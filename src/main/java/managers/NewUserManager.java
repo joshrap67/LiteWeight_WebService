@@ -1,13 +1,11 @@
 package managers;
 
-import aws.DatabaseAccess;
 import aws.S3Access;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
-import exceptions.InvalidAttributeException;
+import daos.UserDAO;
 import helpers.FileReader;
 import helpers.Metrics;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -16,24 +14,27 @@ import models.UserPreferences;
 
 public class NewUserManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final Metrics metrics;
     private final S3Access s3Access;
 
     @Inject
-    public NewUserManager(final DatabaseAccess dbAccessManager, final Metrics metrics,
-        final S3Access s3Access) {
-        this.databaseAccess = dbAccessManager;
+    public NewUserManager(final UserDAO userDAO, final Metrics metrics, final S3Access s3Access) {
+        this.userDAO = userDAO;
         this.s3Access = s3Access;
         this.metrics = metrics;
     }
 
     /**
-     * @param username Username of new user to be inserted
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * Creates a new user item and puts it in the user table. Note this is where the user's random
+     * url for their icon is generated.
+     *
+     * @param username username of the user that is to be created.
+     * @return User the newly created user.
+     * @throws Exception if there is any error putting the user in the user table.
      */
-    public User execute(final String username) throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+    public User createNewUser(final String username) throws Exception {
+        final String classMethod = this.getClass().getSimpleName() + ".createNewUser";
         this.metrics.commonSetup(classMethod);
 
         try {
@@ -62,8 +63,8 @@ public class NewUserManager {
                 .withMap(User.FRIEND_REQUESTS, new HashMap<>())
                 .withMap(User.RECEIVED_WORKOUTS, new HashMap<>())
                 .withMap(User.EXERCISES, FileReader.getDefaultExercises());
+            PutItemOutcome outcome = this.userDAO.putUser(user);
 
-            PutItemOutcome outcome = this.databaseAccess.putUser(user);
             this.metrics.commonClose(true);
             return new User(outcome.getItem().asMap());
         } catch (Exception e) {

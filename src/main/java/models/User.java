@@ -179,6 +179,14 @@ public class User implements Model {
         return retVal;
     }
 
+    @Override
+    public Map<String, Object> asResponse() {
+        Map<String, Object> map = this.asMap();
+        map.remove(PUSH_ENDPOINT_ARN);
+        // todo remove the received workouts and only put the number unseen
+        return this.asMap();
+    }
+
     public Map<String, Map<String, Object>> getUserWorkoutsMap() {
         if (this.userWorkouts == null) {
             return null;

@@ -37,4 +37,9 @@ public class UserPreferences implements Model {
         retVal.putIfAbsent(UPDATE_DEFAULT_WEIGHT_ON_RESTART, this.updateDefaultWeightOnRestart);
         return retVal;
     }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
+    }
 }

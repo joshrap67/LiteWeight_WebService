@@ -1,7 +1,8 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import daos.UserDAO;
+import daos.WorkoutDAO;
 import helpers.Metrics;
 import javax.inject.Inject;
 import models.User;
@@ -10,14 +11,17 @@ import responses.UserWithWorkout;
 
 public class GetUserWorkoutManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
+    private final WorkoutDAO workoutDAO;
     private final Metrics metrics;
     private final NewUserManager newUserManager;
 
     @Inject
-    public GetUserWorkoutManager(final DatabaseAccess databaseAccess, final Metrics metrics,
+    public GetUserWorkoutManager(final UserDAO userDAO, final WorkoutDAO workoutDAO,
+        final Metrics metrics,
         final NewUserManager newUserManager) {
-        this.databaseAccess = databaseAccess;
+        this.workoutDAO = workoutDAO;
+        this.userDAO = userDAO;
         this.metrics = metrics;
         this.newUserManager = newUserManager;
     }
@@ -26,15 +30,16 @@ public class GetUserWorkoutManager {
      * This method is used when the user first successfully signs into the app. It provides the user
      * object to the user as well as the current workout if there is one.
      *
-     * @param activeUser The user that made the api request, trying to get data about themselves.
+     * @param activeUser username of the user that made the api request, trying to get data about
+     *                   themselves.
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public UserWithWorkout execute(final String activeUser) throws Exception {
+    public UserWithWorkout getUserWithWorkout(final String activeUser) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
         try {
-            Item userItem = this.databaseAccess.getUserItem(activeUser);
+            Item userItem = this.userDAO.getUserItem(activeUser);
             UserWithWorkout userWithWorkout;
 
             if (userItem != null) {
@@ -48,17 +53,16 @@ public class GetUserWorkoutManager {
                 } else {
                     // user has a workout so try and fetch it from the DB
                     final Workout workout = new Workout(
-                        this.databaseAccess.getWorkoutItem(currentWorkoutId));
+                        this.workoutDAO.getWorkoutItem(currentWorkoutId));
                     userWithWorkout = new UserWithWorkout(user, workout);
                 }
             } else {
                 // this will be reached if the user just created an account or it somehow got deleted in DB, so put user in DB
-                final User result = this.newUserManager.execute(activeUser);
+                final User result = this.newUserManager.createNewUser(activeUser);
                 userWithWorkout = new UserWithWorkout(result, null);
             }
             return userWithWorkout;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;
         }

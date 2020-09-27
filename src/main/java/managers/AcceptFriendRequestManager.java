@@ -1,12 +1,12 @@
 package managers;
 
-import aws.DatabaseAccess;
 import aws.SnsAccess;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import daos.UserDAO;
 import exceptions.ManagerExecutionException;
 import helpers.Globals;
 import helpers.Metrics;
@@ -21,33 +21,33 @@ import models.User;
 public class AcceptFriendRequestManager {
 
     private final SnsAccess snsAccess;
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final Metrics metrics;
 
     @Inject
-    public AcceptFriendRequestManager(final SnsAccess snsAccess,
-        final DatabaseAccess databaseAccess,
+    public AcceptFriendRequestManager(final SnsAccess snsAccess, final UserDAO userDAO,
         final Metrics metrics) {
         this.snsAccess = snsAccess;
-        this.databaseAccess = databaseAccess;
+        this.userDAO = userDAO;
         this.metrics = metrics;
     }
 
     /**
-     * This method gets the active user's data. If the active user's data does not exist, we assume
-     * this is their first login and we enter a new user object in the db.
+     * Accepts a friend request and adds the accepted user to the friends list of the active user.
+     * Upon success, a data notification is sent to the accepted user.
      *
-     * @param activeUser The user that made the api request, trying to get data about themselves.
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * @param activeUser       username of the user that is accepting the friend request.
+     * @param usernameToAccept username of the user that the active user is accepting.
+     * @throws Exception if there are any input errors or if either user does not exist.
      */
-    public boolean execute(final String activeUser, final String usernameToAccept)
+    public void acceptRequest(final String activeUser, final String usernameToAccept)
         throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".acceptRequest";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User activeUserObject = this.databaseAccess.getUser(activeUser);
-            final User userToAccept = this.databaseAccess.getUser(usernameToAccept);
+            final User activeUserObject = this.userDAO.getUser(activeUser);
+            final User userToAccept = this.userDAO.getUser(usernameToAccept);
 
             if (!activeUserObject.getFriendRequests().containsKey(usernameToAccept)) {
                 this.metrics.commonClose(false);
@@ -63,7 +63,7 @@ public class AcceptFriendRequestManager {
             // remove request from active user and add the new friend
             Friend newFriend = new Friend(userToAccept, true);
             final UpdateItemData activeUserData = new UpdateItemData(
-                activeUser, DatabaseAccess.USERS_TABLE_NAME)
+                activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.FRIENDS + ".#username = :friendVal " +
                     "remove " + User.FRIEND_REQUESTS + ".#username")
                 .withNameMap(new NameMap().with("#username", usernameToAccept))
@@ -71,7 +71,7 @@ public class AcceptFriendRequestManager {
 
             // update the active user to be confirmed in the newly accepted friends mapping
             final UpdateItemData updateFriendData = new UpdateItemData(
-                usernameToAccept, DatabaseAccess.USERS_TABLE_NAME)
+                usernameToAccept, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression(
                     "set " + User.FRIENDS + ".#username." + Friend.CONFIRMED + " = :confirmedVal")
                 .withNameMap(new NameMap().with("#username", activeUser))
@@ -81,7 +81,7 @@ public class AcceptFriendRequestManager {
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(activeUserData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
-            this.databaseAccess.executeWriteTransaction(actions);
+            this.userDAO.executeWriteTransaction(actions);
 
             // if this succeeds, go ahead and send a notification to the accepted user (only need to send username)
             this.snsAccess.sendMessage(userToAccept.getPushEndpointArn(),
@@ -90,7 +90,6 @@ public class AcceptFriendRequestManager {
                         ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
                             .build())));
             this.metrics.commonClose(true);
-            return true;
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

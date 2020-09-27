@@ -6,7 +6,7 @@ import controllers.CancelFriendRequestController;
 import controllers.CopyWorkoutController;
 import controllers.DeclineFriendRequestController;
 import controllers.DeleteExerciseController;
-import controllers.PopWorkoutController;
+import controllers.DeleteWorkoutThenFetchController;
 import controllers.EditWorkoutController;
 import controllers.GetUserDataController;
 import controllers.GetUserWorkoutController;
@@ -51,7 +51,7 @@ public interface LiteWeightComponent {
 
     void inject(RenameWorkoutController renameWorkoutController);
 
-    void inject(PopWorkoutController popWorkoutController);
+    void inject(DeleteWorkoutThenFetchController deleteWorkoutThenFetchController);
 
     void inject(ResetWorkoutStatisticsController resetWorkoutStatisticsController);
 

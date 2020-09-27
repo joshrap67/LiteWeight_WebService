@@ -44,7 +44,7 @@ public class NewWorkoutController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 final UserWithWorkout userWithWorkout = this.newWorkoutManager
-                    .execute(activeUser, workoutName, routine);
+                    .createNewWorkout(activeUser, workoutName, routine);
                 resultStatus = ResultStatus
                     .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
             } catch (ManagerExecutionException meu) {

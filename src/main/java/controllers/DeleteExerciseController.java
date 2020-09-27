@@ -36,7 +36,7 @@ public class DeleteExerciseController implements ApiRequestController {
                 final String exerciseId = (String) jsonBody.get(RequestFields.EXERCISE_ID);
 
                 Injector.getInjector(metrics).inject(this);
-                this.deleteExerciseManager.execute(activeUser, exerciseId);
+                this.deleteExerciseManager.deleteExercise(activeUser, exerciseId);
                 resultStatus = ResultStatus.successful("Exercise deleted successfully.");
             } catch (WorkoutNotFoundException | UserNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));

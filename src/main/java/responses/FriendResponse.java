@@ -28,4 +28,9 @@ public class FriendResponse implements Model {
         retVal.putIfAbsent(User.ICON, this.getIcon());
         return retVal;
     }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
+    }
 }

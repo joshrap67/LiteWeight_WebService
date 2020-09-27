@@ -35,7 +35,7 @@ public class SyncWorkoutController implements ApiRequestController {
                 final Workout workout = new Workout(workoutMap);
 
                 Injector.getInjector(metrics).inject(this);
-                this.syncWorkoutManager.execute(workout);
+                this.syncWorkoutManager.syncWorkout(workout);
                 resultStatus = ResultStatus.successful("Workout synced successfully.");
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));

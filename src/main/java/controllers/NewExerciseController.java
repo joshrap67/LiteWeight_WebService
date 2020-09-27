@@ -42,7 +42,7 @@ public class NewExerciseController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 final ExerciseUserResponse result = this.newExerciseManager
-                    .execute(activeUser, exerciseName, focuses);
+                    .newExercise(activeUser, exerciseName, focuses);
                 resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

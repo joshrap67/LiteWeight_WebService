@@ -61,4 +61,9 @@ public class Workout implements Model {
         retVal.putIfAbsent(CURRENT_DAY, this.currentDay);
         return retVal;
     }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
+    }
 }

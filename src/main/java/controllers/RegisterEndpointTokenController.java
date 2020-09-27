@@ -37,7 +37,7 @@ public class RegisterEndpointTokenController implements ApiRequestController {
                 final String token = (String) json.get(User.PUSH_ENDPOINT_ARN);
 
                 Injector.getInjector(metrics).inject(this);
-                this.registerEndpointTokenManager.execute(activeUser, token);
+                this.registerEndpointTokenManager.registerDevice(activeUser, token);
                 resultStatus = ResultStatus.successful("Endpoint registered successfully.");
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

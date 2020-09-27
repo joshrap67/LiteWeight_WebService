@@ -4,5 +4,7 @@ import java.util.Map;
 
 public interface Model {
 
-    public Map<String, Object> asMap();
+    Map<String, Object> asMap();
+
+    Map<String, Object> asResponse();
 }

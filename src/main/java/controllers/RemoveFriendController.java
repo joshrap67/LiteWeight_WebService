@@ -36,7 +36,7 @@ public class RemoveFriendController implements ApiRequestController {
                 final String userToAccept = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                this.removeFriendManager.execute(activeUser, userToAccept);
+                this.removeFriendManager.removeFriend(activeUser, userToAccept);
                 resultStatus = ResultStatus.successful("Friend successfully removed.");
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));

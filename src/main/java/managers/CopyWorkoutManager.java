@@ -1,9 +1,10 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
+import daos.UserDAO;
+import daos.WorkoutDAO;
 import helpers.Metrics;
 import helpers.UpdateItemData;
 import java.util.ArrayList;
@@ -16,14 +17,14 @@ import responses.UserWithWorkout;
 
 public class CopyWorkoutManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final Metrics metrics;
     private final NewWorkoutManager newWorkoutManager;
 
     @Inject
-    public CopyWorkoutManager(DatabaseAccess databaseAccess, Metrics metrics,
-        NewWorkoutManager newWorkoutManager) {
-        this.databaseAccess = databaseAccess;
+    public CopyWorkoutManager(final UserDAO userDAO, final Metrics metrics,
+        final NewWorkoutManager newWorkoutManager) {
+        this.userDAO = userDAO;
         this.metrics = metrics;
         this.newWorkoutManager = newWorkoutManager;
     }
@@ -32,16 +33,16 @@ public class CopyWorkoutManager {
      * @param activeUser Username of new user to be inserted
      * @return Result status that will be sent to frontend with appropriate data or error messages.
      */
-    public UserWithWorkout execute(final String activeUser, final String newWorkoutName,
+    public UserWithWorkout copyWorkout(final String activeUser, final String newWorkoutName,
         final Workout oldWorkout) throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".copyWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
             final String oldWorkoutId = oldWorkout.getWorkoutId();
 
             final UserWithWorkout userWithWorkout = newWorkoutManager
-                .execute(activeUser, newWorkoutName, oldWorkout.getRoutine());
+                .createNewWorkout(activeUser, newWorkoutName, oldWorkout.getRoutine());
 
             final Workout newWorkout = userWithWorkout.getWorkout();
             final WorkoutUser workoutMetaNew = userWithWorkout.getUser().getUserWorkouts()
@@ -49,7 +50,7 @@ public class CopyWorkoutManager {
 
             // update user object with new access time of the newly selected workout
             final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
-                DatabaseAccess.USERS_TABLE_NAME)
+                UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkout, " +
                     User.WORKOUTS + ".#newWorkoutId= :newWorkoutMeta")
@@ -60,7 +61,7 @@ public class CopyWorkoutManager {
 
             // persist the current week/day/routine of the old workout
             final UpdateItemData updateOldWorkoutItemData = new UpdateItemData(oldWorkoutId,
-                DatabaseAccess.WORKOUT_TABLE_NAME)
+                WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " +
                     Workout.CURRENT_DAY + " = :currentDay, " +
                     Workout.CURRENT_WEEK + " = :currentWeek, " +
@@ -75,11 +76,10 @@ public class CopyWorkoutManager {
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateOldWorkoutItemData.asUpdate()));
-            this.databaseAccess.executeWriteTransaction(actions);
+            this.userDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);
             return userWithWorkout;
-
         } catch (Exception e) {
             this.metrics.commonClose(true);
             throw e;

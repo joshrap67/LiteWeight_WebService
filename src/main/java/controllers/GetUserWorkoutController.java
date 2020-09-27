@@ -35,13 +35,13 @@ public class GetUserWorkoutController implements ApiRequestController {
             if (jsonMap.containsKey(User.USERNAME)) {
                 final String username = (String) jsonMap.get(User.USERNAME);
                 final UserWithWorkout userWithWorkout = this.getUserWorkoutManager
-                    .execute(username);
+                    .getUserWithWorkout(username);
                 resultStatus = ResultStatus
                     .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
             } else if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
                 final UserWithWorkout userWithWorkout = this.getUserWorkoutManager
-                    .execute(activeUser);
+                    .getUserWithWorkout(activeUser);
                 resultStatus = ResultStatus
                     .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
             } else {

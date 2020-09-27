@@ -1,9 +1,10 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import daos.UserDAO;
+import daos.WorkoutDAO;
 import helpers.Metrics;
 import helpers.WorkoutHelper;
 import java.util.ArrayList;
@@ -15,25 +16,30 @@ import models.Workout;
 
 public class DeleteExerciseManager {
 
-    public final DatabaseAccess databaseAccess;
+    public final UserDAO userDAO;
     public final Metrics metrics;
+    public final WorkoutDAO workoutDAO;
 
     @Inject
-    public DeleteExerciseManager(final DatabaseAccess databaseAccess, final Metrics metrics) {
-        this.databaseAccess = databaseAccess;
+    public DeleteExerciseManager(final UserDAO userDAO, final WorkoutDAO workoutDAO,
+        final Metrics metrics) {
+        this.userDAO = userDAO;
+        this.workoutDAO = workoutDAO;
         this.metrics = metrics;
     }
 
     /**
-     * @param exerciseId TODO
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * This method deletes an exercise from a user's owned exercise mapping. It also removes this
+     * exercise from any workout that contains it.
+     *
+     * @param exerciseId Id of the exercise that is to be deleted
      */
-    public boolean execute(final String activeUser, final String exerciseId) throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+    public void deleteExercise(final String activeUser, final String exerciseId) throws Exception {
+        final String classMethod = this.getClass().getSimpleName() + ".deleteExercise";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User user = this.databaseAccess.getUser(activeUser);
+            final User user = this.userDAO.getUser(activeUser);
 
             final ExerciseUser exerciseUser = user.getUserExercises().get(exerciseId);
             List<String> workoutsToUpdate = new ArrayList<>(exerciseUser.getWorkouts().keySet());
@@ -43,21 +49,19 @@ public class DeleteExerciseManager {
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.EXERCISES + "= :exerciseMap")
                 .withValueMap(new ValueMap().withMap(":exerciseMap", user.getUserExercisesMap()));
-            this.databaseAccess.updateUser(user.getUsername(), updateItemSpec);
+            this.userDAO.updateUser(user.getUsername(), updateItemSpec);
             this.metrics.commonClose(true);
-            return true;
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;
         }
-
     }
 
     private void updateWorkouts(final String exerciseId, final List<String> workoutIds,
         final User user) throws Exception {
         // because the number of workouts could go above 25 (max for transaction) just have to do a bunch of blind updates
         for (String workoutId : workoutIds) {
-            final Workout workout = this.databaseAccess.getWorkout(workoutId);
+            final Workout workout = this.workoutDAO.getWorkout(workoutId);
 
             WorkoutHelper.deleteExerciseFromRoutine(exerciseId, workout.getRoutine());
             final String newMostFrequentFocus = WorkoutHelper
@@ -71,7 +75,7 @@ public class DeleteExerciseManager {
                     .withMap(":routineMap", workout.getRoutine().asMap())
                     .withString(":mostFrequentFocusVal", newMostFrequentFocus))
                 .withNameMap(new NameMap().with("#routine", Workout.ROUTINE));
-            this.databaseAccess.updateWorkout(workoutId, updateItemSpec);
+            this.workoutDAO.updateWorkout(workoutId, updateItemSpec);
         }
     }
 }

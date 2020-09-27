@@ -44,4 +44,9 @@ public class WorkoutUser implements Model {
         retVal.putIfAbsent(TOTAL_EXERCISES_SUM, totalExercisesSum);
         return retVal;
     }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
+    }
 }

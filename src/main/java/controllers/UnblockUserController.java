@@ -37,7 +37,7 @@ public class UnblockUserController implements ApiRequestController {
                 final String userToUnblock = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                this.unblockUserManager.execute(activeUser, userToUnblock);
+                this.unblockUserManager.unblockUser(activeUser, userToUnblock);
                 resultStatus = ResultStatus.successful("User successfully unblocked.");
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

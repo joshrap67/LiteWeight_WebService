@@ -32,7 +32,7 @@ public class ProxyPostController implements
             .put("switchWorkout", SwitchWorkoutController.class)
             .put("copyWorkout", CopyWorkoutController.class)
             .put("renameWorkout", RenameWorkoutController.class)
-            .put("popWorkout", PopWorkoutController.class)
+            .put("deleteWorkoutThenFetch", DeleteWorkoutThenFetchController.class)
             .put("resetWorkoutStatistics", ResetWorkoutStatisticsController.class)
             .put("editWorkout", EditWorkoutController.class)
             .put("updateExercise", UpdateExerciseController.class)

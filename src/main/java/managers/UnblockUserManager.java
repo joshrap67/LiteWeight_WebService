@@ -1,8 +1,8 @@
 package managers;
 
-import aws.DatabaseAccess;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
+import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.ManagerExecutionException;
 import exceptions.UserNotFoundException;
@@ -12,45 +12,45 @@ import models.User;
 
 public class UnblockUserManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
     private final Metrics metrics;
 
     @Inject
-    public UnblockUserManager(final DatabaseAccess databaseAccess, final Metrics metrics) {
-        this.databaseAccess = databaseAccess;
+    public UnblockUserManager(final UserDAO userDAO, final Metrics metrics) {
+        this.userDAO = userDAO;
         this.metrics = metrics;
     }
 
     /**
-     * This method gets the active user's data. If the active user's data does not exist, we assume
-     * this is their first login and we enter a new user object in the db.
+     * Unblocks a specified user.
      *
-     * @param activeUser The user that made the api request, trying to get data about themselves.
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * @param activeUser    username of te user that is doing the unblocking.
+     * @param userToUnblock username of the user that the active user is attempting to unblock.
+     * @throws InvalidAttributeException if error in user item.
+     * @throws UserNotFoundException     if either user is not found.
+     * @throws ManagerExecutionException if the user is not actually blocking the user to unblock
      */
-    public boolean execute(final String activeUser, final String usernameToUnblock)
+    public void unblockUser(final String activeUser, final String userToUnblock)
         throws InvalidAttributeException, UserNotFoundException, ManagerExecutionException {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".unblockUser";
         this.metrics.commonSetup(classMethod);
 
         try {
-            final User activeUserObject = this.databaseAccess.getUser(activeUser);
+            final User activeUserObject = this.userDAO.getUser(activeUser);
 
-            if (!activeUserObject.getBlocked().containsKey(usernameToUnblock)) {
+            if (!activeUserObject.getBlocked().containsKey(userToUnblock)) {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(
-                    String.format("Unable to unblock %s", usernameToUnblock));
+                    String.format("Unable to unblock %s", userToUnblock));
             }
 
             // unblock the user
             UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("remove " + User.BLOCKED + ".#username")
-                .withNameMap(new NameMap().with("#username", usernameToUnblock));
-            this.databaseAccess.updateUser(activeUser, updateItemSpec);
+                .withNameMap(new NameMap().with("#username", userToUnblock));
+            this.userDAO.updateUser(activeUser, updateItemSpec);
 
             this.metrics.commonClose(true);
-            return true;
-
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

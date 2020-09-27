@@ -36,7 +36,7 @@ public class CancelFriendRequestController implements ApiRequestController {
                 final String userToCancel = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                this.cancelFriendRequestManager.execute(activeUser, userToCancel);
+                this.cancelFriendRequestManager.cancelRequest(activeUser, userToCancel);
                 resultStatus = ResultStatus.successful("Request successfully canceled.");
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));

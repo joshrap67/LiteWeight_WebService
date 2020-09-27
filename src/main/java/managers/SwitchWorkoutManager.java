@@ -1,14 +1,12 @@
 package managers;
 
-import aws.DatabaseAccess;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
-import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
+import daos.UserDAO;
+import daos.WorkoutDAO;
 import helpers.Metrics;
-import helpers.UpdateItemData;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
 import models.User;
 import models.Workout;
@@ -17,36 +15,47 @@ import responses.UserWithWorkout;
 
 public class SwitchWorkoutManager {
 
-    private final DatabaseAccess databaseAccess;
+    private final UserDAO userDAO;
+    private final WorkoutDAO workoutDAO;
     private final Metrics metrics;
+    private final SyncWorkoutManager syncWorkoutManager;
 
     @Inject
-    public SwitchWorkoutManager(final DatabaseAccess databaseAccess, final Metrics metrics) {
-        this.databaseAccess = databaseAccess;
+    public SwitchWorkoutManager(final UserDAO userDAO, final WorkoutDAO workoutDAO,
+        final Metrics metrics, final SyncWorkoutManager syncWorkoutManager) {
+        this.userDAO = userDAO;
+        this.workoutDAO = workoutDAO;
         this.metrics = metrics;
+        this.syncWorkoutManager = syncWorkoutManager;
     }
 
     /**
-     * @param activeUser Username of new user to be inserted
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * Switches to the workout that the user passes in. The user's current workout (oldWorkout) is
+     * synced before switching to the new workout.
+     *
+     * @param activeUser   user that is attempting to switch workouts.
+     * @param newWorkoutId id of the workout to be switched to.
+     * @param oldWorkout   the old workout the user is switching from.
+     * @return UserWithWorkout has the newly switched workout and the user object updated with the
+     * new current workout.
+     * @throws Exception if user/workout does not exist.
      */
-    public UserWithWorkout execute(final String activeUser, final String newWorkoutId,
+    public UserWithWorkout switchWorkout(final String activeUser, final String newWorkoutId,
         final Workout oldWorkout) throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".switchWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
-            String oldWorkoutId = oldWorkout.getWorkoutId();
-            final User user = this.databaseAccess.getUser(activeUser);
-            final Workout newWorkout = this.databaseAccess.getWorkout(newWorkoutId);
+            final User user = this.userDAO.getUser(activeUser);
+            final Workout newWorkout = this.workoutDAO.getWorkout(newWorkoutId);
 
-            final String creationTimeNew = Instant.now().toString();
+            user.setCurrentWorkout(newWorkoutId);
+            final String timeNow = Instant.now().toString();
             final WorkoutUser workoutMetaNew = user.getUserWorkouts().get(newWorkoutId);
-            workoutMetaNew.setDateLast(creationTimeNew);
+            workoutMetaNew.setDateLast(timeNow);
 
             // update user object with new access time of the newly selected workout
-            final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
-                DatabaseAccess.USERS_TABLE_NAME)
+            final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
                     User.WORKOUTS + ".#newWorkoutId= :newWorkoutMeta")
@@ -56,23 +65,9 @@ public class SwitchWorkoutManager {
                 .withNameMap(new NameMap().with("#newWorkoutId", newWorkoutId));
 
             // persist the current week/day/routine of the old workout
-            final UpdateItemData updateOldWorkoutItemData = new UpdateItemData(oldWorkoutId,
-                DatabaseAccess.WORKOUT_TABLE_NAME)
-                .withUpdateExpression("set " +
-                    Workout.CURRENT_DAY + " = :currentDayVal, " +
-                    Workout.CURRENT_WEEK + " = :currentWeekVal, " +
-                    "#routine =:routineVal")
-                .withValueMap(new ValueMap()
-                    .withNumber(":currentDayVal", oldWorkout.getCurrentDay())
-                    .withNumber(":currentWeekVal", oldWorkout.getCurrentWeek())
-                    .withMap(":routineVal", oldWorkout.getRoutine().asMap()))
-                .withNameMap(new NameMap().with("#routine", Workout.ROUTINE));
+            syncWorkoutManager.syncWorkout(oldWorkout);
 
-            // want a transaction since more than one object is being updated at once
-            final List<TransactWriteItem> actions = new ArrayList<>();
-            actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
-            actions.add(new TransactWriteItem().withUpdate(updateOldWorkoutItemData.asUpdate()));
-            this.databaseAccess.executeWriteTransaction(actions);
+            this.userDAO.updateUser(activeUser, updateItemSpec);
 
             this.metrics.commonClose(true);
             return new UserWithWorkout(user, newWorkout);

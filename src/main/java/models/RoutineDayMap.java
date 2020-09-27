@@ -58,4 +58,9 @@ public class RoutineDayMap implements Model {
         }
         return retVal;
     }
+
+    @Override
+    public Map<String, Object> asResponse() {
+        return this.asMap();
+    }
 }

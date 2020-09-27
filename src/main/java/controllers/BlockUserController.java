@@ -39,7 +39,7 @@ public class BlockUserController implements ApiRequestController {
                 final String userToBlock = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                final String result = this.blockUserManager.execute(activeUser, userToBlock);
+                final String result = this.blockUserManager.blockUser(activeUser, userToBlock);
                 resultStatus = ResultStatus.successful(JsonHelper
                     .serializeMap(ImmutableMap.of(User.ICON, result)));
 

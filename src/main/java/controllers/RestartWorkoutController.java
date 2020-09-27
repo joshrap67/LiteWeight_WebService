@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.RestartWorkoutManager;
-import managers.SyncWorkoutManager;
 import models.Workout;
 import modules.Injector;
 import responses.UserWithWorkout;
@@ -42,7 +41,7 @@ public class RestartWorkoutController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 final UserWithWorkout result = this.restartWorkoutManager
-                    .execute(activeUser, workout);
+                    .restartWorkout(activeUser, workout);
                 resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));

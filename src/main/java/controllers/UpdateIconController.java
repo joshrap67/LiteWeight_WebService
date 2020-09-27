@@ -39,7 +39,7 @@ public class UpdateIconController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 boolean success = this.updateIconManager
-                    .execute(activeUser, imageBytes);
+                    .updateIcon(activeUser, imageBytes);
                 if (success) {
                     resultStatus = ResultStatus.successful("Picture updated successfully.");
                 } else {
