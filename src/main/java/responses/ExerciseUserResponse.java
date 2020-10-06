@@ -5,24 +5,24 @@ import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
-import models.ExerciseUser;
+import models.OwnedExercise;
 
 @Data
 public class ExerciseUserResponse implements Model {
 
     private String exerciseId;
-    private ExerciseUser exerciseUser;
+    private OwnedExercise ownedExercise;
 
-    public ExerciseUserResponse(String exerciseId, ExerciseUser exerciseUser) {
+    public ExerciseUserResponse(String exerciseId, OwnedExercise ownedExercise) {
         this.exerciseId = exerciseId;
-        this.exerciseUser = exerciseUser;
+        this.ownedExercise = ownedExercise;
     }
 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> retVal = new HashMap<>();
         retVal.putIfAbsent(RequestFields.EXERCISE_ID, exerciseId);
-        retVal.putIfAbsent(RequestFields.EXERCISE, exerciseUser);
+        retVal.putIfAbsent(RequestFields.EXERCISE, ownedExercise);
         return retVal;
     }
 

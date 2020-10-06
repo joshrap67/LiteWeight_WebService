@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.UpdateExerciseManager;
-import models.ExerciseUser;
+import models.OwnedExercise;
 import models.User;
 import modules.Injector;
 
@@ -40,11 +40,11 @@ public class UpdateExerciseController implements ApiRequestController {
                 final String exerciseId = (String) jsonBody.get(RequestFields.EXERCISE_ID);
                 final Map<String, Object> exerciseUserMap = (Map<String, Object>) jsonBody
                     .get(RequestFields.EXERCISE);
-                final ExerciseUser exerciseUser = new ExerciseUser(exerciseUserMap);
+                final OwnedExercise ownedExercise = new OwnedExercise(exerciseUserMap);
 
                 Injector.getInjector(metrics).inject(this);
                 final User result = this.updateExerciseManager
-                    .updateExercise(activeUser, exerciseId, exerciseUser);
+                    .updateExercise(activeUser, exerciseId, ownedExercise);
                 resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

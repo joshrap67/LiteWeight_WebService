@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
-import models.ExerciseRoutine;
+import models.RoutineExercise;
 import models.Routine;
 import models.User;
 
@@ -20,27 +20,26 @@ public class WorkoutHelper {
         boolean updateDefaultWeight = user.getUserPreferences().isUpdateDefaultWeightOnSave();
         // get a list of all exercises (by id, not name of course)
         Set<String> exercises = new HashSet<>();
-        for (int week = 0; week < routine.size(); week++) {
-            for (int day = 0; day < routine.getWeek(week).size(); day++) {
-                List<ExerciseRoutine> exerciseListForDay = routine
+        for (Integer week : routine) {
+            for (Integer day : routine.getWeek(week)) {
+                List<RoutineExercise> exerciseListForDay = routine
                     .getExerciseListForDay(week, day);
-                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
-                    String exerciseId = exerciseRoutine.getExerciseId();
-                    if (updateDefaultWeight && exerciseRoutine.getWeight() > user.getUserExercises()
+                for (RoutineExercise routineExercise : exerciseListForDay) {
+                    String exerciseId = routineExercise.getExerciseId();
+                    if (updateDefaultWeight && routineExercise.getWeight() > user.getOwnedExercises()
                         .get(exerciseId).getDefaultWeight()) {
                         // if user wants to update default weight on save and this exercise has a greater
                         // weight than the current default, then update the default
-                        user.getUserExercises().get(exerciseId)
-                            .setDefaultWeight(exerciseRoutine.getWeight());
+                        user.getOwnedExercises().get(exerciseId)
+                            .setDefaultWeight(routineExercise.getWeight());
                     }
                     exercises.add(exerciseId);
-
                 }
             }
         }
 
         for (String exerciseId : exercises) {
-            user.getUserExercises().get(exerciseId).getWorkouts()
+            user.getOwnedExercises().get(exerciseId).getWorkouts()
                 .putIfAbsent(workoutId, workoutName.trim());
         }
     }
@@ -54,18 +53,18 @@ public class WorkoutHelper {
         boolean updateDefaultWeight = user.getUserPreferences().isUpdateDefaultWeightOnSave();
         // get a list of all new exercises (by id)
         Set<String> newExercises = new HashSet<>();
-        for (int week = 0; week < newRoutine.size(); week++) {
-            for (int day = 0; day < newRoutine.getWeek(week).size(); day++) {
-                List<ExerciseRoutine> exerciseListForDay = newRoutine
+        for (Integer week : newRoutine) {
+            for (Integer day : newRoutine.getWeek(week)) {
+                List<RoutineExercise> exerciseListForDay = newRoutine
                     .getExerciseListForDay(week, day);
-                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
-                    String exerciseId = exerciseRoutine.getExerciseId();
-                    if (updateDefaultWeight && exerciseRoutine.getWeight() > user.getUserExercises()
+                for (RoutineExercise routineExercise : exerciseListForDay) {
+                    String exerciseId = routineExercise.getExerciseId();
+                    if (updateDefaultWeight && routineExercise.getWeight() > user.getOwnedExercises()
                         .get(exerciseId).getDefaultWeight()) {
                         // if user wants to update default weight on save and this exercise has a greater
                         // weight than the current default, then update the default
-                        user.getUserExercises().get(exerciseId)
-                            .setDefaultWeight(exerciseRoutine.getWeight());
+                        user.getOwnedExercises().get(exerciseId)
+                            .setDefaultWeight(routineExercise.getWeight());
                     }
                     newExercises.add(exerciseId);
                 }
@@ -73,12 +72,12 @@ public class WorkoutHelper {
         }
         // get a set of all the old exercises (by id)
         Set<String> oldExercises = new HashSet<>();
-        for (int week = 0; week < oldRoutine.size(); week++) {
-            for (int day = 0; day < oldRoutine.getWeek(week).size(); day++) {
-                List<ExerciseRoutine> exerciseListForDay = oldRoutine
+        for (Integer week : oldRoutine) {
+            for (Integer day : oldRoutine.getWeek(week)) {
+                List<RoutineExercise> exerciseListForDay = oldRoutine
                     .getExerciseListForDay(week, day);
-                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
-                    String exerciseId = exerciseRoutine.getExerciseId();
+                for (RoutineExercise routineExercise : exerciseListForDay) {
+                    String exerciseId = routineExercise.getExerciseId();
                     oldExercises.add(exerciseId);
                 }
             }
@@ -89,12 +88,12 @@ public class WorkoutHelper {
 
         for (String exerciseId : newExercises) {
             // exercise is now in this workout, so reflect that in the user object
-            user.getUserExercises().get(exerciseId).getWorkouts()
+            user.getOwnedExercises().get(exerciseId).getWorkouts()
                 .putIfAbsent(workoutId, workoutName.trim());
         }
         for (String exerciseId : deletedExercises) {
             // exercise is no longer in the workout, so remove that mapping from exercise on user object
-            user.getUserExercises().get(exerciseId).getWorkouts().remove(workoutId);
+            user.getOwnedExercises().get(exerciseId).getWorkouts().remove(workoutId);
         }
     }
 
@@ -102,13 +101,13 @@ public class WorkoutHelper {
         final Routine routine) {
 
         Map<String, Integer> focusCount = new HashMap<>();
-        for (int week = 0; week < routine.size(); week++) {
-            for (int day = 0; day < routine.getWeek(week).size(); day++) {
-                List<ExerciseRoutine> exerciseListForDay = routine
+        for (Integer week : routine) {
+            for (Integer day : routine.getWeek(week)) {
+                List<RoutineExercise> exerciseListForDay = routine
                     .getExerciseListForDay(week, day);
-                for (ExerciseRoutine exerciseRoutine : exerciseListForDay) {
-                    String exerciseId = exerciseRoutine.getExerciseId();
-                    for (String focus : user.getUserExercises().get(exerciseId).getFocuses()) {
+                for (RoutineExercise routineExercise : exerciseListForDay) {
+                    String exerciseId = routineExercise.getExerciseId();
+                    for (String focus : user.getOwnedExercises().get(exerciseId).getFocuses()) {
                         focusCount.merge(focus, 1, Integer::sum);
                     }
                 }
@@ -134,8 +133,8 @@ public class WorkoutHelper {
 
     public static void deleteExerciseFromRoutine(final String exerciseId,
         final Routine routine) {
-        for (int week = 0; week < routine.size(); week++) {
-            for (int day = 0; day < routine.getWeek(week).size(); day++) {
+        for (Integer week : routine) {
+            for (Integer day : routine.getWeek(week)) {
                 routine.removeExercise(week, day, exerciseId);
             }
         }

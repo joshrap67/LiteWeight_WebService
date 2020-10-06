@@ -40,6 +40,14 @@ public class UserWithWorkout implements Model {
 
     @Override
     public Map<String, Object> asResponse() {
-        return this.asMap();
+        Map<String, Object> retVal = new HashMap<>();
+        retVal.putIfAbsent(RequestFields.USER, user.asResponse());
+        if (workout != null) {
+            retVal.putIfAbsent(RequestFields.WORKOUT, workout.asResponse());
+        } else {
+            // in case the user has no workout, just return an empty map
+            retVal.putIfAbsent(RequestFields.WORKOUT, new HashMap<>());
+        }
+        return retVal;
     }
 }

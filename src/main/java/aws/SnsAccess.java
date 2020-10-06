@@ -28,6 +28,7 @@ public class SnsAccess {
     public static final String acceptedFriendRequestAction = "acceptedFriendRequest";
     public static final String declinedFriendRequestAction = "declinedFriendRequest";
     public static final String removeFriendAction = "removeFriend";
+    public static final String receivedWorkoutAction = "receivedWorkout";
     private final AmazonSNSClient client;
 
     public SnsAccess() {

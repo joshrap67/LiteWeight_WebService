@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.NewExerciseManager;
-import models.ExerciseUser;
+import models.OwnedExercise;
 import modules.Injector;
 import responses.ExerciseUserResponse;
 
@@ -31,14 +31,14 @@ public class NewExerciseController implements ApiRequestController {
         ResultStatus<String> resultStatus;
 
         final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, ExerciseUser.EXERCISE_NAME,
-                ExerciseUser.FOCUSES);
+            .asList(RequestFields.ACTIVE_USER, OwnedExercise.EXERCISE_NAME,
+                OwnedExercise.FOCUSES);
 
         if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
-                final String exerciseName = (String) jsonBody.get(ExerciseUser.EXERCISE_NAME);
-                final List<String> focuses = (List<String>) jsonBody.get(ExerciseUser.FOCUSES);
+                final String exerciseName = (String) jsonBody.get(OwnedExercise.EXERCISE_NAME);
+                final List<String> focuses = (List<String>) jsonBody.get(OwnedExercise.FOCUSES);
 
                 Injector.getInjector(metrics).inject(this);
                 final ExerciseUserResponse result = this.newExerciseManager

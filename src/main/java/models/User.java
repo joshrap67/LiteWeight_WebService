@@ -31,27 +31,29 @@ public class User implements Model {
     public static final String RECEIVED_WORKOUTS = "receivedWorkouts";
     public static final String USER_PREFERENCES = "preferences";
     public static final String BLOCKED = "blocked";
+    public static final String NEW_WORKOUTS = "newWorkouts";
 
     private String username;
     private String icon;
-    private String pushEndpointArn; // todo don't return to frontend
+    private String pushEndpointArn;
     private String premiumToken;
     private String currentWorkout;
     private Integer workoutsSent;
+    private Integer newWorkouts;
     private UserPreferences userPreferences;
 
     @Setter(AccessLevel.NONE)
     private Map<String, String> blocked;
     @Setter(AccessLevel.NONE)
-    private Map<String, WorkoutUser> userWorkouts;
+    private Map<String, WorkoutMeta> userWorkouts;
     @Setter(AccessLevel.NONE)
-    private Map<String, ExerciseUser> userExercises;
+    private Map<String, OwnedExercise> ownedExercises;
     @Setter(AccessLevel.NONE)
     private Map<String, Friend> friends;
     @Setter(AccessLevel.NONE)
     private Map<String, FriendRequest> friendRequests;
     @Setter(AccessLevel.NONE)
-    private Map<String, String> receivedWorkouts;
+    private Map<String, ReceivedWorkoutMeta> receivedWorkouts;
 
 
     public User(final Item userItem)
@@ -68,8 +70,8 @@ public class User implements Model {
         this.setWorkoutsSent(Parser.convertObjectToInteger(json.get(WORKOUTS_SENT)));
         this.setUserPreferences(new UserPreferences(
             (Map<String, Object>) json.get(USER_PREFERENCES)));
-        this.setUserWorkouts((Map<String, Object>) json.get(WORKOUTS));
-        this.setUserExercises((Map<String, Object>) json.get(EXERCISES));
+        this.putNewWorkoutMeta((Map<String, Object>) json.get(WORKOUTS));
+        this.setOwnedExercises((Map<String, Object>) json.get(EXERCISES));
         this.setFriends((Map<String, Object>) json.get(FRIENDS));
         this.setFriendRequests((Map<String, Object>) json.get(FRIEND_REQUESTS));
         this.setReceivedWorkouts((Map<String, Object>) json.get(RECEIVED_WORKOUTS));
@@ -77,15 +79,15 @@ public class User implements Model {
     }
 
     // Setters
-    public void setUserExercises(Map<String, Object> json) {
+    public void setOwnedExercises(Map<String, Object> json) {
         if (json == null) {
-            this.userExercises = null;
+            this.ownedExercises = null;
         } else {
-            this.userExercises = new HashMap<>();
+            this.ownedExercises = new HashMap<>();
             for (String exerciseId : json.keySet()) {
-                this.userExercises
+                this.ownedExercises
                     .putIfAbsent(exerciseId,
-                        new ExerciseUser((Map<String, Object>) json.get(exerciseId)));
+                        new OwnedExercise((Map<String, Object>) json.get(exerciseId)));
             }
         }
     }
@@ -125,24 +127,29 @@ public class User implements Model {
         }
     }
 
+    public void putNewWorkoutMeta(String workoutId, WorkoutMeta workoutMeta) {
+        this.userWorkouts.putIfAbsent(workoutId, workoutMeta);
+    }
+
     public void setReceivedWorkouts(Map<String, Object> json) {
         if (json == null) {
             this.receivedWorkouts = null;
         } else {
             this.receivedWorkouts = new HashMap<>();
             for (String workoutId : json.keySet()) {
-                this.receivedWorkouts.putIfAbsent(workoutId, (String) json.get(workoutId));
+                this.receivedWorkouts.putIfAbsent(workoutId, new ReceivedWorkoutMeta(
+                    (Map<String, Object>) json.get(workoutId), workoutId));
             }
         }
     }
 
-    public void setUserWorkouts(Map<String, Object> json) {
+    public void putNewWorkoutMeta(Map<String, Object> json) {
         if (json == null) {
             this.userWorkouts = null;
         } else {
             this.userWorkouts = new HashMap<>();
             for (String workoutId : json.keySet()) {
-                this.userWorkouts.putIfAbsent(workoutId, new WorkoutUser(
+                this.userWorkouts.putIfAbsent(workoutId, new WorkoutMeta(
                     (Map<String, Object>) json.get(workoutId)));
             }
         }
@@ -173,9 +180,9 @@ public class User implements Model {
         retVal.putIfAbsent(WORKOUTS, this.getUserWorkoutsMap());
         retVal.putIfAbsent(EXERCISES, this.getUserExercisesMap());
         retVal.putIfAbsent(FRIENDS, this.getFriendsMap());
+        retVal.putIfAbsent(RECEIVED_WORKOUTS, this.getReceivedWorkoutMetaMap());
         retVal.putIfAbsent(USER_PREFERENCES, this.userPreferences.asMap());
         retVal.putIfAbsent(FRIEND_REQUESTS, this.getFriendRequestsMap());
-        retVal.putIfAbsent(RECEIVED_WORKOUTS, this.receivedWorkouts);
         return retVal;
     }
 
@@ -183,7 +190,7 @@ public class User implements Model {
     public Map<String, Object> asResponse() {
         Map<String, Object> map = this.asMap();
         map.remove(PUSH_ENDPOINT_ARN);
-        // todo remove the received workouts and only put the number unseen
+        map.remove(RECEIVED_WORKOUTS);
         return this.asMap();
     }
 
@@ -194,18 +201,30 @@ public class User implements Model {
 
         return this.userWorkouts.entrySet().stream().collect(
             collectingAndThen(
-                toMap(Entry::getKey, (Map.Entry<String, WorkoutUser> e) -> e.getValue().asMap()),
+                toMap(Entry::getKey, (Map.Entry<String, WorkoutMeta> e) -> e.getValue().asMap()),
+                HashMap::new));
+    }
+
+    public Map<String, Map<String, Object>> getReceivedWorkoutMetaMap() {
+        if (this.receivedWorkouts == null) {
+            return null;
+        }
+
+        return this.receivedWorkouts.entrySet().stream().collect(
+            collectingAndThen(
+                toMap(Entry::getKey,
+                    (Map.Entry<String, ReceivedWorkoutMeta> e) -> e.getValue().asMap()),
                 HashMap::new));
     }
 
     public Map<String, Map<String, Object>> getUserExercisesMap() {
-        if (this.userExercises == null) {
+        if (this.ownedExercises == null) {
             return null;
         }
 
-        return this.userExercises.entrySet().stream().collect(
+        return this.ownedExercises.entrySet().stream().collect(
             collectingAndThen(
-                toMap(Entry::getKey, (Map.Entry<String, ExerciseUser> e) -> e.getValue().asMap()),
+                toMap(Entry::getKey, (Map.Entry<String, OwnedExercise> e) -> e.getValue().asMap()),
                 HashMap::new));
     }
 
@@ -218,9 +237,5 @@ public class User implements Model {
             collectingAndThen(
                 toMap(Entry::getKey, (Map.Entry<String, Friend> e) -> e.getValue().asMap()),
                 HashMap::new));
-    }
-
-    public void setUserWorkouts(String workoutId, WorkoutUser workoutUser) {
-        this.userWorkouts.putIfAbsent(workoutId, workoutUser);
     }
 }

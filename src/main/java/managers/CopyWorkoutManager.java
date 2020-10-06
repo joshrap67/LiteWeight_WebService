@@ -12,7 +12,7 @@ import java.util.List;
 import javax.inject.Inject;
 import models.User;
 import models.Workout;
-import models.WorkoutUser;
+import models.WorkoutMeta;
 import responses.UserWithWorkout;
 
 public class CopyWorkoutManager {
@@ -45,7 +45,7 @@ public class CopyWorkoutManager {
                 .createNewWorkout(activeUser, newWorkoutName, oldWorkout.getRoutine());
 
             final Workout newWorkout = userWithWorkout.getWorkout();
-            final WorkoutUser workoutMetaNew = userWithWorkout.getUser().getUserWorkouts()
+            final WorkoutMeta workoutMetaNew = userWithWorkout.getUser().getUserWorkouts()
                 .get(newWorkout.getWorkoutId());
 
             // update user object with new access time of the newly selected workout

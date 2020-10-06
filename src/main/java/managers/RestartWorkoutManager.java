@@ -10,11 +10,11 @@ import helpers.UpdateItemData;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
-import models.ExerciseRoutine;
-import models.ExerciseUser;
+import models.RoutineExercise;
+import models.OwnedExercise;
 import models.User;
 import models.Workout;
-import models.WorkoutUser;
+import models.WorkoutMeta;
 import responses.UserWithWorkout;
 
 public class RestartWorkoutManager {
@@ -48,7 +48,7 @@ public class RestartWorkoutManager {
             final User user = this.userDAO.getUser(activeUser);
 
             final String workoutId = workout.getWorkoutId();
-            final WorkoutUser workoutMeta = user.getUserWorkouts().get(workoutId);
+            final WorkoutMeta workoutMeta = user.getUserWorkouts().get(workoutId);
             restartWorkout(workout, workoutMeta, user);
 
             workoutMeta.setTimesCompleted(workoutMeta.getTimesCompleted() + 1);
@@ -92,26 +92,26 @@ public class RestartWorkoutManager {
         }
     }
 
-    private void restartWorkout(final Workout workout, final WorkoutUser workoutMeta,
+    private void restartWorkout(final Workout workout, final WorkoutMeta workoutMeta,
         final User user) {
         // reset each exercise to not completed and update average accordingly
-        for (int week = 0; week < workout.getRoutine().size(); week++) {
-            for (int day = 0; day < workout.getRoutine().getWeek(week).size(); day++) {
-                for (ExerciseRoutine exerciseRoutine : workout.getRoutine()
+        for (Integer week : workout.getRoutine()) {
+            for (Integer day : workout.getRoutine().getWeek(week)) {
+                for (RoutineExercise routineExercise : workout.getRoutine()
                     .getExerciseListForDay(week, day)) {
-                    if (exerciseRoutine.isCompleted()) {
+                    if (routineExercise.isCompleted()) {
                         // update new average since this exercise was indeed completed
                         workoutMeta.setAverageExercisesCompleted(
                             increaseAverage(workoutMeta.getAverageExercisesCompleted(),
                                 workoutMeta.getTotalExercisesSum(), 1));
-                        exerciseRoutine.setCompleted(false);
+                        routineExercise.setCompleted(false);
 
                         if (user.getUserPreferences().isUpdateDefaultWeightOnRestart()) {
                             // automatically update default weight with this weight if its higher than previous
-                            String exerciseId = exerciseRoutine.getExerciseId();
-                            ExerciseUser exerciseUser = user.getUserExercises().get(exerciseId);
-                            if (exerciseRoutine.getWeight() > exerciseUser.getDefaultWeight()) {
-                                exerciseUser.setDefaultWeight(exerciseRoutine.getWeight());
+                            String exerciseId = routineExercise.getExerciseId();
+                            OwnedExercise ownedExercise = user.getOwnedExercises().get(exerciseId);
+                            if (routineExercise.getWeight() > ownedExercise.getDefaultWeight()) {
+                                ownedExercise.setDefaultWeight(routineExercise.getWeight());
                             }
                         }
                     } else {

@@ -8,7 +8,7 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
-public class ExerciseRoutine implements Model {
+public class RoutineExercise implements Model {
 
     public static final String COMPLETED = "completed";
     public static final String EXERCISE_ID = "exerciseId";
@@ -24,7 +24,7 @@ public class ExerciseRoutine implements Model {
     private Integer reps;
     private String details;
 
-    public ExerciseRoutine(Map<String, Object> json) throws InvalidAttributeException {
+    public RoutineExercise(Map<String, Object> json) throws InvalidAttributeException {
         this.completed = (boolean) json.get(COMPLETED);
         this.exerciseId = (String) json.get(EXERCISE_ID);
         this.weight = Parser.convertObjectToDouble(json.get(WEIGHT));

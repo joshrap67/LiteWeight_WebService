@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.imageio.ImageIO;
-import models.ExerciseUser;
+import models.OwnedExercise;
 
 public class FileReader {
 
@@ -42,8 +42,8 @@ public class FileReader {
                     .split(FOCUS_DELIM);
 
                 List<String> focusList = new ArrayList<>(Arrays.asList(focuses));
-                ExerciseUser exerciseUser = new ExerciseUser(name, video, focusList, true);
-                retVal.putIfAbsent(uuid, exerciseUser.asMap());
+                OwnedExercise ownedExercise = new OwnedExercise(name, video, focusList, true);
+                retVal.putIfAbsent(uuid, ownedExercise.asMap());
             }
             reader.close();
         } catch (Exception e) {

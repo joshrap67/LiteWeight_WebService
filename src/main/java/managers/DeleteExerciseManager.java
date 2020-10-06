@@ -10,7 +10,7 @@ import helpers.WorkoutHelper;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
-import models.ExerciseUser;
+import models.OwnedExercise;
 import models.User;
 import models.Workout;
 
@@ -41,10 +41,10 @@ public class DeleteExerciseManager {
         try {
             final User user = this.userDAO.getUser(activeUser);
 
-            final ExerciseUser exerciseUser = user.getUserExercises().get(exerciseId);
-            List<String> workoutsToUpdate = new ArrayList<>(exerciseUser.getWorkouts().keySet());
+            final OwnedExercise ownedExercise = user.getOwnedExercises().get(exerciseId);
+            List<String> workoutsToUpdate = new ArrayList<>(ownedExercise.getWorkouts().keySet());
             updateWorkouts(exerciseId, workoutsToUpdate, user);
-            user.getUserExercises().remove(exerciseId);
+            user.getOwnedExercises().remove(exerciseId);
 
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.EXERCISES + "= :exerciseMap")

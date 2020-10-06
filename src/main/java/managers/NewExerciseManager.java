@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
-import models.ExerciseUser;
+import models.OwnedExercise;
 import models.User;
 import responses.ExerciseUserResponse;
 
@@ -53,18 +53,18 @@ public class NewExerciseManager {
             }
 
             // all input is valid so go ahead and make the new exercise
-            ExerciseUser exerciseUser = new ExerciseUser(exerciseName,
-                ExerciseUser.defaultVideoValue, focusList, false);
+            OwnedExercise ownedExercise = new OwnedExercise(exerciseName,
+                OwnedExercise.defaultVideoValue, focusList, false);
             String exerciseId = UUID.randomUUID().toString();
 
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.EXERCISES + ".#exerciseId= :exerciseMap")
                 .withNameMap(new NameMap().with("#exerciseId", exerciseId))
-                .withValueMap(new ValueMap().withMap(":exerciseMap", exerciseUser.asMap()));
+                .withValueMap(new ValueMap().withMap(":exerciseMap", ownedExercise.asMap()));
             this.userDAO.updateUser(user.getUsername(), updateItemSpec);
 
             this.metrics.commonClose(true);
-            return new ExerciseUserResponse(exerciseId, exerciseUser);
+            return new ExerciseUserResponse(exerciseId, ownedExercise);
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

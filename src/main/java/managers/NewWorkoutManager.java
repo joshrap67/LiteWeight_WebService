@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import models.Routine;
 import models.User;
 import models.Workout;
-import models.WorkoutUser;
+import models.WorkoutMeta;
 import responses.UserWithWorkout;
 
 public class NewWorkoutManager {
@@ -76,14 +76,14 @@ public class NewWorkoutManager {
             newWorkout.setCurrentDay(0);
             newWorkout.setCurrentWeek(0);
 
-            final WorkoutUser workoutUser = new WorkoutUser();
-            workoutUser.setWorkoutName(workoutName.trim());
-            workoutUser.setAverageExercisesCompleted(0.0);
-            workoutUser.setDateLast(creationTime);
-            workoutUser.setTimesCompleted(0);
-            workoutUser.setTotalExercisesSum(0);
+            final WorkoutMeta workoutMeta = new WorkoutMeta();
+            workoutMeta.setWorkoutName(workoutName.trim());
+            workoutMeta.setAverageExercisesCompleted(0.0);
+            workoutMeta.setDateLast(creationTime);
+            workoutMeta.setTimesCompleted(0);
+            workoutMeta.setTotalExercisesSum(0);
             // need to set it here so frontend gets updated user item back
-            user.setUserWorkouts(workoutId, workoutUser);
+            user.putNewWorkoutMeta(workoutId, workoutMeta);
 
             // update all the exercises that are now apart of this workout
             WorkoutHelper.updateUserExercises(user, routine, workoutId, workoutName);
@@ -96,7 +96,7 @@ public class NewWorkoutManager {
                     User.EXERCISES + "= :exercisesMap")
                 .withValueMap(new ValueMap()
                     .withString(":currentWorkoutVal", workoutId)
-                    .withMap(":workoutUserMap", workoutUser.asMap())
+                    .withMap(":workoutUserMap", workoutMeta.asMap())
                     .withMap(":exercisesMap", user.getUserExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 

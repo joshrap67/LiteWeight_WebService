@@ -11,7 +11,6 @@ import java.util.List;
 import javax.inject.Inject;
 import models.User;
 import models.Workout;
-import models.WorkoutUser;
 import responses.UserWithWorkout;
 
 public class DeleteWorkoutThenFetchWorkoutManager {
@@ -49,8 +48,8 @@ public class DeleteWorkoutThenFetchWorkoutManager {
             final User user = this.userDAO.getUser(activeUser);
 
             // remove the workout everywhere in the user object
-            for (String exerciseId : user.getUserExercises().keySet()) {
-                user.getUserExercises().get(exerciseId).getWorkouts().remove(deletedWorkoutId);
+            for (String exerciseId : user.getOwnedExercises().keySet()) {
+                user.getOwnedExercises().get(exerciseId).getWorkouts().remove(deletedWorkoutId);
             }
             user.getUserWorkouts().remove(deletedWorkoutId);
 

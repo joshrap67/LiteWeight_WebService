@@ -9,7 +9,7 @@ import exceptions.UserNotFoundException;
 import helpers.Metrics;
 import javax.inject.Inject;
 import models.User;
-import models.WorkoutUser;
+import models.WorkoutMeta;
 
 public class ResetWorkoutStatisticsManager {
 
@@ -40,14 +40,14 @@ public class ResetWorkoutStatisticsManager {
         try {
             final User user = this.userDAO.getUser(activeUser);
 
-            final WorkoutUser workoutUser = user.getUserWorkouts().get(workoutId);
-            workoutUser.setAverageExercisesCompleted(0.0);
-            workoutUser.setTimesCompleted(0);
-            workoutUser.setTotalExercisesSum(0);
+            final WorkoutMeta workoutMeta = user.getUserWorkouts().get(workoutId);
+            workoutMeta.setAverageExercisesCompleted(0.0);
+            workoutMeta.setTimesCompleted(0);
+            workoutMeta.setTotalExercisesSum(0);
 
             final UpdateItemSpec updateUserItemData = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.WORKOUTS + ".#workoutId= :workoutsMap")
-                .withValueMap(new ValueMap().withMap(":workoutsMap", workoutUser.asMap()))
+                .withValueMap(new ValueMap().withMap(":workoutsMap", workoutMeta.asMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
             this.userDAO.updateUser(activeUser, updateUserItemData);
 

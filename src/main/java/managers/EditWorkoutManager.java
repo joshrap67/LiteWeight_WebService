@@ -67,6 +67,8 @@ public class EditWorkoutManager {
             editedWorkout.setMostFrequentFocus(
                 WorkoutHelper.findMostFrequentFocus(user, editedWorkout.getRoutine()));
 
+            // todo confirm the active user owns this just for security reasons?
+
             // Need to determine if the current week/day is valid (frontend's responsibility is updating them)
             confirmValidCurrentDayAndWeek(editedWorkout);
             final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
@@ -106,13 +108,13 @@ public class EditWorkoutManager {
         // make sure that the current week according to the frontend is actually valid
         int currentDay = editedWorkout.getCurrentDay();
         int currentWeek = editedWorkout.getCurrentWeek();
-        if (currentWeek >= 0 && currentWeek >= editedWorkout.getRoutine().size()) {
+        if (currentWeek >= 0 && currentWeek >= editedWorkout.getRoutine().getNumberOfWeeks()) {
             // frontend incorrectly set the current week, so just set it to 0
             editedWorkout.setCurrentWeek(0);
         }
 
         if (currentDay >= 0 && currentDay >= editedWorkout.getRoutine().getWeek(currentWeek)
-            .size()) {
+            .getNumberOfDays()) {
             // frontend incorrectly set the current day, so just set it to 0
             editedWorkout.setCurrentDay(0);
         }

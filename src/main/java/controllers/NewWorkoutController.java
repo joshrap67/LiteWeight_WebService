@@ -46,7 +46,7 @@ public class NewWorkoutController implements ApiRequestController {
                 final UserWithWorkout userWithWorkout = this.newWorkoutManager
                     .createNewWorkout(activeUser, workoutName, routine);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(userWithWorkout.asMap()));
+                    .successful(JsonHelper.serializeMap(userWithWorkout.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadEntity(meu.getMessage());

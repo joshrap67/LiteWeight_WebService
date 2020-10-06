@@ -66,15 +66,15 @@ public class SendFriendRequestManager {
             final UpdateItemData updateFriendData = new UpdateItemData(
                 usernameToAdd, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression(
-                    "set " + User.FRIEND_REQUESTS + ".#username= :" + User.FRIEND_REQUESTS)
+                    "set " + User.FRIEND_REQUESTS + ".#username= :requestsVal")
                 .withValueMap(
-                    new ValueMap().withMap(":" + User.FRIEND_REQUESTS, friendRequest.asMap()))
+                    new ValueMap().withMap(":requestsVal", friendRequest.asMap()))
                 .withNameMap(new NameMap().with("#username", activeUser));
             // friend to add needs to have the friend request added to its friend request list
             final UpdateItemData updateActiveUserData = new UpdateItemData(
                 activeUser, UserDAO.USERS_TABLE_NAME)
-                .withUpdateExpression("set " + User.FRIENDS + ".#username= :" + User.FRIENDS)
-                .withValueMap(new ValueMap().withMap(":" + User.FRIENDS, friendToAdd.asMap()))
+                .withUpdateExpression("set " + User.FRIENDS + ".#username= :friendsVal")
+                .withValueMap(new ValueMap().withMap(":friendsVal", friendToAdd.asMap()))
                 .withNameMap(new NameMap().with("#username", usernameToAdd));
 
             // want a transaction since more than one object is being updated at once

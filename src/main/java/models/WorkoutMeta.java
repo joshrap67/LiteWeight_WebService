@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class WorkoutUser implements Model {
+public class WorkoutMeta implements Model {
 
     public static final String WORKOUT_NAME = "workoutName";
     public static final String DATE_LAST = "dateLast";
@@ -24,7 +24,7 @@ public class WorkoutUser implements Model {
     private Double averageExercisesCompleted;
     private Integer totalExercisesSum;
 
-    public WorkoutUser(Map<String, Object> json) {
+    public WorkoutMeta(Map<String, Object> json) {
         this.workoutName = (String) json.get(WORKOUT_NAME);
 
         this.dateLast = (String) json.get(DATE_LAST);

@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.Setter;
 
 @Data
-public class ExerciseUser implements Model {
+public class OwnedExercise implements Model {
 
     public static final String EXERCISE_NAME = "exerciseName";
     public static final String FOCUSES = "focuses";
@@ -39,7 +39,7 @@ public class ExerciseUser implements Model {
     private Map<String, String> workouts; // id to workout name that this exercise is apart of
 
 
-    public ExerciseUser(Map<String, Object> json) {
+    public OwnedExercise(Map<String, Object> json) {
         this.exerciseName = (String) json.get(EXERCISE_NAME);
         this.defaultExercise = (boolean) json.get(DEFAULT_EXERCISE);
         this.defaultWeight = Parser.convertObjectToDouble(json.get(DEFAULT_WEIGHT));
@@ -51,7 +51,7 @@ public class ExerciseUser implements Model {
         this.focuses = (List<String>) json.get(FOCUSES);
     }
 
-    public ExerciseUser(String exerciseName, String videUrl, List<String> focuses,
+    public OwnedExercise(String exerciseName, String videUrl, List<String> focuses,
         boolean isDefault) {
         // constructor that is called when user is created for the first time with default exercises or when making new exercise
         this.exerciseName = exerciseName;

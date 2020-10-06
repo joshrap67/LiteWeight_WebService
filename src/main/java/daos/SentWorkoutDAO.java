@@ -23,17 +23,17 @@ import java.util.Optional;
 import javax.inject.Inject;
 import models.Workout;
 
-public class WorkoutDAO {
+public class SentWorkoutDAO {
 
-    public static final String WORKOUT_TABLE_NAME = "workouts";
+    public static final String SENT_WORKOUT_TABLE_NAME = "sentWorkouts";
 
-    public static final String WORKOUT_TABLE_PRIMARY_KEY = Workout.WORKOUT_ID;
+    public static final String SENT_WORKOUT_TABLE_PRIMARY_KEY = Workout.WORKOUT_ID;
 
-    protected final Table workoutTable;
+    protected final Table sentWorkoutTable;
     private final Database database;
 
     @Inject
-    public WorkoutDAO(final Database database) {
+    public SentWorkoutDAO(final Database database) {
         AmazonDynamoDBClient client = (AmazonDynamoDBClient) AmazonDynamoDBClient.builder()
             .withRegion(Config.REGION)
             .withCredentials(new EnvironmentVariableCredentialsProvider())
@@ -41,16 +41,16 @@ public class WorkoutDAO {
         final DynamoDB dynamoDb = new DynamoDB(client);
 
         this.database = database;
-        this.workoutTable = dynamoDb.getTable(WORKOUT_TABLE_NAME);
+        this.sentWorkoutTable = dynamoDb.getTable(SENT_WORKOUT_TABLE_NAME);
     }
 
     public PutItemOutcome putWorkout(final Item workout) {
-        return this.workoutTable.putItem(workout);
+        return this.sentWorkoutTable.putItem(workout);
     }
 
     public Item getWorkoutItem(String currentWorkoutId) {
-        return this.workoutTable
-            .getItem(new PrimaryKey(WORKOUT_TABLE_PRIMARY_KEY, currentWorkoutId));
+        return this.sentWorkoutTable
+            .getItem(new PrimaryKey(SENT_WORKOUT_TABLE_PRIMARY_KEY, currentWorkoutId));
     }
 
     public Workout getWorkout(String currentWorkoutId)
@@ -64,8 +64,8 @@ public class WorkoutDAO {
 
     public UpdateItemOutcome updateWorkout(final String workoutId,
         final UpdateItemSpec updateItemSpec) {
-        updateItemSpec.withPrimaryKey(WORKOUT_TABLE_PRIMARY_KEY, workoutId);
-        return this.workoutTable.updateItem(updateItemSpec);
+        updateItemSpec.withPrimaryKey(SENT_WORKOUT_TABLE_PRIMARY_KEY, workoutId);
+        return this.sentWorkoutTable.updateItem(updateItemSpec);
     }
 
     //transactions
@@ -79,15 +79,15 @@ public class WorkoutDAO {
     }
 
     //for cold start mitigation
-    public List<TableDescription> describeWorkoutTable() {
+    public List<TableDescription> describeSentWorkoutTable() {
         final ArrayList<TableDescription> descriptions = new ArrayList<>();
-        descriptions.add(this.workoutTable.describe());
+        descriptions.add(this.sentWorkoutTable.describe());
         return descriptions;
     }
 
     public static String getKeyIndex(final String tableName) throws Exception {
-        if (tableName.equals(WORKOUT_TABLE_NAME)) {
-            return WORKOUT_TABLE_PRIMARY_KEY;
+        if (tableName.equals(SENT_WORKOUT_TABLE_NAME)) {
+            return SENT_WORKOUT_TABLE_PRIMARY_KEY;
         } else {
             throw new Exception("Invalid table name: " + tableName);
         }

@@ -2,7 +2,7 @@ package helpers;
 
 import java.util.ArrayList;
 import java.util.List;
-import models.ExerciseUser;
+import models.OwnedExercise;
 import models.Routine;
 import models.User;
 
@@ -30,12 +30,12 @@ public class Validator {
             error.append(String.format("%s\n", workoutNameError));
         }
 
-        if (routine.size() > Globals.MAX_WEEKS_ROUTINE) {
+        if (routine.getNumberOfWeeks() > Globals.MAX_WEEKS_ROUTINE) {
             error.append("Workout exceeds maximum amount of weeks allowed.");
         }
 
-        for (int week = 0; week < routine.size(); week++) {
-            int dayCount = routine.getWeek(week).size();
+        for (Integer week : routine) {
+            int dayCount = routine.getWeek(week).getNumberOfDays();
             if (dayCount > Globals.MAX_DAYS_ROUTINE) {
                 error.append("Week: ").append(week)
                     .append(" exceeds maximum amount of days in a week.");
@@ -47,18 +47,18 @@ public class Validator {
 
     public static String validEditWorkoutInput(Routine routine) {
         StringBuilder error = new StringBuilder();
-        if (routine.size() > Globals.MAX_WEEKS_ROUTINE) {
+        if (routine.getNumberOfWeeks() > Globals.MAX_WEEKS_ROUTINE) {
             error.append("Workout exceeds maximum amount of weeks allowed.");
         }
 
         boolean emptyDays = false;
-        for (int week = 0; week < routine.size(); week++) {
-            int dayCount = routine.getWeek(week).size();
+        for (Integer week : routine) {
+            int dayCount = routine.getWeek(week).getNumberOfDays();
             if (dayCount > Globals.MAX_DAYS_ROUTINE) {
                 error.append("Week: ").append(week)
                     .append(" exceeds maximum amount of days in a week.");
             }
-            for (int day = 0; day < routine.getWeek(week).size(); day++) {
+            for (Integer day : routine.getWeek(week)) {
                 if (routine.getExerciseListForDay(week, day).isEmpty()) {
                     emptyDays = true;
                 }
@@ -87,32 +87,32 @@ public class Validator {
         return error;
     }
 
-    public static String validExerciseUser(final ExerciseUser exerciseUser,
+    public static String validExerciseUser(final OwnedExercise ownedExercise,
         List<String> exerciseNames, String oldExerciseName) {
         StringBuilder error = new StringBuilder();
-        if (exerciseUser.getDefaultWeight() > MAX_WEIGHT) {
+        if (ownedExercise.getDefaultWeight() > MAX_WEIGHT) {
             error.append("Weight exceeds max allowed.");
         }
-        if (exerciseUser.getDefaultSets() > MAX_SETS) {
+        if (ownedExercise.getDefaultSets() > MAX_SETS) {
             error.append("Sets exceeds max allowed.");
         }
-        if (exerciseUser.getDefaultReps() > MAX_REPS) {
+        if (ownedExercise.getDefaultReps() > MAX_REPS) {
             error.append("Sets exceeds max allowed.");
         }
-        if (exerciseUser.getDefaultDetails().length() > MAX_DETAILS_LENGTH) {
+        if (ownedExercise.getDefaultDetails().length() > MAX_DETAILS_LENGTH) {
             error.append("Details length exceeds max allowed.");
         }
-        if (exerciseUser.getVideoUrl().length() > MAX_URL_LENGTH) {
+        if (ownedExercise.getVideoUrl().length() > MAX_URL_LENGTH) {
             error.append("URL length exceeds max allowed.");
         }
-        if (!exerciseUser.isDefaultExercise() &&
-            !exerciseUser.getExerciseName().equals(oldExerciseName) &&
-            exerciseNames.contains(exerciseUser.getExerciseName())) {
+        if (!ownedExercise.isDefaultExercise() &&
+            !ownedExercise.getExerciseName().equals(oldExerciseName) &&
+            exerciseNames.contains(ownedExercise.getExerciseName())) {
             // make sure to compare old name since user might not have changed name and otherwise would always get error saying exercise already exists
             error.append("Exercise name already exists.");
         }
-        if (!exerciseUser.isDefaultExercise()
-            && exerciseUser.getExerciseName().length() > MAX_EXERCISE_NAME) {
+        if (!ownedExercise.isDefaultExercise()
+            && ownedExercise.getExerciseName().length() > MAX_EXERCISE_NAME) {
             error.append("Exercise name too long.");
         }
 
@@ -124,11 +124,11 @@ public class Validator {
         StringBuilder error = new StringBuilder();
         List<String> exerciseNames = new ArrayList<>();
         int customCount = 0;
-        for (String _exerciseId : activeUser.getUserExercises().keySet()) {
-            if (!activeUser.getUserExercises().get(_exerciseId).isDefaultExercise()) {
+        for (String _exerciseId : activeUser.getOwnedExercises().keySet()) {
+            if (!activeUser.getOwnedExercises().get(_exerciseId).isDefaultExercise()) {
                 customCount++;
             }
-            exerciseNames.add(activeUser.getUserExercises().get(_exerciseId).getExerciseName());
+            exerciseNames.add(activeUser.getOwnedExercises().get(_exerciseId).getExerciseName());
         }
         if (focusList.isEmpty()) {
             error.append("Must have at least one focus.\n");

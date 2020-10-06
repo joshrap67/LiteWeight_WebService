@@ -8,7 +8,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import helpers.Metrics;
 import models.User;
-import responses.UserResponse;
 
 public class GetUserDataManager {
 
@@ -31,7 +30,7 @@ public class GetUserDataManager {
      * @return UserResponse of the user's active data (certain fields omitted for client
      * consumption)
      */
-    public UserResponse getUserData(final String username)
+    public User getUserData(final String username)
         throws UserNotFoundException, InvalidAttributeException {
         final String classMethod = this.getClass().getSimpleName() + ".getUserData";
         this.metrics.commonSetup(classMethod);
@@ -39,7 +38,7 @@ public class GetUserDataManager {
         try {
             Item user = Optional.ofNullable(this.userDAO.getUserItem(username)).orElseThrow(
                 () -> new UserNotFoundException(String.format("%s not found.", username)));
-            return new UserResponse(user);
+            return new User(user);
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;
@@ -54,22 +53,21 @@ public class GetUserDataManager {
      * @return UserResponse of the user's active data (certain fields omitted for client
      * consumption)
      */
-    public UserResponse getActiveUserData(final String activeUser) throws Exception {
+    public User getActiveUserData(final String activeUser) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".getActiveUserData";
         this.metrics.commonSetup(classMethod);
 
         try {
-            UserResponse userResponse;
-            Item user = this.userDAO.getUserItem(activeUser);
-            if (user == null) {
+            User user;
+            Item userItem = this.userDAO.getUserItem(activeUser);
+            if (userItem == null) {
                 // user has not been added yet in the DB, so create an entry for them
-                User userResult = this.newUserManager.createNewUser(activeUser);
-                userResponse = new UserResponse(userResult.asMap());
+                user = this.newUserManager.createNewUser(activeUser);
             } else {
                 // user already exists in DB so just return their data
-                userResponse = new UserResponse(user);
+                user = new User(userItem);
             }
-            return userResponse;
+            return user;
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

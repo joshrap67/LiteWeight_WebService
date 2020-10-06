@@ -42,7 +42,8 @@ public class DeleteWorkoutThenFetchController implements ApiRequestController {
                 Injector.getInjector(metrics).inject(this);
                 final UserWithWorkout result = this.deleteWorkoutThenFetchWorkoutManager
                     .deleteWorkoutThenFetch(activeUser, deletedWorkoutId, nextWorkoutId);
-                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
+                resultStatus = ResultStatus
+                    .successful(JsonHelper.serializeMap(result.asResponse()));
             } catch (UserNotFoundException | WorkoutNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
                 resultStatus = ResultStatus.failureBadEntity(exception.getMessage());

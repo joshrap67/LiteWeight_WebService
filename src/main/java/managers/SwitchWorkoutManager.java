@@ -10,7 +10,7 @@ import java.time.Instant;
 import javax.inject.Inject;
 import models.User;
 import models.Workout;
-import models.WorkoutUser;
+import models.WorkoutMeta;
 import responses.UserWithWorkout;
 
 public class SwitchWorkoutManager {
@@ -51,7 +51,7 @@ public class SwitchWorkoutManager {
 
             user.setCurrentWorkout(newWorkoutId);
             final String timeNow = Instant.now().toString();
-            final WorkoutUser workoutMetaNew = user.getUserWorkouts().get(newWorkoutId);
+            final WorkoutMeta workoutMetaNew = user.getUserWorkouts().get(newWorkoutId);
             workoutMetaNew.setDateLast(timeNow);
 
             // update user object with new access time of the newly selected workout

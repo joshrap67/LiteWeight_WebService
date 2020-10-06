@@ -1,6 +1,7 @@
 package managers;
 
 import aws.SnsAccess;
+import daos.SentWorkoutDAO;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import helpers.Config;
@@ -11,12 +12,15 @@ public class WarmingManager {
 
     private final UserDAO userDAO;
     private final WorkoutDAO workoutDAO;
+    private final SentWorkoutDAO sentWorkoutDAO;
     private final SnsAccess snsAccess;
     private final Metrics metrics;
 
     @Inject
-    public WarmingManager(final UserDAO userDAO, final WorkoutDAO workoutDAO, final Metrics metrics,
+    public WarmingManager(final UserDAO userDAO, final WorkoutDAO workoutDAO,
+        final SentWorkoutDAO sentWorkoutDAO, final Metrics metrics,
         final SnsAccess snsAccess) {
+        this.sentWorkoutDAO = sentWorkoutDAO;
         this.userDAO = userDAO;
         this.workoutDAO = workoutDAO;
         this.metrics = metrics;
@@ -34,6 +38,7 @@ public class WarmingManager {
 
         try {
             this.userDAO.describeUserTable();
+            this.sentWorkoutDAO.describeSentWorkoutTable();
             this.workoutDAO.describeWorkoutTable();
             this.snsAccess.getPlatformAttributes(Config.PUSH_SNS_PLATFORM_ARN_DEV);
 
