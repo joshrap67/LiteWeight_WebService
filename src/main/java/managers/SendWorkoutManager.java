@@ -99,7 +99,8 @@ public class SendWorkoutManager {
             receivedWorkoutMeta.setWorkoutName(originalWorkout.getWorkoutName());
             receivedWorkoutMeta.setTotalDays(originalWorkout.getRoutine().getTotalNumberOfDays());
 
-            final SentWorkout workoutToSend = new SentWorkout(originalWorkout, activeUserObject);
+            final SentWorkout workoutToSend = new SentWorkout(originalWorkout, activeUserObject,
+                sentWorkoutId);
             final Map<String, AttributeValue> workoutToSendItemValues = workoutToSend
                 .asItemAttributes();
 

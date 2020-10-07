@@ -48,7 +48,7 @@ public class SendWorkoutController implements ApiRequestController {
                 resultStatus = ResultStatus
                     .successful(JsonHelper.serializeMap(Maps.newHashMap(
                         ImmutableMap.<String, String>builder()
-                            .put(SentWorkout.WORKOUT_ID, sentWorkoutId)
+                            .put(SentWorkout.SENT_WORKOUT_ID, sentWorkoutId)
                             .build())));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

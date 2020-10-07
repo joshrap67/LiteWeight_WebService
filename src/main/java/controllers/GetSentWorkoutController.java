@@ -32,14 +32,14 @@ public class GetSentWorkoutController implements ApiRequestController {
 
         ResultStatus<String> resultStatus;
         final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, SentWorkout.WORKOUT_ID);
+            .asList(RequestFields.ACTIVE_USER, SentWorkout.SENT_WORKOUT_ID);
 
         if (jsonMap.keySet().containsAll(requiredKeys)) {
             try {
                 Injector.getInjector(metrics).inject(this);
 
                 final String username = (String) jsonMap.get(User.USERNAME);
-                final String workoutId = (String) jsonMap.get(SentWorkout.WORKOUT_ID);
+                final String workoutId = (String) jsonMap.get(SentWorkout.SENT_WORKOUT_ID);
                 final SentWorkout sentWorkout = this.getSentWorkoutManager
                     .getSentWorkout(username, workoutId);
 

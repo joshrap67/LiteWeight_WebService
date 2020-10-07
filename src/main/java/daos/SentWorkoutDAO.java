@@ -22,13 +22,12 @@ import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
 import models.SentWorkout;
-import models.Workout;
 
 public class SentWorkoutDAO {
 
     public static final String SENT_WORKOUT_TABLE_NAME = "sentWorkouts";
 
-    public static final String SENT_WORKOUT_TABLE_PRIMARY_KEY = Workout.WORKOUT_ID;
+    public static final String SENT_WORKOUT_TABLE_PRIMARY_KEY = SentWorkout.SENT_WORKOUT_ID;
 
     protected final Table sentWorkoutTable;
     private final Database database;

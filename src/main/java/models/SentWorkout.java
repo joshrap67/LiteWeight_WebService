@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SentWorkout implements Model {
 
-    public static final String WORKOUT_ID = "workoutId";
+    public static final String SENT_WORKOUT_ID = "sentWorkoutId";
     public static final String WORKOUT_NAME = "workoutName";
     public static final String CREATOR = "creator";
     public static final String ROUTINE = "routine";
 
-    private String workoutId;
+    private String sentWorkoutId;
     private String workoutName;
     private String creator;
     private SentRoutine routine;
@@ -30,14 +30,14 @@ public class SentWorkout implements Model {
     }
 
     public SentWorkout(Map<String, Object> json) throws InvalidAttributeException {
-        this.workoutId = (String) json.get(WORKOUT_ID);
+        this.sentWorkoutId = (String) json.get(SENT_WORKOUT_ID);
         this.workoutName = (String) json.get(WORKOUT_NAME);
         this.creator = (String) json.get(CREATOR);
         this.routine = new SentRoutine((Map<String, Object>) json.get(ROUTINE));
     }
 
-    public SentWorkout(final Workout workout, final User user) {
-        this.workoutId = workout.getWorkoutId();
+    public SentWorkout(final Workout workout, final User user, final String sentWorkoutId) {
+        this.sentWorkoutId = sentWorkoutId;
         this.workoutName = workout.getWorkoutName();
         this.creator = workout.getCreator();
         this.routine = convertWorkoutRoutineToSentRoutine(workout.getRoutine(), user);
@@ -67,7 +67,7 @@ public class SentWorkout implements Model {
     public Map<String, AttributeValue> asItemAttributes() {
         final Map<String, AttributeValue> workoutToSendItemValues = new HashMap<>();
         workoutToSendItemValues.putIfAbsent(WORKOUT_NAME, new AttributeValue(this.workoutName));
-        workoutToSendItemValues.putIfAbsent(WORKOUT_ID, new AttributeValue(this.workoutId));
+        workoutToSendItemValues.putIfAbsent(SENT_WORKOUT_ID, new AttributeValue(this.sentWorkoutId));
         workoutToSendItemValues.putIfAbsent(CREATOR, new AttributeValue(this.creator));
         workoutToSendItemValues.putIfAbsent(ROUTINE, new AttributeValue()
             .withM(AttributeValueHelper.convertMapToAttributeValueMap(this.routine.asMap())));
@@ -78,7 +78,7 @@ public class SentWorkout implements Model {
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();
         retVal.putIfAbsent(WORKOUT_NAME, this.workoutName);
-        retVal.putIfAbsent(WORKOUT_ID, this.workoutId);
+        retVal.putIfAbsent(SENT_WORKOUT_ID, this.sentWorkoutId);
         retVal.putIfAbsent(CREATOR, this.creator);
         retVal.putIfAbsent(ROUTINE, this.routine.asMap());
         return retVal;
