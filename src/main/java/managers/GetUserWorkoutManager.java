@@ -32,10 +32,11 @@ public class GetUserWorkoutManager {
      *
      * @param activeUser username of the user that made the api request, trying to get data about
      *                   themselves.
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * @return User object and workout object that of the current workout (null if no workouts
+     * exist).
      */
     public UserWithWorkout getUserWithWorkout(final String activeUser) throws Exception {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".getUserWithWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
