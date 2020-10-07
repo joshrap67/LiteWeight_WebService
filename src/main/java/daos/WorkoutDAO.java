@@ -48,17 +48,17 @@ public class WorkoutDAO {
         return this.workoutTable.putItem(workout);
     }
 
-    public Item getWorkoutItem(String currentWorkoutId) {
+    public Item getWorkoutItem(String workoutId) {
         return this.workoutTable
-            .getItem(new PrimaryKey(WORKOUT_TABLE_PRIMARY_KEY, currentWorkoutId));
+            .getItem(new PrimaryKey(WORKOUT_TABLE_PRIMARY_KEY, workoutId));
     }
 
-    public Workout getWorkout(String currentWorkoutId)
+    public Workout getWorkout(String workoutId)
         throws NullPointerException, InvalidAttributeException, WorkoutNotFoundException {
-        final Item workoutItem = Optional.ofNullable(this.getWorkoutItem(currentWorkoutId))
+        final Item workoutItem = Optional.ofNullable(this.getWorkoutItem(workoutId))
             .orElseThrow(
                 () -> new WorkoutNotFoundException(
-                    String.format("Workout with ID: %s not found", currentWorkoutId)));
+                    String.format("Workout with ID: %s not found", workoutId)));
         return new Workout(workoutItem);
     }
 

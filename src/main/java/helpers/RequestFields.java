@@ -13,4 +13,5 @@ public class RequestFields {
     public static final String NEXT_WORKOUT_ID = "nextWorkoutId";
     public static final String BATCH_NUMBER = "batchNumber";
     public static final String RECEIVED_WORKOUTS = "receivedWorkouts";
+    public static final String SENT_WORKOUT = "sentWorkout";
 }

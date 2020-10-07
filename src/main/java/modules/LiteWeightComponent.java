@@ -9,6 +9,7 @@ import controllers.DeleteExerciseController;
 import controllers.DeleteWorkoutThenFetchController;
 import controllers.EditWorkoutController;
 import controllers.GetReceivedWorkoutsController;
+import controllers.GetSentWorkoutController;
 import controllers.GetUserDataController;
 import controllers.GetUserWorkoutController;
 import controllers.NewExerciseController;
@@ -96,4 +97,6 @@ public interface LiteWeightComponent {
     void inject(SendWorkoutController sendWorkoutController);
 
     void inject(GetReceivedWorkoutsController getReceivedWorkoutsController);
+
+    void inject(GetSentWorkoutController getSentWorkoutController);
 }

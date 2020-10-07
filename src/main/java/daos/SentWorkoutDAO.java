@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
+import models.SentWorkout;
 import models.Workout;
 
 public class SentWorkoutDAO {
@@ -44,25 +45,25 @@ public class SentWorkoutDAO {
         this.sentWorkoutTable = dynamoDb.getTable(SENT_WORKOUT_TABLE_NAME);
     }
 
-    public PutItemOutcome putWorkout(final Item workout) {
+    public PutItemOutcome putSentWorkout(final Item workout) {
         return this.sentWorkoutTable.putItem(workout);
     }
 
-    public Item getWorkoutItem(String currentWorkoutId) {
+    public Item getSentWorkoutItem(String currentWorkoutId) {
         return this.sentWorkoutTable
             .getItem(new PrimaryKey(SENT_WORKOUT_TABLE_PRIMARY_KEY, currentWorkoutId));
     }
 
-    public Workout getWorkout(String currentWorkoutId)
+    public SentWorkout getSentWorkout(String workoutId)
         throws NullPointerException, InvalidAttributeException, WorkoutNotFoundException {
-        final Item workoutItem = Optional.ofNullable(this.getWorkoutItem(currentWorkoutId))
+        final Item workoutItem = Optional.ofNullable(this.getSentWorkoutItem(workoutId))
             .orElseThrow(
                 () -> new WorkoutNotFoundException(
-                    String.format("Workout with ID: %s not found", currentWorkoutId)));
-        return new Workout(workoutItem);
+                    String.format("Sent Workout with ID: %s not found", workoutId)));
+        return new SentWorkout(workoutItem);
     }
 
-    public UpdateItemOutcome updateWorkout(final String workoutId,
+    public UpdateItemOutcome updateSentWorkout(final String workoutId,
         final UpdateItemSpec updateItemSpec) {
         updateItemSpec.withPrimaryKey(SENT_WORKOUT_TABLE_PRIMARY_KEY, workoutId);
         return this.sentWorkoutTable.updateItem(updateItemSpec);
