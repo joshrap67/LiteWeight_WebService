@@ -49,7 +49,7 @@ public class NewUserManager {
             userPreferences.setUpdateDefaultWeightOnRestart(true);
             userPreferences.setUpdateDefaultWeightOnSave(true);
 
-            Item user = new Item()
+            final Item user = new Item()
                 .withString(User.USERNAME, username)
                 .withNull(User.PREMIUM_TOKEN)
                 .withString(User.ICON, fileName)
@@ -62,6 +62,7 @@ public class NewUserManager {
                 .withMap(User.BLOCKED, new HashMap<>())
                 .withMap(User.FRIEND_REQUESTS, new HashMap<>())
                 .withMap(User.RECEIVED_WORKOUTS, new HashMap<>())
+                .withNumber(User.UNSEEN_RECEIVED_WORKOUTS, 0)
                 .withMap(User.EXERCISES, FileReader.getDefaultExercises());
             PutItemOutcome outcome = this.userDAO.putUser(user);
 

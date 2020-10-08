@@ -32,6 +32,7 @@ public class User implements Model {
     public static final String USER_PREFERENCES = "preferences";
     public static final String BLOCKED = "blocked";
     public static final String NEW_WORKOUTS = "newWorkouts";
+    public static final String UNSEEN_RECEIVED_WORKOUTS = "unseenReceivedWorkouts";
 
     private String username;
     private String icon;
@@ -40,6 +41,7 @@ public class User implements Model {
     private String currentWorkout;
     private Integer workoutsSent;
     private Integer newWorkouts;
+    private Integer unseenReceivedWorkouts;
     private UserPreferences userPreferences;
 
     @Setter(AccessLevel.NONE)
@@ -76,6 +78,8 @@ public class User implements Model {
         this.setFriendRequests((Map<String, Object>) json.get(FRIEND_REQUESTS));
         this.setReceivedWorkouts((Map<String, Object>) json.get(RECEIVED_WORKOUTS));
         this.setBlocked((Map<String, Object>) json.get(BLOCKED));
+        this.setUnseenReceivedWorkouts(
+            Parser.convertObjectToInteger(json.get(UNSEEN_RECEIVED_WORKOUTS)));
     }
 
     // Setters
@@ -183,6 +187,7 @@ public class User implements Model {
         retVal.putIfAbsent(RECEIVED_WORKOUTS, this.getReceivedWorkoutMetaMap());
         retVal.putIfAbsent(USER_PREFERENCES, this.userPreferences.asMap());
         retVal.putIfAbsent(FRIEND_REQUESTS, this.getFriendRequestsMap());
+        retVal.putIfAbsent(UNSEEN_RECEIVED_WORKOUTS, this.unseenReceivedWorkouts);
         return retVal;
     }
 

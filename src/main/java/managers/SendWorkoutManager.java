@@ -75,6 +75,7 @@ public class SendWorkoutManager {
 
             final Workout originalWorkout = this.workoutDAO.getWorkout(workoutId);
             String sentWorkoutId = null;
+            int unseenCount = recipientUser.getUnseenReceivedWorkouts();
 
             for (String workoutIdMeta : recipientUser.getReceivedWorkouts().keySet()) {
                 final ReceivedWorkoutMeta meta = recipientUser.getReceivedWorkouts()
@@ -83,12 +84,18 @@ public class SendWorkoutManager {
                     .getSender().equals(activeUser)) {
                     // sender has already sent a workout with this name
                     sentWorkoutId = meta.getWorkoutId();
+                    // workout with this name has already been sent, so we don't want a new notification if it is already unseen
+                    if (meta.isSeen()) {
+                        // workout with this name has already been sent and seen, make it unseen since workout updated
+                        unseenCount++;
+                    }
                     break;
                 }
             }
             if (sentWorkoutId == null) {
                 // this is the first time this workout has been sent by the active user with this workout name, so we need an id
                 sentWorkoutId = UUID.randomUUID().toString();
+                unseenCount++;
             }
 
             final ReceivedWorkoutMeta receivedWorkoutMeta = new ReceivedWorkoutMeta();
@@ -105,19 +112,19 @@ public class SendWorkoutManager {
                 .asItemAttributes();
 
             // if meta is already there with this workout name, we just overwrite it for recipient
-            // todo update their unseen count for received workouts
             final UpdateItemData recipientItemData = new UpdateItemData(
                 recipientUsername, UserDAO.USERS_TABLE_NAME)
-                .withUpdateExpression(
-                    "set " + User.RECEIVED_WORKOUTS + ".#workoutId= :workoutMetaVal")
-                .withValueMap(
-                    new ValueMap().withMap(":workoutMetaVal", receivedWorkoutMeta.asMap()))
+                .withUpdateExpression("set "
+                    + User.RECEIVED_WORKOUTS + ".#workoutId= :workoutMetaVal, "
+                    + User.UNSEEN_RECEIVED_WORKOUTS + "= :unseenVal")
+                .withValueMap(new ValueMap()
+                    .withMap(":workoutMetaVal", receivedWorkoutMeta.asMap())
+                    .withNumber(":unseenVal", unseenCount))
                 .withNameMap(new NameMap().with("#workoutId", sentWorkoutId));
             // need to update the number of sent workouts for the active user
             final UpdateItemData activeUserItemData = new UpdateItemData(
                 activeUser, UserDAO.USERS_TABLE_NAME)
-                .withUpdateExpression(
-                    "set " + User.WORKOUTS_SENT + "= :sentVal")
+                .withUpdateExpression("set " + User.WORKOUTS_SENT + "= :sentVal")
                 .withValueMap(
                     new ValueMap().withNumber(":sentVal", activeUserObject.getWorkoutsSent() + 1));
 
