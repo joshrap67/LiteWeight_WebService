@@ -11,14 +11,13 @@ import helpers.RequestFields;
 import helpers.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.GetReceivedWorkoutsManager;
 import models.ReceivedWorkoutMeta;
-import models.User;
 import modules.Injector;
-import responses.ReceivedWorkouts;
 
 public class GetReceivedWorkoutsController implements ApiRequestController {
 
@@ -38,15 +37,18 @@ public class GetReceivedWorkoutsController implements ApiRequestController {
             try {
                 Injector.getInjector(metrics).inject(this);
 
-                final String username = (String) jsonMap.get(User.USERNAME);
+                final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
                 final Integer batchNumber = Parser
                     .convertObjectToInteger(jsonMap.get(RequestFields.BATCH_NUMBER));
                 final Map<String, ReceivedWorkoutMeta> receivedWorkouts = this.getReceivedWorkoutsManager
-                    .getReceivedWorkouts(username, batchNumber);
+                    .getReceivedWorkouts(activeUser, batchNumber);
 
-                resultStatus = ResultStatus
-                    .successful(JsonHelper
-                        .serializeMap(new ReceivedWorkouts(receivedWorkouts).asResponse()));
+                Map<String, Object> retMap = new HashMap<>();
+                for (String workoutId : receivedWorkouts.keySet()) {
+                    retMap.putIfAbsent(workoutId, receivedWorkouts.get(workoutId).asResponse());
+                }
+
+                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(retMap));
             } catch (final MissingApiRequestKeyException e) {
                 throw e;
             } catch (UserNotFoundException | WorkoutNotFoundException exception) {

@@ -44,10 +44,7 @@ public class GetSentWorkoutController implements ApiRequestController {
                     .getSentWorkout(username, workoutId);
 
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(Maps.newHashMap(
-                        ImmutableMap.<String, Object>builder()
-                            .put(RequestFields.SENT_WORKOUT, sentWorkout.asResponse())
-                            .build())));
+                    .successful(JsonHelper.serializeMap(Maps.newHashMap(sentWorkout.asResponse())));
             } catch (final MissingApiRequestKeyException e) {
                 throw e;
             } catch (UserNotFoundException | WorkoutNotFoundException exception) {

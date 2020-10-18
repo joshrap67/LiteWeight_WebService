@@ -100,6 +100,7 @@ public class SendWorkoutManager {
 
             final ReceivedWorkoutMeta receivedWorkoutMeta = new ReceivedWorkoutMeta();
             receivedWorkoutMeta.setDateSent(Instant.now().toString());
+            receivedWorkoutMeta.setWorkoutId(sentWorkoutId);
             receivedWorkoutMeta.setSeen(false);
             receivedWorkoutMeta.setSender(activeUser);
             receivedWorkoutMeta.setMostFrequentFocus(originalWorkout.getMostFrequentFocus());

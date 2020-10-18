@@ -25,6 +25,7 @@ import controllers.SendFriendRequestController;
 import controllers.SendWorkoutController;
 import controllers.SetAllReceivedWorkoutsSeenController;
 import controllers.SetAllRequestsSeenController;
+import controllers.SetReceivedWorkoutSeenController;
 import controllers.SwitchWorkoutController;
 import controllers.SyncWorkoutController;
 import controllers.UnblockUserController;
@@ -102,4 +103,6 @@ public interface LiteWeightComponent {
     void inject(GetSentWorkoutController getSentWorkoutController);
 
     void inject(SetAllReceivedWorkoutsSeenController setAllReceivedWorkoutsSeenController);
+
+    void inject(SetReceivedWorkoutSeenController setReceivedWorkoutSeenController);
 }

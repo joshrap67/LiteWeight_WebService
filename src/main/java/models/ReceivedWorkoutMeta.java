@@ -17,6 +17,7 @@ public class ReceivedWorkoutMeta implements Model {
     public static final String SENDER = "sender";
     public static final String MOST_FREQUENT_FOCUS = "mostFrequentFocus";
     public static final String TOTAL_DAYS = "totalDays";
+    public static final String WORKOUT_ID = "receivedWorkoutId";
 
     private String workoutName;
     private String workoutId;
@@ -50,6 +51,8 @@ public class ReceivedWorkoutMeta implements Model {
 
     @Override
     public Map<String, Object> asResponse() {
-        return this.asMap();
+        Map<String, Object> retVal = this.asMap();
+        retVal.putIfAbsent(WORKOUT_ID, this.workoutId);
+        return retVal;
     }
 }
