@@ -42,7 +42,7 @@ public class FileReader {
                     .split(FOCUS_DELIM);
 
                 List<String> focusList = new ArrayList<>(Arrays.asList(focuses));
-                OwnedExercise ownedExercise = new OwnedExercise(name, video, focusList, true);
+                OwnedExercise ownedExercise = new OwnedExercise(name, video, focusList);
                 retVal.putIfAbsent(uuid, ownedExercise.asMap());
             }
             reader.close();

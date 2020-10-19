@@ -54,7 +54,7 @@ public class NewExerciseManager {
 
             // all input is valid so go ahead and make the new exercise
             OwnedExercise ownedExercise = new OwnedExercise(exerciseName,
-                OwnedExercise.defaultVideoValue, focusList, false);
+                OwnedExercise.defaultVideoValue, focusList);
             String exerciseId = UUID.randomUUID().toString();
 
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec()

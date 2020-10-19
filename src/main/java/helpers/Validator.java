@@ -11,7 +11,7 @@ public class Validator {
     private static final int
         MAX_WEIGHT = 99999, MAX_SETS = 99, MAX_REPS = 999, MAX_DETAILS_LENGTH = 120,
         MAX_URL_LENGTH = 200, MAX_EXERCISE_NAME = 40,
-        MAX_FREE_CUSTOM_EXERCISES = 15, MAX_PREMIUM_CUSTOM_EXERCISES = 30;
+        MAX_FREE_EXERCISES = 100, MAX_PREMIUM_EXERCISES = 200;
 
     public static String validNewWorkoutInput(final String workoutName, final User activeUser,
         final Routine routine) {
@@ -87,7 +87,7 @@ public class Validator {
         return error;
     }
 
-    public static String validExerciseUser(final OwnedExercise ownedExercise,
+    public static String validOwnedExercise(final OwnedExercise ownedExercise,
         List<String> exerciseNames, String oldExerciseName) {
         StringBuilder error = new StringBuilder();
         if (ownedExercise.getDefaultWeight() > MAX_WEIGHT) {
@@ -105,14 +105,12 @@ public class Validator {
         if (ownedExercise.getVideoUrl().length() > MAX_URL_LENGTH) {
             error.append("URL length exceeds max allowed.");
         }
-        if (!ownedExercise.isDefaultExercise() &&
-            !ownedExercise.getExerciseName().equals(oldExerciseName) &&
+        if (!ownedExercise.getExerciseName().equals(oldExerciseName) &&
             exerciseNames.contains(ownedExercise.getExerciseName())) {
             // make sure to compare old name since user might not have changed name and otherwise would always get error saying exercise already exists
             error.append("Exercise name already exists.");
         }
-        if (!ownedExercise.isDefaultExercise()
-            && ownedExercise.getExerciseName().length() > MAX_EXERCISE_NAME) {
+        if (ownedExercise.getExerciseName().length() > MAX_EXERCISE_NAME) {
             error.append("Exercise name too long.");
         }
 
@@ -123,11 +121,7 @@ public class Validator {
         List<String> focusList) {
         StringBuilder error = new StringBuilder();
         List<String> exerciseNames = new ArrayList<>();
-        int customCount = 0;
         for (String _exerciseId : activeUser.getOwnedExercises().keySet()) {
-            if (!activeUser.getOwnedExercises().get(_exerciseId).isDefaultExercise()) {
-                customCount++;
-            }
             exerciseNames.add(activeUser.getOwnedExercises().get(_exerciseId).getExerciseName());
         }
         if (focusList.isEmpty()) {
@@ -140,11 +134,12 @@ public class Validator {
             error.append("Exercise length is too long.\n");
         }
 
-        if (activeUser.getPremiumToken() == null && customCount >= MAX_FREE_CUSTOM_EXERCISES) {
-            error.append("Max free custom exercise limit reached.\n");
+        if (activeUser.getPremiumToken() == null
+            && activeUser.getOwnedExercises().size() >= MAX_FREE_EXERCISES) {
+            error.append("Max free exercise limit reached.\n");
         } else if (activeUser.getPremiumToken() != null
-            && customCount >= MAX_PREMIUM_CUSTOM_EXERCISES) {
-            error.append("Max custom exercise limit reached.\n");
+            && activeUser.getOwnedExercises().size() >= MAX_PREMIUM_EXERCISES) {
+            error.append("Max exercise limit reached.\n");
         }
 
         return error.toString().trim();

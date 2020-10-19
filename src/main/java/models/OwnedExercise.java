@@ -14,7 +14,6 @@ public class OwnedExercise implements Model {
 
     public static final String EXERCISE_NAME = "exerciseName";
     public static final String FOCUSES = "focuses";
-    public static final String DEFAULT_EXERCISE = "defaultExercise";
     public static final String DEFAULT_WEIGHT = "defaultWeight";
     public static final String DEFAULT_SETS = "defaultSets";
     public static final String DEFAULT_REPS = "defaultReps";
@@ -28,7 +27,6 @@ public class OwnedExercise implements Model {
     public static final String defaultVideoValue = "";
 
     private String exerciseName;
-    private boolean defaultExercise;
     private Double defaultWeight; // stored in lbs
     private Integer defaultSets;
     private Integer defaultReps;
@@ -41,7 +39,6 @@ public class OwnedExercise implements Model {
 
     public OwnedExercise(Map<String, Object> json) {
         this.exerciseName = (String) json.get(EXERCISE_NAME);
-        this.defaultExercise = (boolean) json.get(DEFAULT_EXERCISE);
         this.defaultWeight = Parser.convertObjectToDouble(json.get(DEFAULT_WEIGHT));
         this.defaultSets = Parser.convertObjectToInteger(json.get(DEFAULT_SETS));
         this.defaultReps = Parser.convertObjectToInteger(json.get(DEFAULT_REPS));
@@ -51,13 +48,11 @@ public class OwnedExercise implements Model {
         this.focuses = (List<String>) json.get(FOCUSES);
     }
 
-    public OwnedExercise(String exerciseName, String videUrl, List<String> focuses,
-        boolean isDefault) {
+    public OwnedExercise(String exerciseName, String videUrl, List<String> focuses) {
         // constructor that is called when user is created for the first time with default exercises or when making new exercise
         this.exerciseName = exerciseName;
         this.videoUrl = videUrl;
         this.focuses = focuses;
-        this.defaultExercise = isDefault;
         this.defaultWeight = defaultWeightValue;
         this.defaultReps = defaultRepsValue;
         this.defaultSets = defaultSetsValue;
@@ -80,7 +75,6 @@ public class OwnedExercise implements Model {
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();
         retVal.putIfAbsent(EXERCISE_NAME, this.exerciseName);
-        retVal.putIfAbsent(DEFAULT_EXERCISE, this.defaultExercise);
         retVal.putIfAbsent(DEFAULT_WEIGHT, this.defaultWeight);
         retVal.putIfAbsent(DEFAULT_REPS, this.defaultReps);
         retVal.putIfAbsent(DEFAULT_SETS, this.defaultSets);

@@ -54,7 +54,7 @@ public class UpdateExerciseManager {
             final String oldExerciseName = user.getOwnedExercises().get(exerciseId)
                 .getExerciseName();
             final String exerciseError = Validator
-                .validExerciseUser(ownedExercise, exerciseNames, oldExerciseName);
+                .validOwnedExercise(ownedExercise, exerciseNames, oldExerciseName);
             if (!exerciseError.isEmpty()) {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(exerciseError);
