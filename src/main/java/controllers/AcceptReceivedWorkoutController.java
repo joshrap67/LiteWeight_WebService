@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import managers.AcceptReceivedWorkoutManager;
 import models.SentWorkout;
+import models.Workout;
 import modules.Injector;
 import responses.AcceptWorkoutResponse;
 
@@ -37,10 +38,14 @@ public class AcceptReceivedWorkoutController implements ApiRequestController {
             try {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
                 final String workoutId = (String) json.get(SentWorkout.SENT_WORKOUT_ID);
+                String optionalName = null;
+                if (json.containsKey(Workout.WORKOUT_NAME)) {
+                    optionalName = (String) json.get(Workout.WORKOUT_NAME);
+                }
 
                 Injector.getInjector(metrics).inject(this);
                 AcceptWorkoutResponse result = this.acceptReceivedWorkoutManager
-                    .acceptReceivedWorkout(activeUser, workoutId);
+                    .acceptReceivedWorkout(activeUser, workoutId, optionalName);
                 resultStatus = ResultStatus
                     .successful(JsonHelper.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {

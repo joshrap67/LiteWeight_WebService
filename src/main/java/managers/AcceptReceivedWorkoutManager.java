@@ -56,12 +56,11 @@ public class AcceptReceivedWorkoutManager {
      * @throws Exception if there are any input errors or if either user does not exist.
      */
     public AcceptWorkoutResponse acceptReceivedWorkout(final String activeUser,
-        final String workoutIdToAccept)
+        final String workoutIdToAccept, final String optionalName)
         throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".acceptReceivedWorkout";
         this.metrics.commonSetup(classMethod);
 
-        // todo separate method for replacing workout if it already exists with this name??
         try {
             final User activeUserObject = this.userDAO.getUser(activeUser);
             final SentWorkout workoutToAccept = this.sentWorkoutDAO
@@ -69,26 +68,16 @@ public class AcceptReceivedWorkoutManager {
             final ReceivedWorkoutMeta receivedWorkoutMeta = activeUserObject.getReceivedWorkouts()
                 .get(workoutIdToAccept);
 
+            if (optionalName != null) {
+                workoutToAccept.setWorkoutName(optionalName);
+            }
+
             String errorMessage = validInput(activeUserObject, workoutToAccept);
             if (!errorMessage.isEmpty()) {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(errorMessage);
             }
 
-            // need to determine how many copies of this workout name exist for the active user
-            int workoutCount = 0;
-            for (String workoutId : activeUserObject.getUserWorkouts().keySet()) {
-                if (activeUserObject.getUserWorkouts().get(workoutId).getWorkoutName()
-                    .equals(workoutToAccept.getWorkoutName())) {
-                    workoutCount++;
-                }
-            }
-            if (workoutCount > 0) {
-                // todo find a better way...
-                // e.g. "Josh's Workout" if the user already had a workout called "Josh's Workout"
-                workoutToAccept.setWorkoutName(
-                    String.format("%s (%d)", workoutToAccept.getWorkoutName(), workoutCount));
-            }
             // add any exercises that the user does not already own
             addNewExercises(workoutToAccept, activeUserObject);
 
@@ -190,6 +179,13 @@ public class AcceptReceivedWorkoutManager {
         for (String exerciseId : activeUserObject.getOwnedExercises().keySet()) {
             ownedExercises
                 .add(activeUserObject.getOwnedExercises().get(exerciseId).getExerciseName());
+        }
+        List<WorkoutMeta> workoutMetas = new ArrayList<>(
+            activeUserObject.getUserWorkouts().values());
+        for (WorkoutMeta workoutMeta : workoutMetas) {
+            if (workoutMeta.getWorkoutName().equals(sentWorkout.getWorkoutName())) {
+                error.append("Workout with this name already exists.");
+            }
         }
         Set<String> totalExercises = Sets.union(sentWorkoutExercises, ownedExercises);
         if (activeUserObject.getPremiumToken() == null
