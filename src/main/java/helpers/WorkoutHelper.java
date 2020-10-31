@@ -18,7 +18,7 @@ public class WorkoutHelper {
         // updates the list of exercises on the user object to include this new workout in all contained exercises
 
         boolean updateDefaultWeight = user.getUserPreferences().isUpdateDefaultWeightOnSave();
-        // get a list of all exercises (by id, not name of course)
+        // get a list of all exercises by id
         Set<String> exercises = new HashSet<>();
         for (Integer week : routine) {
             for (Integer day : routine.getWeek(week)) {
@@ -129,14 +129,5 @@ public class WorkoutHelper {
             }
         }
         return retVal.toString();
-    }
-
-    public static void deleteExerciseFromRoutine(final String exerciseId,
-        final Routine routine) {
-        for (Integer week : routine) {
-            for (Integer day : routine.getWeek(week)) {
-                routine.removeExercise(week, day, exerciseId);
-            }
-        }
     }
 }

@@ -1,6 +1,5 @@
 package models;
 
-import exceptions.InvalidAttributeException;
 import helpers.Parser;
 import interfaces.Model;
 import java.util.HashMap;
@@ -24,13 +23,23 @@ public class RoutineExercise implements Model {
     private Integer reps;
     private String details;
 
-    public RoutineExercise(Map<String, Object> json) throws InvalidAttributeException {
+    public RoutineExercise(Map<String, Object> json) {
         this.completed = (boolean) json.get(COMPLETED);
         this.exerciseId = (String) json.get(EXERCISE_ID);
         this.weight = Parser.convertObjectToDouble(json.get(WEIGHT));
         this.sets = Parser.convertObjectToInteger(json.get(SETS));
         this.reps = Parser.convertObjectToInteger(json.get(REPS));
         this.details = (String) json.get(DETAILS);
+    }
+
+    public RoutineExercise(final SentExercise sentExercise, final String exerciseId) {
+        // this constructor is used when converting from an exercise from a sent workout back to a normal workout exercise
+        this.completed = false;
+        this.exerciseId = exerciseId;
+        this.weight = sentExercise.getWeight();
+        this.sets = sentExercise.getSets();
+        this.reps = sentExercise.getReps();
+        this.details = sentExercise.getDetails();
     }
 
 

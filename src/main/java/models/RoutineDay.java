@@ -12,6 +12,10 @@ public class RoutineDay implements Iterable<Integer>, Model {
 
     private Map<Integer, RoutineExercise> exercises;
 
+    public RoutineDay() {
+        this.exercises = new HashMap<>();
+    }
+
     public RoutineDay(Map<String, Object> exercisesForDay) throws InvalidAttributeException {
         this.exercises = new HashMap<>();
         for (String sortVal : exercisesForDay.keySet()) {
@@ -19,6 +23,10 @@ public class RoutineDay implements Iterable<Integer>, Model {
                 (Map<String, Object>) exercisesForDay.get(sortVal));
             this.exercises.put(Integer.parseInt(sortVal), routineExercise);
         }
+    }
+
+    public void put(int sortVal, RoutineExercise routineExercise) {
+        this.exercises.put(sortVal, routineExercise);
     }
 
     public int getNumberOfExercises() {

@@ -1,6 +1,5 @@
 package helpers;
 
-import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
@@ -58,22 +57,6 @@ public class UpdateItemData {
         return updateItemSpec;
     }
 
-//    public PutItemSpec asPutSpec() throws Exception {
-//        final PutItemSpec putItemSpec = new PutItemSpec()
-//            .withPrimaryKey(Database.getKeyIndex(this.tableName), this.keyValue)
-//            .withUpdateExpression(this.updateExpression);
-//
-//        if (this.valueMap != null) {
-//            putItemSpec.withValueMap(this.valueMap);
-//        }
-//
-//        if (this.nameMap != null) {
-//            putItemSpec.withNameMap(this.nameMap);
-//        }
-//
-//        return putItemSpec;
-//    }
-
     public Update asUpdate() throws Exception {
         final Update update = new Update().withUpdateExpression(this.updateExpression)
             .withTableName(this.tableName).withKey(this.getKeyMap());
@@ -101,7 +84,7 @@ public class UpdateItemData {
 
     private Map<String, AttributeValue> getKeyMap() throws Exception {
         final String keyIndex = Database.getKeyIndex(this.tableName);
-        return new HashMap<String, AttributeValue>() {{
+        return new HashMap<>() {{
             put(keyIndex, new AttributeValue().withS(UpdateItemData.this.keyValue));
         }};
     }

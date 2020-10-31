@@ -49,10 +49,21 @@ public class OwnedExercise implements Model {
     }
 
     public OwnedExercise(String exerciseName, String videUrl, List<String> focuses) {
-        // constructor that is called when user is created for the first time with default exercises or when making new exercise
         this.exerciseName = exerciseName;
         this.videoUrl = videUrl;
         this.focuses = focuses;
+        this.defaultWeight = defaultWeightValue;
+        this.defaultReps = defaultRepsValue;
+        this.defaultSets = defaultSetsValue;
+        this.defaultDetails = defaultDetailsValue;
+        this.workouts = new HashMap<>();
+    }
+
+    public OwnedExercise(final SentWorkoutExercise sentWorkoutExercise, final String name) {
+        // used to convert to an owned exercise from a sentWorkoutExercise
+        this.exerciseName = name;
+        this.focuses = sentWorkoutExercise.getFocuses();
+        this.videoUrl = sentWorkoutExercise.getVideoUrl();
         this.defaultWeight = defaultWeightValue;
         this.defaultReps = defaultRepsValue;
         this.defaultSets = defaultSetsValue;

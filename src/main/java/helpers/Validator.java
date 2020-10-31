@@ -10,18 +10,21 @@ public class Validator {
 
     private static final int
         MAX_WEIGHT = 99999, MAX_SETS = 99, MAX_REPS = 999, MAX_DETAILS_LENGTH = 120,
-        MAX_URL_LENGTH = 200, MAX_EXERCISE_NAME = 40,
-        MAX_FREE_EXERCISES = 100, MAX_PREMIUM_EXERCISES = 200;
+        MAX_URL_LENGTH = 200, MAX_EXERCISE_NAME = 40;
 
     public static String validNewWorkoutInput(final String workoutName, final User activeUser,
         final Routine routine) {
 
         StringBuilder error = new StringBuilder();
-        if (activeUser.getUserWorkouts().size() > Globals.MAX_FREE_WORKOUTS
+        if (activeUser.getUserWorkouts().size() >= Globals.MAX_FREE_WORKOUTS
             && activeUser.getPremiumToken() == null) {
             // TODO need to actually verify that token is good?
             error.append("Max amount of free workouts reached.\n");
-        } // TODO still need a max non free workouts
+        }
+        if (activeUser.getPremiumToken() != null
+            && activeUser.getUserWorkouts().size() >= Globals.MAX_WORKOUTS) {
+            error.append("Maximum workouts would be exceeded.");
+        }
         if (workoutName.length() > Globals.MAX_WORKOUT_NAME_LENGTH) {
             error.append("Workout name is too long.\n");
         }
@@ -135,10 +138,10 @@ public class Validator {
         }
 
         if (activeUser.getPremiumToken() == null
-            && activeUser.getOwnedExercises().size() >= MAX_FREE_EXERCISES) {
+            && activeUser.getOwnedExercises().size() >= Globals.MAX_FREE_EXERCISES) {
             error.append("Max free exercise limit reached.\n");
         } else if (activeUser.getPremiumToken() != null
-            && activeUser.getOwnedExercises().size() >= MAX_PREMIUM_EXERCISES) {
+            && activeUser.getOwnedExercises().size() >= Globals.MAX_PREMIUM_EXERCISES) {
             error.append("Max exercise limit reached.\n");
         }
 

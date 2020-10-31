@@ -18,6 +18,25 @@ public class SentRoutine implements Model, Iterable<Integer> {
         this.weeks = new HashMap<>();
     }
 
+    public SentRoutine(final Routine routine, Map<String, OwnedExercise> ownedExerciseMap) {
+        this.weeks = new HashMap<>();
+        for (Integer week : routine) {
+            final SentWeek sentWeek = new SentWeek();
+            for (Integer day : routine.getWeek(week)) {
+                final SentDay sentDay = new SentDay();
+                int sortVal = 0;
+                for (RoutineExercise exercise : routine.getExerciseListForDay(week, day)) {
+                    final SentExercise sentExercise = new SentExercise(exercise,
+                        ownedExerciseMap.get(exercise.getExerciseId()).getExerciseName());
+                    sentDay.put(sortVal, sentExercise);
+                    sortVal++;
+                }
+                sentWeek.put(day, sentDay);
+            }
+            this.putWeek(week, sentWeek);
+        }
+    }
+
     public SentRoutine(Map<String, Object> json) throws InvalidAttributeException {
         if (json == null) {
             this.weeks = null;

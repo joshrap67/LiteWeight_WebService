@@ -35,12 +35,15 @@ public class Database {
     }
 
     public static String getKeyIndex(final String tableName) throws Exception {
-        if (tableName.equals(WorkoutDAO.WORKOUT_TABLE_NAME)) {
-            return WorkoutDAO.WORKOUT_TABLE_PRIMARY_KEY;
-        } else if (tableName.equals(UserDAO.USERS_TABLE_NAME)) {
-            return UserDAO.USERS_PRIMARY_KEY;
-        } else {
-            throw new Exception("Invalid table name: " + tableName);
+        switch (tableName) {
+            case WorkoutDAO.WORKOUT_TABLE_NAME:
+                return WorkoutDAO.WORKOUT_TABLE_PRIMARY_KEY;
+            case UserDAO.USERS_TABLE_NAME:
+                return UserDAO.USERS_PRIMARY_KEY;
+            case SentWorkoutDAO.SENT_WORKOUT_TABLE_NAME:
+                return SentWorkoutDAO.SENT_WORKOUT_TABLE_PRIMARY_KEY;
+            default:
+                throw new Exception("Invalid table name: " + tableName);
         }
     }
 }

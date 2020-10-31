@@ -32,6 +32,26 @@ public class Routine implements Model, Iterable<Integer> {
         }
     }
 
+    public Routine(final SentRoutine routine, final Map<String, String> exerciseNameToId) {
+        // this constructor is used to convert from a sent routine back to a normal workout routine
+        this.weeks = new HashMap<>();
+        for (Integer week : routine) {
+            final RoutineWeek routineWeek = new RoutineWeek();
+            for (Integer day : routine.getWeek(week)) {
+                final RoutineDay routineDay = new RoutineDay();
+                int sortVal = 0;
+                for (SentExercise sentExercise : routine.getExerciseListForDay(week, day)) {
+                    RoutineExercise routineExercise = new RoutineExercise(sentExercise,
+                        exerciseNameToId.get(sentExercise.getExerciseName()));
+                    routineDay.put(sortVal, routineExercise);
+                    sortVal++;
+                }
+                routineWeek.put(day, routineDay);
+            }
+            this.putWeek(week, routineWeek);
+        }
+    }
+
     public List<RoutineExercise> getExerciseListForDay(int week, int day) {
         List<RoutineExercise> exerciseList = new ArrayList<>();
         for (Integer sortVal : this.getWeek(week).getDay(day)) {
@@ -54,6 +74,15 @@ public class Routine implements Model, Iterable<Integer> {
 
     public boolean removeExercise(int week, int day, String exerciseId) {
         return this.getDay(week, day).deleteExercise(exerciseId);
+    }
+
+    public static void deleteExerciseFromRoutine(final String exerciseId, final Routine routine) {
+        // removes all instances of a given exercise in the routine
+        for (Integer week : routine) {
+            for (Integer day : routine.getWeek(week)) {
+                routine.removeExercise(week, day, exerciseId);
+            }
+        }
     }
 
     public int getNumberOfWeeks() {

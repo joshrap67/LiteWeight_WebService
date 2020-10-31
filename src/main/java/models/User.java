@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
+import managers.GetReceivedWorkoutsManager;
 
 @Data
 public class User implements Model {
@@ -195,8 +196,20 @@ public class User implements Model {
     public Map<String, Object> asResponse() {
         Map<String, Object> map = this.asMap();
         map.remove(PUSH_ENDPOINT_ARN);
+        map.putIfAbsent(RECEIVED_WORKOUTS, getReceivedWorkoutsResponse());
         map.remove(RECEIVED_WORKOUTS);
         return this.asMap();
+    }
+
+    private Map<String, Object> getReceivedWorkoutsResponse() {
+        // give the user their first batch of received workouts. Any other ones will have to be added via API call
+        Map<String, ReceivedWorkoutMeta> firstBatch = GetReceivedWorkoutsManager
+            .getBatchOfWorkouts(this.getReceivedWorkouts(), 0);
+        Map<String, Object> retMap = new HashMap<>();
+        for (String workoutId : receivedWorkouts.keySet()) {
+            retMap.putIfAbsent(workoutId, receivedWorkouts.get(workoutId).asResponse());
+        }
+        return retMap;
     }
 
     public Map<String, Map<String, Object>> getUserWorkoutsMap() {

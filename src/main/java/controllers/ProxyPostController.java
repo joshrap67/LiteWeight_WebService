@@ -57,6 +57,7 @@ public class ProxyPostController implements
             .put("getSentWorkout", GetSentWorkoutController.class)
             .put("setAllReceivedWorkoutsSeen", SetAllReceivedWorkoutsSeenController.class)
             .put("setReceivedWorkoutSeen", SetReceivedWorkoutSeenController.class)
+            .put("acceptReceivedWorkout", AcceptReceivedWorkoutController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
@@ -127,6 +128,7 @@ public class ProxyPostController implements
         metrics.commonClose(resultStatus.success);
         metrics.logMetrics();
 
+        // todo return 400s not 422s
         return new APIGatewayProxyResponseEvent()
             .withBody(resultStatus.resultMessage)
             .withStatusCode(resultStatus.responseCode);

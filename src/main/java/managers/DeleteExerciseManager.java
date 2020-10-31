@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import models.OwnedExercise;
+import models.Routine;
 import models.User;
 import models.Workout;
 
@@ -63,7 +64,7 @@ public class DeleteExerciseManager {
         for (String workoutId : workoutIds) {
             final Workout workout = this.workoutDAO.getWorkout(workoutId);
 
-            WorkoutHelper.deleteExerciseFromRoutine(exerciseId, workout.getRoutine());
+            Routine.deleteExerciseFromRoutine(exerciseId, workout.getRoutine());
             final String newMostFrequentFocus = WorkoutHelper
                 .findMostFrequentFocus(user, workout.getRoutine());
             workout.setMostFrequentFocus(newMostFrequentFocus);
