@@ -35,7 +35,6 @@ public class SetAllReceivedWorkoutsSeenManager {
         this.metrics.commonSetup(classMethod);
 
         try {
-            // todo have one that only does it by batch?
             final User user = this.userDAO.getUser(activeUser);
             final Map<String, ReceivedWorkoutMeta> receivedWorkouts = user.getReceivedWorkouts();
             for (String workoutId : receivedWorkouts.keySet()) {
@@ -43,11 +42,8 @@ public class SetAllReceivedWorkoutsSeenManager {
             }
 
             final UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
-                .withUpdateExpression("set "
-                    + User.UNSEEN_RECEIVED_WORKOUTS + "=:seenVal, "
-                    + User.RECEIVED_WORKOUTS + "=:receivedWorkoutsVal")
+                .withUpdateExpression("set " + User.RECEIVED_WORKOUTS + "=:receivedWorkoutsVal")
                 .withValueMap(new ValueMap()
-                    .withNumber(":seenVal", 0)
                     .withMap(":receivedWorkoutsVal", user.getReceivedWorkoutMetaMap()));
             this.userDAO.updateUser(activeUser, updateActiveUserData);
 

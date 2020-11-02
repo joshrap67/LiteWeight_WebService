@@ -42,7 +42,7 @@ public class SendFriendRequestController implements ApiRequestController {
                 final FriendResponse friendResponse = this.sendFriendRequestManager
                     .sendRequest(activeUser, userToAdd);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(friendResponse.asMap()));
+                    .successful(JsonHelper.serializeMap(friendResponse.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadEntity(meu.getMessage());

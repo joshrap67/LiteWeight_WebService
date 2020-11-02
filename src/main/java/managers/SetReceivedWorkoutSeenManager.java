@@ -46,11 +46,9 @@ public class SetReceivedWorkoutSeenManager {
             workoutMeta.setSeen(true);
 
             final UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
-                .withUpdateExpression("set "
-                    + User.UNSEEN_RECEIVED_WORKOUTS + "=:seenVal, "
-                    + User.RECEIVED_WORKOUTS + ".#workoutId=:receivedWorkoutVal")
+                .withUpdateExpression(
+                    "set " + User.RECEIVED_WORKOUTS + ".#workoutId=:receivedWorkoutVal")
                 .withValueMap(new ValueMap()
-                    .withNumber(":seenVal", user.getUnseenReceivedWorkouts() - 1)
                     .withMap(":receivedWorkoutVal", workoutMeta.asMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
             this.userDAO.updateUser(activeUser, updateActiveUserData);

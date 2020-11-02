@@ -33,7 +33,9 @@ public class User implements Model {
     public static final String USER_PREFERENCES = "preferences";
     public static final String BLOCKED = "blocked";
     public static final String NEW_WORKOUTS = "newWorkouts";
+    // not database keys, but keys for responses to front end
     public static final String UNSEEN_RECEIVED_WORKOUTS = "unseenReceivedWorkouts";
+    public static final String TOTAL_RECEIVED_WORKOUTS = "totalReceivedWorkouts";
 
     private String username;
     private String icon;
@@ -42,7 +44,6 @@ public class User implements Model {
     private String currentWorkout;
     private Integer workoutsSent;
     private Integer newWorkouts;
-    private Integer unseenReceivedWorkouts;
     private UserPreferences userPreferences;
 
     @Setter(AccessLevel.NONE)
@@ -79,8 +80,6 @@ public class User implements Model {
         this.setFriendRequests((Map<String, Object>) json.get(FRIEND_REQUESTS));
         this.setReceivedWorkouts((Map<String, Object>) json.get(RECEIVED_WORKOUTS));
         this.setBlocked((Map<String, Object>) json.get(BLOCKED));
-        this.setUnseenReceivedWorkouts(
-            Parser.convertObjectToInteger(json.get(UNSEEN_RECEIVED_WORKOUTS)));
     }
 
     // Setters
@@ -188,7 +187,6 @@ public class User implements Model {
         retVal.putIfAbsent(RECEIVED_WORKOUTS, this.getReceivedWorkoutMetaMap());
         retVal.putIfAbsent(USER_PREFERENCES, this.userPreferences.asMap());
         retVal.putIfAbsent(FRIEND_REQUESTS, this.getFriendRequestsMap());
-        retVal.putIfAbsent(UNSEEN_RECEIVED_WORKOUTS, this.unseenReceivedWorkouts);
         return retVal;
     }
 
@@ -196,9 +194,11 @@ public class User implements Model {
     public Map<String, Object> asResponse() {
         Map<String, Object> map = this.asMap();
         map.remove(PUSH_ENDPOINT_ARN);
-        map.putIfAbsent(RECEIVED_WORKOUTS, getReceivedWorkoutsResponse());
         map.remove(RECEIVED_WORKOUTS);
-        return this.asMap();
+        map.putIfAbsent(RECEIVED_WORKOUTS, getReceivedWorkoutsResponse());
+        map.putIfAbsent(UNSEEN_RECEIVED_WORKOUTS, getUnseenWorkoutsCount());
+        map.putIfAbsent(TOTAL_RECEIVED_WORKOUTS, this.receivedWorkouts.size());
+        return map;
     }
 
     private Map<String, Object> getReceivedWorkoutsResponse() {
@@ -206,10 +206,20 @@ public class User implements Model {
         Map<String, ReceivedWorkoutMeta> firstBatch = GetReceivedWorkoutsManager
             .getBatchOfWorkouts(this.getReceivedWorkouts(), 0);
         Map<String, Object> retMap = new HashMap<>();
-        for (String workoutId : receivedWorkouts.keySet()) {
+        for (String workoutId : firstBatch.keySet()) {
             retMap.putIfAbsent(workoutId, receivedWorkouts.get(workoutId).asResponse());
         }
         return retMap;
+    }
+
+    private int getUnseenWorkoutsCount() {
+        int retVal = 0;
+        for (String workoutId : this.receivedWorkouts.keySet()) {
+            if (!receivedWorkouts.get(workoutId).isSeen()) {
+                retVal++;
+            }
+        }
+        return retVal;
     }
 
     public Map<String, Map<String, Object>> getUserWorkoutsMap() {

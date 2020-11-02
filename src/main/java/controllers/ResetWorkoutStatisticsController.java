@@ -40,7 +40,7 @@ public class ResetWorkoutStatisticsController implements ApiRequestController {
                 Injector.getInjector(metrics).inject(this);
                 final User result = this.resetWorkoutStatisticsManager
                     .resetStatistics(activeUser, workoutId);
-                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
+                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asResponse()));
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
                 resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());

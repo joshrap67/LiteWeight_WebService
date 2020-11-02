@@ -62,7 +62,6 @@ public class NewUserManager {
                 .withMap(User.BLOCKED, new HashMap<>())
                 .withMap(User.FRIEND_REQUESTS, new HashMap<>())
                 .withMap(User.RECEIVED_WORKOUTS, new HashMap<>())
-                .withNumber(User.UNSEEN_RECEIVED_WORKOUTS, 0)
                 .withMap(User.EXERCISES, FileReader.getDefaultExercises());
             PutItemOutcome outcome = this.userDAO.putUser(user);
 

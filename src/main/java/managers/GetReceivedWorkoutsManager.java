@@ -14,7 +14,7 @@ public class GetReceivedWorkoutsManager {
 
     private final UserDAO userDAO;
     private final Metrics metrics;
-    public static final int WORKOUT_BATCH_SIZE = 5;
+    public static final int WORKOUT_BATCH_SIZE = 10; // todo change after dev is done
 
     @Inject
     public GetReceivedWorkoutsManager(final UserDAO userDAO, final Metrics metrics) {

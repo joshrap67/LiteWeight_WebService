@@ -44,7 +44,7 @@ public class SwitchWorkoutController implements ApiRequestController {
                 Injector.getInjector(metrics).inject(this);
                 final UserWithWorkout result = this.switchWorkoutManager
                     .switchWorkout(activeUser, newWorkoutId, oldWorkout);
-                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
+                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asResponse()));
             } catch (WorkoutNotFoundException | UserNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
                 resultStatus = ResultStatus.failureBadEntity(exception.getMessage());

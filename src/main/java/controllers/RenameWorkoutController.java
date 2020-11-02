@@ -42,7 +42,7 @@ public class RenameWorkoutController implements ApiRequestController {
                 Injector.getInjector(metrics).inject(this);
                 final User result = this.renameWorkoutManager
                     .renameWorkout(activeUser, workoutId, workoutName);
-                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asMap()));
+                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadEntity(meu.getMessage());

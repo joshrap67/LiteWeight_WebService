@@ -75,7 +75,7 @@ public class Validator {
     }
 
     public static String validWorkoutName(final String workoutName, final User user) {
-        String error = null;
+        StringBuilder error = new StringBuilder();
         boolean repeat = false;
         for (String workoutId : user.getUserWorkouts().keySet()) {
             if (user.getUserWorkouts().get(workoutId).getWorkoutName()
@@ -85,9 +85,9 @@ public class Validator {
             }
         }
         if (repeat) {
-            error = "Workout name already exists.";
+            error.append("Workout name already exists.");
         }
-        return error;
+        return error.toString().trim();
     }
 
     public static String validOwnedExercise(final OwnedExercise ownedExercise,

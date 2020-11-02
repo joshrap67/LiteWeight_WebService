@@ -115,19 +115,14 @@ public class AcceptReceivedWorkoutManager {
             WorkoutHelper.updateUserExercises(activeUserObject, routine, workoutId,
                 workoutToAccept.getWorkoutName());
 
-            boolean decreaseUnseenCount = !receivedWorkoutMeta.isSeen();
             UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
-                    User.UNSEEN_RECEIVED_WORKOUTS + " =:unseenValue, " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
                     User.WORKOUTS + ".#workoutId= :workoutUserMap, " +
                     User.EXERCISES + "= :exercisesMap "
                     + "remove " + User.RECEIVED_WORKOUTS + ".#receivedWorkoutId")
                 .withValueMap(new ValueMap()
-                    .withNumber(":unseenValue",
-                        decreaseUnseenCount ? activeUserObject.getUnseenReceivedWorkouts() - 1
-                            : activeUserObject.getUnseenReceivedWorkouts())
                     .withString(":currentWorkoutVal",
                         updateCurrentWorkout ? workoutId : activeUserObject.getCurrentWorkout())
                     .withMap(":workoutUserMap", workoutMeta.asMap())
