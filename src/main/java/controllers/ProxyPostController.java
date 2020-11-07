@@ -58,6 +58,7 @@ public class ProxyPostController implements
             .put("setAllReceivedWorkoutsSeen", SetAllReceivedWorkoutsSeenController.class)
             .put("setReceivedWorkoutSeen", SetReceivedWorkoutSeenController.class)
             .put("acceptReceivedWorkout", AcceptReceivedWorkoutController.class)
+            .put("declineReceivedWorkout", DeclineReceivedWorkoutController.class)
             .build());
 
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
