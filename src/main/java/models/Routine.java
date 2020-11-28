@@ -18,6 +18,18 @@ public class Routine implements Model, Iterable<Integer> {
         this.weeks = new HashMap<>();
     }
 
+    public Routine(Routine toBeCloned) {
+        // copy constructor
+        this.weeks = new HashMap<>();
+        for (Integer week : toBeCloned) {
+            RoutineWeek routineWeek = new RoutineWeek();
+            for (Integer day : toBeCloned.getWeek(week)) {
+                routineWeek.put(day, toBeCloned.getDay(week, day).clone());
+            }
+            this.weeks.putIfAbsent(week, routineWeek);
+        }
+    }
+
     public Routine(Map<String, Object> json) throws InvalidAttributeException {
         if (json == null) {
             this.weeks = null;

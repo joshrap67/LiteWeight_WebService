@@ -2,9 +2,18 @@ package managers;
 
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import com.amazonaws.services.dynamodbv2.model.Put;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
+import exceptions.ManagerExecutionException;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import models.Routine;
+import models.RoutineExercise;
+import utils.AttributeValueUtils;
 import utils.Metrics;
 import utils.UpdateItemData;
 import java.util.ArrayList;
@@ -14,24 +23,29 @@ import models.User;
 import models.Workout;
 import models.WorkoutMeta;
 import responses.UserWithWorkout;
+import utils.Validator;
+import utils.WorkoutUtils;
 
 public class CopyWorkoutManager {
 
     private final UserDAO userDAO;
     private final Metrics metrics;
-    private final NewWorkoutManager newWorkoutManager;
 
     @Inject
-    public CopyWorkoutManager(final UserDAO userDAO, final Metrics metrics,
-        final NewWorkoutManager newWorkoutManager) {
+    public CopyWorkoutManager(final UserDAO userDAO, final Metrics metrics) {
         this.userDAO = userDAO;
         this.metrics = metrics;
-        this.newWorkoutManager = newWorkoutManager;
     }
 
     /**
-     * @param activeUser Username of new user to be inserted
-     * @return Result status that will be sent to frontend with appropriate data or error messages.
+     * Copies an old workout as a new workout - assuming all input is valid. Also syncs the old
+     * workout before performing the copy.
+     *
+     * @param activeUser     username doing the copying.
+     * @param newWorkoutName workout name for the copy of the old workout.
+     * @param oldWorkout     workout that is being copied.
+     * @return user with workout object that contains all the changed fields, as well as the new
+     * copied workout set as current.
      */
     public UserWithWorkout copyWorkout(final String activeUser, final String newWorkoutName,
         final Workout oldWorkout) throws Exception {
@@ -39,25 +53,64 @@ public class CopyWorkoutManager {
         this.metrics.commonSetup(classMethod);
 
         try {
+            final User activeUserObject = this.userDAO.getUser(activeUser);
             final String oldWorkoutId = oldWorkout.getWorkoutId();
 
-            // todo this should be part of the transaction below to satisfy ACID?
-            final UserWithWorkout userWithWorkout = newWorkoutManager
-                .createNewWorkout(activeUser, newWorkoutName, oldWorkout.getRoutine());
+            final String errorMessage = Validator
+                .validNewWorkoutInput(newWorkoutName, activeUserObject, oldWorkout.getRoutine());
 
-            final Workout newWorkout = userWithWorkout.getWorkout();
-            final WorkoutMeta workoutMetaNew = userWithWorkout.getUser().getUserWorkouts()
-                .get(newWorkout.getWorkoutId());
+            if (!errorMessage.isEmpty()) {
+                this.metrics.commonClose(false);
+                throw new ManagerExecutionException(errorMessage);
+            }
 
-            // update user object with new access time of the newly selected workout
+            // copy the workout as a new one. Not using manager due to transactions
+            final String workoutId = UUID.randomUUID().toString();
+            final String creationTime = Instant.now().toString();
+            final Workout newWorkout = new Workout();
+            // remove any progress of the workout that is being copied
+            Routine newRoutine = new Routine(oldWorkout.getRoutine());
+            for (Integer week : newRoutine) {
+                for (Integer day : newRoutine.getWeek(week)) {
+                    for (RoutineExercise exercise : newRoutine.getExerciseListForDay(week, day)) {
+                        exercise.setCompleted(false);
+                    }
+                }
+            }
+            newWorkout.setCreationDate(creationTime);
+            newWorkout.setCreator(activeUser);
+            newWorkout.setMostFrequentFocus(oldWorkout.getMostFrequentFocus());
+            newWorkout.setWorkoutId(workoutId);
+            newWorkout.setWorkoutName(newWorkoutName.trim());
+            newWorkout.setRoutine(newRoutine);
+            newWorkout.setCurrentDay(0);
+            newWorkout.setCurrentWeek(0);
+
+            final WorkoutMeta workoutMeta = new WorkoutMeta();
+            workoutMeta.setWorkoutName(newWorkoutName.trim());
+            workoutMeta.setAverageExercisesCompleted(0.0);
+            workoutMeta.setDateLast(creationTime);
+            workoutMeta.setTimesCompleted(0);
+            workoutMeta.setTotalExercisesSum(0);
+            // need to set it here so frontend gets updated user item back
+            activeUserObject.putNewWorkoutMeta(workoutId, workoutMeta);
+            activeUserObject.setCurrentWorkout(workoutId);
+
+            // update all the exercises that are now apart of this newly copied workout
+            WorkoutUtils.updateOwnedExercises(activeUserObject, oldWorkout.getRoutine(), workoutId,
+                newWorkoutName);
+
+            // update user object with this newly copied workout
             final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
-                    User.CURRENT_WORKOUT + " = :currentWorkout, " +
-                    User.WORKOUTS + ".#newWorkoutId= :newWorkoutMeta")
+                    User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
+                    User.WORKOUTS + ".#newWorkoutId= :newWorkoutMeta, " +
+                    User.EXERCISES + "= :exercisesMap")
                 .withValueMap(new ValueMap()
-                    .withString(":currentWorkout", newWorkout.getWorkoutId())
-                    .withMap(":newWorkoutMeta", workoutMetaNew.asMap()))
+                    .withString(":currentWorkoutVal", newWorkout.getWorkoutId())
+                    .withMap(":newWorkoutMeta", workoutMeta.asMap())
+                    .withMap(":exercisesMap", activeUserObject.getUserExercisesMap()))
                 .withNameMap(new NameMap().with("#newWorkoutId", newWorkout.getWorkoutId()));
 
             // persist the current week/day/routine of the old workout
@@ -76,12 +129,15 @@ public class CopyWorkoutManager {
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateOldWorkoutItemData.asUpdate()));
+            actions.add(new TransactWriteItem()
+                .withPut(new Put().withTableName(WorkoutDAO.WORKOUT_TABLE_NAME).withItem(
+                    AttributeValueUtils.convertMapToAttributeValueMap(newWorkout.asMap()))));
             this.userDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);
-            return userWithWorkout;
+            return new UserWithWorkout(activeUserObject, newWorkout);
         } catch (Exception e) {
-            this.metrics.commonClose(true);
+            this.metrics.commonClose(false);
             throw e;
         }
     }

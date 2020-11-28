@@ -29,7 +29,7 @@ public class Validator {
             error.append("Workout name is too long.\n");
         }
         String workoutNameError = validWorkoutName(workoutName, activeUser);
-        if (workoutNameError != null) {
+        if (!workoutNameError.isEmpty()) {
             error.append(String.format("%s\n", workoutNameError));
         }
 

@@ -66,7 +66,6 @@ public class SwitchWorkoutManager {
 
             // persist the current week/day/routine of the old workout
             this.syncWorkoutManager.syncWorkout(oldWorkout);
-
             this.userDAO.updateUser(activeUser, updateItemSpec);
 
             this.metrics.commonClose(true);

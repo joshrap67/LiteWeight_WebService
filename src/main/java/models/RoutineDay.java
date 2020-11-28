@@ -25,6 +25,16 @@ public class RoutineDay implements Iterable<Integer>, Model {
         }
     }
 
+    public RoutineDay clone() {
+        RoutineDay retVal = new RoutineDay();
+        for (Integer sortVal : this.exercises.keySet()) {
+            RoutineExercise specificExerciseCloned = new RoutineExercise(
+                this.exercises.get(sortVal));
+            retVal.getExercises().putIfAbsent(sortVal, specificExerciseCloned);
+        }
+        return retVal;
+    }
+
     public void put(int sortVal, RoutineExercise routineExercise) {
         this.exercises.put(sortVal, routineExercise);
     }

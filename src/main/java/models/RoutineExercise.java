@@ -42,6 +42,16 @@ public class RoutineExercise implements Model {
         this.details = sharedExercise.getDetails();
     }
 
+    public RoutineExercise(RoutineExercise toBeCopied) {
+        // Copy constructor used for deep copies
+        this.completed = toBeCopied.completed;
+        this.exerciseId = toBeCopied.exerciseId;
+        this.weight = toBeCopied.weight;
+        this.sets = toBeCopied.sets;
+        this.reps = toBeCopied.reps;
+        this.details = toBeCopied.details;
+    }
+
 
     @Override
     public Map<String, Object> asMap() {

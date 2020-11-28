@@ -83,6 +83,7 @@ public class NewWorkoutManager {
             workoutMeta.setTotalExercisesSum(0);
             // need to set it here so frontend gets updated user item back
             user.putNewWorkoutMeta(workoutId, workoutMeta);
+            user.setCurrentWorkout(workoutId);
 
             // update all the exercises that are now apart of this workout
             WorkoutUtils.updateOwnedExercises(user, routine, workoutId, workoutName);
