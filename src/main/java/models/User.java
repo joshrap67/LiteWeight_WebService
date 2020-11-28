@@ -57,7 +57,7 @@ public class User implements Model {
     @Setter(AccessLevel.NONE)
     private Map<String, FriendRequest> friendRequests;
     @Setter(AccessLevel.NONE)
-    private Map<String, ReceivedWorkoutMeta> receivedWorkouts;
+    private Map<String, SharedWorkoutMeta> receivedWorkouts;
 
 
     public User(final Item userItem)
@@ -141,7 +141,7 @@ public class User implements Model {
         } else {
             this.receivedWorkouts = new HashMap<>();
             for (String workoutId : json.keySet()) {
-                this.receivedWorkouts.putIfAbsent(workoutId, new ReceivedWorkoutMeta(
+                this.receivedWorkouts.putIfAbsent(workoutId, new SharedWorkoutMeta(
                     (Map<String, Object>) json.get(workoutId), workoutId));
             }
         }
@@ -203,7 +203,7 @@ public class User implements Model {
 
     private Map<String, Object> getReceivedWorkoutsResponse() {
         // give the user their first batch of received workouts. Any other ones will have to be added via API call
-        Map<String, ReceivedWorkoutMeta> firstBatch = GetReceivedWorkoutsManager
+        Map<String, SharedWorkoutMeta> firstBatch = GetReceivedWorkoutsManager
             .getBatchOfWorkouts(this.getReceivedWorkouts(), 0);
         Map<String, Object> retMap = new HashMap<>();
         for (String workoutId : firstBatch.keySet()) {
@@ -241,7 +241,7 @@ public class User implements Model {
         return this.receivedWorkouts.entrySet().stream().collect(
             collectingAndThen(
                 toMap(Entry::getKey,
-                    (Map.Entry<String, ReceivedWorkoutMeta> e) -> e.getValue().asMap()),
+                    (Map.Entry<String, SharedWorkoutMeta> e) -> e.getValue().asMap()),
                 HashMap::new));
     }
 

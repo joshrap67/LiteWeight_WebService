@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.GetReceivedWorkoutsManager;
-import models.ReceivedWorkoutMeta;
+import models.SharedWorkoutMeta;
 import modules.Injector;
 
 public class GetReceivedWorkoutsController implements ApiRequestController {
@@ -40,7 +40,7 @@ public class GetReceivedWorkoutsController implements ApiRequestController {
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
                 final Integer batchNumber = Parser
                     .convertObjectToInteger(jsonMap.get(RequestFields.BATCH_NUMBER));
-                final Map<String, ReceivedWorkoutMeta> receivedWorkouts = this.getReceivedWorkoutsManager
+                final Map<String, SharedWorkoutMeta> receivedWorkouts = this.getReceivedWorkoutsManager
                     .getReceivedWorkouts(activeUser, batchNumber);
 
                 Map<String, Object> retMap = new HashMap<>();

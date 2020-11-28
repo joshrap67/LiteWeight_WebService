@@ -8,7 +8,7 @@ import exceptions.UserNotFoundException;
 import helpers.Metrics;
 import java.util.Map;
 import javax.inject.Inject;
-import models.ReceivedWorkoutMeta;
+import models.SharedWorkoutMeta;
 import models.User;
 
 public class SetAllReceivedWorkoutsSeenManager {
@@ -36,7 +36,7 @@ public class SetAllReceivedWorkoutsSeenManager {
 
         try {
             final User user = this.userDAO.getUser(activeUser);
-            final Map<String, ReceivedWorkoutMeta> receivedWorkouts = user.getReceivedWorkouts();
+            final Map<String, SharedWorkoutMeta> receivedWorkouts = user.getReceivedWorkouts();
             for (String workoutId : receivedWorkouts.keySet()) {
                 receivedWorkouts.get(workoutId).setSeen(true);
             }

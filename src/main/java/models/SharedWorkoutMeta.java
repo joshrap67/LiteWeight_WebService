@@ -9,12 +9,13 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ReceivedWorkoutMeta implements Model {
+public class SharedWorkoutMeta implements Model {
 
     public static final String WORKOUT_NAME = "workoutName";
     public static final String DATE_SENT = "dateSent";
     public static final String SEEN = "seen";
     public static final String SENDER = "sender";
+    public static final String ICON = "icon";
     public static final String MOST_FREQUENT_FOCUS = "mostFrequentFocus";
     public static final String TOTAL_DAYS = "totalDays";
     public static final String WORKOUT_ID = "receivedWorkoutId";
@@ -26,8 +27,9 @@ public class ReceivedWorkoutMeta implements Model {
     private String sender;
     private Integer totalDays;
     private String mostFrequentFocus;
+    private String icon;
 
-    public ReceivedWorkoutMeta(Map<String, Object> json, String workoutId) {
+    public SharedWorkoutMeta(Map<String, Object> json, String workoutId) {
         this.workoutName = (String) json.get(WORKOUT_NAME);
         this.workoutId = workoutId;
         this.dateSent = (String) json.get(DATE_SENT);
@@ -35,6 +37,7 @@ public class ReceivedWorkoutMeta implements Model {
         this.seen = (boolean) json.get(SEEN);
         this.sender = (String) json.get(SENDER);
         this.totalDays = Parser.convertObjectToInteger(json.get(TOTAL_DAYS));
+        this.icon = (String) json.get(ICON);
     }
 
     @Override
@@ -46,6 +49,7 @@ public class ReceivedWorkoutMeta implements Model {
         retVal.putIfAbsent(MOST_FREQUENT_FOCUS, this.mostFrequentFocus);
         retVal.putIfAbsent(SENDER, this.sender);
         retVal.putIfAbsent(TOTAL_DAYS, this.totalDays);
+        retVal.putIfAbsent(ICON, this.icon);
         return retVal;
     }
 

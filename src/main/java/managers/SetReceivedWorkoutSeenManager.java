@@ -7,9 +7,8 @@ import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
 import helpers.Metrics;
-import java.util.Map;
 import javax.inject.Inject;
-import models.ReceivedWorkoutMeta;
+import models.SharedWorkoutMeta;
 import models.User;
 
 public class SetReceivedWorkoutSeenManager {
@@ -37,7 +36,7 @@ public class SetReceivedWorkoutSeenManager {
 
         try {
             final User user = this.userDAO.getUser(activeUser);
-            ReceivedWorkoutMeta workoutMeta = user.getReceivedWorkouts().get(workoutId);
+            SharedWorkoutMeta workoutMeta = user.getReceivedWorkouts().get(workoutId);
             if (workoutMeta.isSeen()) {
                 // if it is already seen don't bother with any update
                 this.metrics.commonClose(true);

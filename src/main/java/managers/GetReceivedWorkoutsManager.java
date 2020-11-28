@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.inject.Inject;
-import models.ReceivedWorkoutMeta;
+import models.SharedWorkoutMeta;
 import models.User;
 import org.joda.time.DateTime;
 
@@ -33,7 +33,7 @@ public class GetReceivedWorkoutsManager {
      * @param batchNumber batch number that the user is currently on.
      * @return Map of the received workout metas that fall into this batch
      */
-    public Map<String, ReceivedWorkoutMeta> getReceivedWorkouts(final String activeUser,
+    public Map<String, SharedWorkoutMeta> getReceivedWorkouts(final String activeUser,
         final int batchNumber)
         throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".getReceivedWorkouts";
@@ -41,7 +41,7 @@ public class GetReceivedWorkoutsManager {
 
         try {
             final User activeUserObject = this.userDAO.getUser(activeUser);
-            final Map<String, ReceivedWorkoutMeta> receivedWorkouts = activeUserObject
+            final Map<String, SharedWorkoutMeta> receivedWorkouts = activeUserObject
                 .getReceivedWorkouts();
 
             return getBatchOfWorkouts(receivedWorkouts, batchNumber);
@@ -51,13 +51,13 @@ public class GetReceivedWorkoutsManager {
         }
     }
 
-    public static Map<String, ReceivedWorkoutMeta> getBatchOfWorkouts(
-        final Map<String, ReceivedWorkoutMeta> receivedWorkouts, final Integer batchNumber) {
+    public static Map<String, SharedWorkoutMeta> getBatchOfWorkouts(
+        final Map<String, SharedWorkoutMeta> receivedWorkouts, final Integer batchNumber) {
         int newestReceivedWorkoutIndex = batchNumber * WORKOUT_BATCH_SIZE;
         int oldestReceivedWorkoutIndex = ((batchNumber + 1) * WORKOUT_BATCH_SIZE) - 1;
 
         ArrayList<String> workoutIds = new ArrayList<>(receivedWorkouts.keySet());
-        Map<String, ReceivedWorkoutMeta> workoutsBatch = new LinkedHashMap<>();
+        Map<String, SharedWorkoutMeta> workoutsBatch = new LinkedHashMap<>();
 
         // get all of the received workouts from the first workout to the oldest workout in the batch
         if (workoutIds.size() > newestReceivedWorkoutIndex) {

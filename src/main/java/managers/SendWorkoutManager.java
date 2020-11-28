@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.inject.Inject;
 import models.NotificationData;
-import models.ReceivedWorkoutMeta;
+import models.SharedWorkoutMeta;
 import models.SentWorkout;
 import models.User;
 import models.Workout;
@@ -77,7 +77,7 @@ public class SendWorkoutManager {
             String sentWorkoutId = null;
 
             for (String workoutIdMeta : recipientUser.getReceivedWorkouts().keySet()) {
-                final ReceivedWorkoutMeta meta = recipientUser.getReceivedWorkouts()
+                final SharedWorkoutMeta meta = recipientUser.getReceivedWorkouts()
                     .get(workoutIdMeta);
                 if (meta.getWorkoutName().equals(originalWorkout.getWorkoutName()) && meta
                     .getSender().equals(activeUser)) {
@@ -91,14 +91,15 @@ public class SendWorkoutManager {
                 sentWorkoutId = UUID.randomUUID().toString();
             }
 
-            final ReceivedWorkoutMeta receivedWorkoutMeta = new ReceivedWorkoutMeta();
-            receivedWorkoutMeta.setDateSent(Instant.now().toString());
-            receivedWorkoutMeta.setWorkoutId(sentWorkoutId);
-            receivedWorkoutMeta.setSeen(false);
-            receivedWorkoutMeta.setSender(activeUser);
-            receivedWorkoutMeta.setMostFrequentFocus(originalWorkout.getMostFrequentFocus());
-            receivedWorkoutMeta.setWorkoutName(originalWorkout.getWorkoutName());
-            receivedWorkoutMeta.setTotalDays(originalWorkout.getRoutine().getTotalNumberOfDays());
+            final SharedWorkoutMeta sharedWorkoutMeta = new SharedWorkoutMeta();
+            sharedWorkoutMeta.setDateSent(Instant.now().toString());
+            sharedWorkoutMeta.setWorkoutId(sentWorkoutId);
+            sharedWorkoutMeta.setSeen(false);
+            sharedWorkoutMeta.setSender(activeUser);
+            sharedWorkoutMeta.setMostFrequentFocus(originalWorkout.getMostFrequentFocus());
+            sharedWorkoutMeta.setWorkoutName(originalWorkout.getWorkoutName());
+            sharedWorkoutMeta.setTotalDays(originalWorkout.getRoutine().getTotalNumberOfDays());
+            sharedWorkoutMeta.setIcon(activeUserObject.getIcon());
 
             final SentWorkout workoutToSend = new SentWorkout(originalWorkout, activeUserObject,
                 sentWorkoutId);
@@ -111,7 +112,7 @@ public class SendWorkoutManager {
                 .withUpdateExpression("set "
                     + User.RECEIVED_WORKOUTS + ".#workoutId= :workoutMetaVal")
                 .withValueMap(new ValueMap()
-                    .withMap(":workoutMetaVal", receivedWorkoutMeta.asMap()))
+                    .withMap(":workoutMetaVal", sharedWorkoutMeta.asMap()))
                 .withNameMap(new NameMap().with("#workoutId", sentWorkoutId));
             // need to update the number of sent workouts for the active user
             final UpdateItemData activeUserItemData = new UpdateItemData(
@@ -132,7 +133,7 @@ public class SendWorkoutManager {
             // if this succeeds, go ahead and send a notification to the recipient with the workout meta
             this.snsAccess.sendMessage(recipientUser.getPushEndpointArn(),
                 new NotificationData(SnsAccess.receivedWorkoutAction,
-                    receivedWorkoutMeta.asResponse()));
+                    sharedWorkoutMeta.asResponse()));
             return sentWorkoutId;
         } catch (Exception e) {
             this.metrics.commonClose(false);

@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import javax.inject.Inject;
 import models.OwnedExercise;
-import models.ReceivedWorkoutMeta;
+import models.SharedWorkoutMeta;
 import models.Routine;
 import models.SentExercise;
 import models.SentWorkout;
@@ -65,7 +65,7 @@ public class AcceptReceivedWorkoutManager {
             final User activeUserObject = this.userDAO.getUser(activeUser);
             final SentWorkout workoutToAccept = this.sentWorkoutDAO
                 .getSentWorkout(workoutIdToAccept);
-            final ReceivedWorkoutMeta receivedWorkoutMeta = activeUserObject.getReceivedWorkouts()
+            final SharedWorkoutMeta sharedWorkoutMeta = activeUserObject.getReceivedWorkouts()
                 .get(workoutIdToAccept);
 
             if (optionalName != null) {
@@ -97,7 +97,7 @@ public class AcceptReceivedWorkoutManager {
             final Routine routine = new Routine(workoutToAccept.getRoutine(), exerciseNameToId);
             newWorkout.setCreationDate(creationTime);
             newWorkout.setCreator(activeUser);
-            newWorkout.setMostFrequentFocus(receivedWorkoutMeta.getMostFrequentFocus());
+            newWorkout.setMostFrequentFocus(sharedWorkoutMeta.getMostFrequentFocus());
             newWorkout.setWorkoutId(workoutId);
             newWorkout.setWorkoutName(workoutToAccept.getWorkoutName());
             newWorkout.setRoutine(routine);
