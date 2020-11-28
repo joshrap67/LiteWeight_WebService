@@ -1,10 +1,14 @@
 package managers;
 
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
+import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
+import daos.SentWorkoutDAO;
 import daos.UserDAO;
 import exceptions.ManagerExecutionException;
 import helpers.Metrics;
 import helpers.UpdateItemData;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import models.User;
 
@@ -41,13 +45,20 @@ public class DeclineReceivedWorkoutManager {
                         declinedWorkoutId));
             }
 
+            // remove workout from sent workout table
+            UpdateItemData updateSentWorkoutData = new UpdateItemData(
+                declinedWorkoutId, SentWorkoutDAO.SENT_WORKOUT_TABLE_NAME);
+
             // remove workout from active user
-            final UpdateItemData activeUserData = new UpdateItemData(
+            UpdateItemData activeUserData = new UpdateItemData(
                 activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.RECEIVED_WORKOUTS + ".#workoutId")
                 .withNameMap(new NameMap().with("#workoutId", declinedWorkoutId));
 
-            this.userDAO.updateUser(activeUser, activeUserData.asUpdateItemSpec());
+            List<TransactWriteItem> actions = new ArrayList<>();
+            actions.add(new TransactWriteItem().withUpdate(activeUserData.asUpdate()));
+            actions.add(new TransactWriteItem().withDelete(updateSentWorkoutData.asDelete()));
+            this.userDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);
         } catch (Exception e) {

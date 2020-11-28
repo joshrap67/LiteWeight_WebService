@@ -56,7 +56,7 @@ public class AcceptReceivedWorkoutController implements ApiRequestController {
                 resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-                resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
+                resultStatus = ResultStatus.failureBadRequest("Unable to accept workout.");
             }
         } else {
             throw new MissingApiRequestKeyException(requiredKeys);

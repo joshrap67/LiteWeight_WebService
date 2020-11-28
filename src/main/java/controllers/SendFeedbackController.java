@@ -1,8 +1,6 @@
 package controllers;
 
-import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
-import exceptions.UserNotFoundException;
 import helpers.ErrorMessage;
 import helpers.Metrics;
 import helpers.RequestFields;
@@ -12,14 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import managers.AcceptFriendRequestManager;
-import models.User;
+import managers.SendFeedbackManager;
 import modules.Injector;
 
-public class AcceptFriendRequestController implements ApiRequestController {
+public class SendFeedbackController implements ApiRequestController {
 
     @Inject
-    public AcceptFriendRequestManager acceptFriendRequestManager;
+    public SendFeedbackManager sendFeedbackManager;
 
     @Override
     public ResultStatus<String> processApiRequest(Map<String, Object> json,
@@ -29,25 +26,20 @@ public class AcceptFriendRequestController implements ApiRequestController {
         ResultStatus<String> resultStatus;
 
         final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, User.USERNAME);
+            .asList(RequestFields.ACTIVE_USER, RequestFields.FEEDBACK_TIME, RequestFields.FEEDBACK);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
-                final String userToAccept = (String) json.get(User.USERNAME);
+                final String feedbackTime = (String) json.get(RequestFields.FEEDBACK_TIME);
+                final String feedback = (String) json.get(RequestFields.FEEDBACK);
 
                 Injector.getInjector(metrics).inject(this);
-                this.acceptFriendRequestManager.acceptRequest(activeUser, userToAccept);
-                resultStatus = ResultStatus.successful("Friend successfully added.");
-            } catch (ManagerExecutionException meu) {
-                metrics.log("Input error: " + meu.getMessage());
-                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
-            } catch (UserNotFoundException unfe) {
-                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+                this.sendFeedbackManager.sendFeedback(activeUser, feedbackTime, feedback);
+                resultStatus = ResultStatus.successful("Feedback successfully sent.");
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-                resultStatus = ResultStatus.failureBadRequest("Unable to accept friend request.");
+                resultStatus = ResultStatus.failureBadRequest("Unable to send feedback.");
             }
         } else {
             throw new MissingApiRequestKeyException(requiredKeys);

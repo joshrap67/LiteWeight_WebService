@@ -37,6 +37,7 @@ public class ResetWorkoutStatisticsManager {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
+        // todo return just the updated meta...
         try {
             final User user = this.userDAO.getUser(activeUser);
 

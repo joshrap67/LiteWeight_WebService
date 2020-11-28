@@ -51,7 +51,7 @@ public class SendFriendRequestController implements ApiRequestController {
                 resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
-                resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
+                resultStatus = ResultStatus.failureBadRequest("Unable to send friend request.");
             }
         } else {
             throw new MissingApiRequestKeyException(requiredKeys);

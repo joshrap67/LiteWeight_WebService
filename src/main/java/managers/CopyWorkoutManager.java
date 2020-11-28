@@ -41,6 +41,7 @@ public class CopyWorkoutManager {
         try {
             final String oldWorkoutId = oldWorkout.getWorkoutId();
 
+            // todo this should be part of the transaction below to satisfy ACID?
             final UserWithWorkout userWithWorkout = newWorkoutManager
                 .createNewWorkout(activeUser, newWorkoutName, oldWorkout.getRoutine());
 

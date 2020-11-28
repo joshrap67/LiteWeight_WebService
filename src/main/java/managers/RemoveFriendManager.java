@@ -73,7 +73,7 @@ public class RemoveFriendManager {
             this.userDAO.executeWriteTransaction(actions);
             // if this succeeds, go ahead and send a notification to the accepted user (only need to send username)
             this.snsAccess.sendMessage(userToRemove.getPushEndpointArn(),
-                new NotificationData(SnsAccess.removeFriendAction,
+                new NotificationData(SnsAccess.removedAsFriendAction,
                     Maps.newHashMap(
                         ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
                             .build())));

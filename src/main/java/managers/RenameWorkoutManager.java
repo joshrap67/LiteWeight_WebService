@@ -65,10 +65,10 @@ public class RenameWorkoutManager {
             final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
-                    User.WORKOUTS + ".#workoutId = :workoutsMap, " +
+                    User.WORKOUTS + ".#workoutId = :workoutMap, " +
                     User.EXERCISES + "= :exercisesMap")
                 .withValueMap(new ValueMap()
-                    .withMap(":workoutsMap", workoutMeta.asMap())
+                    .withMap(":workoutMap", workoutMeta.asMap())
                     .withMap(":exercisesMap", user.getUserExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 

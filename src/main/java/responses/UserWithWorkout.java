@@ -1,6 +1,5 @@
 package responses;
 
-import exceptions.InvalidAttributeException;
 import helpers.RequestFields;
 import interfaces.Model;
 import java.util.HashMap;
@@ -14,40 +13,39 @@ public class UserWithWorkout implements Model {
 
     private User user;
     private Workout workout;
+    private boolean workoutPresent;
 
     public UserWithWorkout(User user, Workout workout) {
         this.user = user;
+        this.workoutPresent = workout != null;
         this.workout = workout;
-    }
-
-    public UserWithWorkout(Map<String, Object> json) throws InvalidAttributeException {
-        this.user = new User((Map<String, Object>) json.get(RequestFields.USER));
-        this.workout = new Workout((Map<String, Object>) json.get(RequestFields.WORKOUT));
     }
 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> retVal = new HashMap<>();
-        retVal.putIfAbsent(RequestFields.USER, user.asMap());
-        if (workout != null) {
-            retVal.putIfAbsent(RequestFields.WORKOUT, workout.asMap());
+        retVal.putIfAbsent(RequestFields.USER, this.user.asMap());
+        if (this.workoutPresent) {
+            retVal.putIfAbsent(RequestFields.WORKOUT, this.workout.asMap());
         } else {
             // in case the user has no workout, just return an empty map
             retVal.putIfAbsent(RequestFields.WORKOUT, new HashMap<>());
         }
+        retVal.putIfAbsent(RequestFields.WORKOUT_PRESENT, this.workoutPresent);
         return retVal;
     }
 
     @Override
     public Map<String, Object> asResponse() {
         Map<String, Object> retVal = new HashMap<>();
-        retVal.putIfAbsent(RequestFields.USER, user.asResponse());
-        if (workout != null) {
-            retVal.putIfAbsent(RequestFields.WORKOUT, workout.asResponse());
+        retVal.putIfAbsent(RequestFields.USER, this.user.asResponse());
+        if (this.workoutPresent) {
+            retVal.putIfAbsent(RequestFields.WORKOUT, this.workout.asResponse());
         } else {
             // in case the user has no workout, just return an empty map
             retVal.putIfAbsent(RequestFields.WORKOUT, new HashMap<>());
         }
+        retVal.putIfAbsent(RequestFields.WORKOUT_PRESENT, this.workoutPresent);
         return retVal;
     }
 }

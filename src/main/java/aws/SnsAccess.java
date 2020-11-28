@@ -27,7 +27,7 @@ public class SnsAccess {
     public static final String canceledFriendRequestAction = "canceledFriendRequest";
     public static final String acceptedFriendRequestAction = "acceptedFriendRequest";
     public static final String declinedFriendRequestAction = "declinedFriendRequest";
-    public static final String removeFriendAction = "removeFriend";
+    public static final String removedAsFriendAction = "removedAsFriend";
     public static final String receivedWorkoutAction = "receivedWorkout";
     private final AmazonSNSClient client;
 
@@ -102,8 +102,6 @@ public class SnsAccess {
         try {
             publishResult = this.client.publish(publishRequest);
         } catch (final EndpointDisabledException ede) {
-            //this isn't an error on our end, read more about this exception here:
-            //https://forums.aws.amazon.com/thread.jspa?threadID=174551
             publishResult = new PublishResult();
         }
 
@@ -120,5 +118,18 @@ public class SnsAccess {
             .getPlatformApplicationAttributes(
                 new GetPlatformApplicationAttributesRequest()
                     .withPlatformApplicationArn(platformArn));
+    }
+
+    public PublishResult sendEmail(final String arn, final String subject, final String body) {
+        final PublishRequest publishRequest = new PublishRequest(arn, body, subject);
+
+        PublishResult publishResult;
+        try {
+            publishResult = this.client.publish(publishRequest);
+        } catch (final EndpointDisabledException ede) {
+            publishResult = new PublishResult();
+        }
+
+        return publishResult;
     }
 }

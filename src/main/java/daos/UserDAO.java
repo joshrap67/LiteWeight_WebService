@@ -49,7 +49,7 @@ public class UserDAO {
         throws NullPointerException, InvalidAttributeException, UserNotFoundException {
         final Item userItem = Optional.ofNullable(this.getUserItem(username))
             .orElseThrow(
-                () -> new UserNotFoundException(String.format("%s not found", username)));
+                () -> new UserNotFoundException(String.format("User \"%s\" not found", username)));
         return new User(userItem);
     }
 
