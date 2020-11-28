@@ -38,6 +38,6 @@ public class SendFeedbackManager {
     public static String getFormattedFeedback(String senderUsername, String feedbackTime,
         String feedback) {
         return String
-            .format("User: %s\nTime: %s\nFeedback: %s", senderUsername, feedbackTime, feedback);
+            .format("User: %s\nTime: %s\n-----Feedback-----\n%s", senderUsername, feedbackTime, feedback);
     }
 }

@@ -38,8 +38,8 @@ public class RegisterEndpointTokenManager {
     }
 
     /**
-     * This function takes in a device token registered in google cloud messaging and creates a SNS
-     * endpoint for this token and then registers the ARN of the SNS endpoint on the user item.
+     * This function takes in a device token registered in google cloud messaging and maps a SNS
+     * endpoint for this token, and then registers the ARN of the SNS endpoint on the user item.
      *
      * @param activeUser  The user making the api request whos push endpoint is being registered.
      * @param deviceToken This is the GCM token for the user's device that is used to register the
@@ -79,7 +79,6 @@ public class RegisterEndpointTokenManager {
 
             this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
             this.metrics.commonClose(true);
-
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

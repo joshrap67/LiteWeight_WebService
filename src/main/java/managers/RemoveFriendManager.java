@@ -22,8 +22,7 @@ public class RemoveFriendManager {
     private final Metrics metrics;
 
     @Inject
-    public RemoveFriendManager(final NotificationService notificationService,
-        final UserDAO userDAO,
+    public RemoveFriendManager(final NotificationService notificationService, final UserDAO userDAO,
         final Metrics metrics) {
         this.notificationService = notificationService;
         this.userDAO = userDAO;
@@ -65,7 +64,6 @@ public class RemoveFriendManager {
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", activeUser));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(activeUserData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));

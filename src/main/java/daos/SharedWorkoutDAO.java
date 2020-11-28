@@ -52,7 +52,7 @@ public class SharedWorkoutDAO {
             .getItem(new PrimaryKey(SENT_WORKOUT_TABLE_PRIMARY_KEY, currentWorkoutId));
     }
 
-    public SharedWorkout getSentWorkout(String workoutId)
+    public SharedWorkout getSharedWorkout(String workoutId)
         throws NullPointerException, InvalidAttributeException, WorkoutNotFoundException {
         final Item workoutItem = Optional.ofNullable(this.getSentWorkoutItem(workoutId))
             .orElseThrow(

@@ -11,7 +11,7 @@ import controllers.DeleteExerciseController;
 import controllers.DeleteWorkoutThenFetchController;
 import controllers.EditWorkoutController;
 import controllers.GetReceivedWorkoutsController;
-import controllers.GetSentWorkoutController;
+import controllers.GetSharedWorkoutController;
 import controllers.GetUserDataController;
 import controllers.GetUserWorkoutController;
 import controllers.NewExerciseController;
@@ -27,7 +27,7 @@ import controllers.SendFeedbackController;
 import controllers.SendFriendRequestController;
 import controllers.SendWorkoutController;
 import controllers.SetAllReceivedWorkoutsSeenController;
-import controllers.SetAllRequestsSeenController;
+import controllers.SetAllFriendRequestsSeenController;
 import controllers.SetReceivedWorkoutSeenController;
 import controllers.SwitchWorkoutController;
 import controllers.SyncWorkoutController;
@@ -85,7 +85,7 @@ public interface LiteWeightComponent {
 
     void inject(CancelFriendRequestController cancelFriendRequestController);
 
-    void inject(SetAllRequestsSeenController setAllRequestsSeenController);
+    void inject(SetAllFriendRequestsSeenController setAllFriendRequestsSeenController);
 
     void inject(UpdateUserPreferencesController updateUserPreferencesController);
 
@@ -103,7 +103,7 @@ public interface LiteWeightComponent {
 
     void inject(GetReceivedWorkoutsController getReceivedWorkoutsController);
 
-    void inject(GetSentWorkoutController getSentWorkoutController);
+    void inject(GetSharedWorkoutController getSharedWorkoutController);
 
     void inject(SetAllReceivedWorkoutsSeenController setAllReceivedWorkoutsSeenController);
 

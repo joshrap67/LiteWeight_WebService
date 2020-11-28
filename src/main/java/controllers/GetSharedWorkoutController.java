@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.common.collect.Maps;
+import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
@@ -14,15 +15,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import managers.GetSentWorkoutManager;
+import managers.GetSharedWorkoutManager;
 import models.SharedWorkout;
 import models.User;
 import modules.Injector;
 
-public class GetSentWorkoutController implements ApiRequestController {
+public class GetSharedWorkoutController implements ApiRequestController {
 
     @Inject
-    public GetSentWorkoutManager getSentWorkoutManager;
+    public GetSharedWorkoutManager getSharedWorkoutManager;
 
     @Override
     public ResultStatus<String> processApiRequest(Map<String, Object> jsonMap,
@@ -39,14 +40,17 @@ public class GetSentWorkoutController implements ApiRequestController {
 
                 final String username = (String) jsonMap.get(User.USERNAME);
                 final String workoutId = (String) jsonMap.get(SharedWorkout.SENT_WORKOUT_ID);
-                final SharedWorkout sharedWorkout = this.getSentWorkoutManager
-                    .getSentWorkout(username, workoutId);
+                final SharedWorkout sharedWorkout = this.getSharedWorkoutManager
+                    .getSharedWorkout(username, workoutId);
 
                 resultStatus = ResultStatus
                     .successful(
                         JsonHelper.serializeMap(Maps.newHashMap(sharedWorkout.asResponse())));
             } catch (final MissingApiRequestKeyException e) {
                 throw e;
+            } catch (ManagerExecutionException meu) {
+                metrics.log("Input error: " + meu.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(meu.getMessage());
             } catch (UserNotFoundException | WorkoutNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
                 resultStatus = ResultStatus.failureBadRequest(exception.getMessage());

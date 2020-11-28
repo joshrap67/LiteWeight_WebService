@@ -27,7 +27,8 @@ public class SendFriendRequestManager {
     private final Metrics metrics;
 
     @Inject
-    public SendFriendRequestManager(final NotificationService notificationService, final UserDAO userDAO,
+    public SendFriendRequestManager(final NotificationService notificationService,
+        final UserDAO userDAO,
         final Metrics metrics) {
         this.notificationService = notificationService;
         this.userDAO = userDAO;
@@ -77,7 +78,6 @@ public class SendFriendRequestManager {
                 .withValueMap(new ValueMap().withMap(":friendsVal", friendToAdd.asMap()))
                 .withNameMap(new NameMap().with("#username", usernameToAdd));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateActiveUserData.asUpdate()));
@@ -87,6 +87,8 @@ public class SendFriendRequestManager {
             this.notificationService.sendMessage(userToAdd.getPushEndpointArn(),
                 new NotificationData(NotificationService.friendRequestAction,
                     new FriendRequestResponse(friendRequest, activeUser).asMap()));
+
+            this.metrics.commonClose(true);
             return new FriendResponse(friendToAdd, usernameToAdd);
         } catch (Exception e) {
             this.metrics.commonClose(false);

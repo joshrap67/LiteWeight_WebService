@@ -32,14 +32,14 @@ public class UpdateExerciseManager {
      *
      * @param activeUser   username of the user that is updating the exercise.
      * @param exerciseId   id of the exercise that is being updated.
-     * @param ownedExercise the exercise that is to be updated.
+     * @param updatedExercise the exercise that is to be updated.
      * @return User the user object with this exercise now updated.
      * @throws UserNotFoundException     if the active user is not found.
      * @throws InvalidAttributeException if the user item is invalid.
      * @throws ManagerExecutionException if there is any input errors.
      */
     public User updateExercise(final String activeUser, final String exerciseId,
-        final OwnedExercise ownedExercise)
+        final OwnedExercise updatedExercise)
         throws UserNotFoundException, InvalidAttributeException, ManagerExecutionException {
         final String classMethod = this.getClass().getSimpleName() + ".updateExercise";
         this.metrics.commonSetup(classMethod);
@@ -54,7 +54,7 @@ public class UpdateExerciseManager {
             final String oldExerciseName = user.getOwnedExercises().get(exerciseId)
                 .getExerciseName();
             final String exerciseError = Validator
-                .validOwnedExercise(ownedExercise, exerciseNames, oldExerciseName);
+                .validOwnedExercise(updatedExercise, exerciseNames, oldExerciseName);
             if (!exerciseError.isEmpty()) {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(exerciseError);
@@ -63,12 +63,12 @@ public class UpdateExerciseManager {
             // all input is valid so go ahead and just replace old exercise in db with updated one
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.EXERCISES + ".#exerciseId= :exerciseMap")
-                .withValueMap(new ValueMap().withMap(":exerciseMap", ownedExercise.asMap()))
+                .withValueMap(new ValueMap().withMap(":exerciseMap", updatedExercise.asMap()))
                 .withNameMap(new NameMap().with("#exerciseId", exerciseId));
             this.userDAO.updateUser(user.getUsername(), updateItemSpec);
 
             // make sure to update user that is returned to frontend
-            user.getOwnedExercises().put(exerciseId, ownedExercise);
+            user.getOwnedExercises().put(exerciseId, updatedExercise);
             this.metrics.commonClose(true);
             return user;
         } catch (Exception e) {

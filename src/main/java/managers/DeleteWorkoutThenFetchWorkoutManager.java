@@ -28,14 +28,13 @@ public class DeleteWorkoutThenFetchWorkoutManager {
     }
 
     /**
-     * Pops a workout from the workout map and then returns the next workout according to how the
-     * client is sorting it (for now it is the most recently accessed).
+     * Deletes a workout from the workout map and then returns the next workout according to the id
+     * that was passed in.
      *
      * @param activeUser       user that is popping this workout.
-     * @param deletedWorkoutId workout id of the workout that is to be popped.
-     * @return UserWithWorkout with the user object updated with the next workout on the workout
-     * list stack as well as the updated user object. Note the workout will be null if there are no
-     * more workouts after the pop.
+     * @param deletedWorkoutId workout id of the workout that is to be deleted.
+     * @return the user object updated with the next workout as well as all other updated fields.
+     * Note the workout will be null if there are no more workouts after the pop.
      * @throws Exception if the workout/user is not found.
      */
     public UserWithWorkout deleteWorkoutThenFetch(final String activeUser,
@@ -73,12 +72,12 @@ public class DeleteWorkoutThenFetchWorkoutManager {
             final UpdateItemData updateWorkoutItemData = new UpdateItemData(deletedWorkoutId,
                 WorkoutDAO.WORKOUT_TABLE_NAME);
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withDelete(updateWorkoutItemData.asDelete()));
             this.userDAO.executeWriteTransaction(actions);
 
+            this.metrics.commonClose(true);
             return new UserWithWorkout(user, nextWorkout);
         } catch (Exception e) {
             this.metrics.commonClose(false);

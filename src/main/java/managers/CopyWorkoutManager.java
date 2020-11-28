@@ -73,7 +73,6 @@ public class CopyWorkoutManager {
                     .withMap(":routineValue", oldWorkout.getRoutine().asMap()))
                 .withNameMap(new NameMap().with("#routine", Workout.ROUTINE));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateOldWorkoutItemData.asUpdate()));

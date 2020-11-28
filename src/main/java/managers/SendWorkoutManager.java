@@ -46,7 +46,7 @@ public class SendWorkoutManager {
      * Sends a workout to a recipient. Note that these workouts are separate objects with exercises
      * that are indexed by name and not by id.
      * <p>
-     * If a workout has already been sent by the active user with the same name, the old sent
+     * If a workout has already been sent by the active user with the same name, the old shared
      * workout is overwritten and updated.
      * <p>
      * A push notification is sent to the recipient upon successful creation of the sent workout.
@@ -121,7 +121,6 @@ public class SendWorkoutManager {
                 .withValueMap(
                     new ValueMap().withNumber(":sentVal", activeUserObject.getWorkoutsSent() + 1));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(recipientItemData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(activeUserItemData.asUpdate()));
@@ -134,6 +133,8 @@ public class SendWorkoutManager {
             this.notificationService.sendMessage(recipientUser.getPushEndpointArn(),
                 new NotificationData(NotificationService.receivedWorkoutAction,
                     sharedWorkoutMeta.asResponse()));
+
+            this.metrics.commonClose(true);
             return sentWorkoutId;
         } catch (Exception e) {
             this.metrics.commonClose(false);
@@ -165,7 +166,6 @@ public class SendWorkoutManager {
             stringBuilder.append("Cannot send workout to yourself.\n");
         }
 
-        // todo have a timeout for number of workouts sendable in a given amount of time?
         return stringBuilder.toString().trim();
     }
 }

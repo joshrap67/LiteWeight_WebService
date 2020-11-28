@@ -62,6 +62,7 @@ public class GetUserWorkoutManager {
                 final User result = this.newUserManager.createNewUser(activeUser);
                 userWithWorkout = new UserWithWorkout(result, null);
             }
+            this.metrics.commonClose(true);
             return userWithWorkout;
         } catch (Exception e) {
             this.metrics.commonClose(false);

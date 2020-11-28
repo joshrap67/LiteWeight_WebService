@@ -21,7 +21,8 @@ public class CancelFriendRequestManager {
     private final Metrics metrics;
 
     @Inject
-    public CancelFriendRequestManager(final NotificationService notificationService, final UserDAO userDAO,
+    public CancelFriendRequestManager(final NotificationService notificationService,
+        final UserDAO userDAO,
         final Metrics metrics) {
         this.notificationService = notificationService;
         this.userDAO = userDAO;
@@ -29,10 +30,10 @@ public class CancelFriendRequestManager {
     }
 
     /**
-     * This method gets the active user's data. If the active user's data does not exist, we assume
-     * this is their first login and we enter a new user object in the db.
+     * Cancels a friend request and then sends a notification to the user who was canceled.
      *
-     * @param activeUser The user that made the api request, trying to get data about themselves.
+     * @param activeUser       user that is canceling the request.
+     * @param usernameToCancel user that is being canceled by active user.
      */
     public void cancelRequest(final String activeUser, final String usernameToCancel)
         throws Exception {
@@ -53,7 +54,6 @@ public class CancelFriendRequestManager {
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", usernameToCancel));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateActiveUserData.asUpdate()));

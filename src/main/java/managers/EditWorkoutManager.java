@@ -32,10 +32,10 @@ public class EditWorkoutManager {
     }
 
     /**
-     * Edits a workout that is passed in by the client. The newly edited workout is saved in the
-     * database and the user's owned exercises are updated to match whether they are apart of this
-     * exercise now or not. The most frequent focus is also updated in the workout if it now is
-     * different as a result of the edits.
+     * Saves edited changes to an existing workout. The edited workout is saved in the database and
+     * the user's owned exercises are updated to match whether they are apart of this workout now or
+     * not. The most frequent focus is also updated in the workout if it now is different as a
+     * result of the edits.
      *
      * @param activeUser    the user that is editing this workout.
      * @param editedWorkout the modified workout as sent by the client.
@@ -67,8 +67,6 @@ public class EditWorkoutManager {
             editedWorkout.setMostFrequentFocus(
                 WorkoutUtils.findMostFrequentFocus(user, editedWorkout.getRoutine()));
 
-            // todo confirm the active user owns this just for security reasons?
-
             // Need to determine if the current week/day is valid (frontend's responsibility is updating them)
             confirmValidCurrentDayAndWeek(editedWorkout);
             final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
@@ -90,7 +88,6 @@ public class EditWorkoutManager {
                     .withMap(":routineMap", editedWorkout.getRoutine().asMap()))
                 .withNameMap(new NameMap().with("#routine", Workout.ROUTINE));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateWorkoutItemData.asUpdate()));

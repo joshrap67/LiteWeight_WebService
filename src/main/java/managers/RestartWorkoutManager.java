@@ -78,7 +78,6 @@ public class RestartWorkoutManager {
                     .withMap(":exercisesMap", user.getUserExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateWorkoutData.asUpdate()));
@@ -120,7 +119,6 @@ public class RestartWorkoutManager {
                             increaseAverage(workoutMeta.getAverageExercisesCompleted(),
                                 workoutMeta.getTotalExercisesSum(), 0));
                     }
-                    // todo handle this overflowing lmao
                     workoutMeta.setTotalExercisesSum(workoutMeta.getTotalExercisesSum() + 1);
                 }
             }

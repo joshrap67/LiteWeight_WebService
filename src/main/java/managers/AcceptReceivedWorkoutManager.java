@@ -40,7 +40,8 @@ public class AcceptReceivedWorkoutManager {
     private final Metrics metrics;
 
     @Inject
-    public AcceptReceivedWorkoutManager(final SharedWorkoutDAO sharedWorkoutDAO, final UserDAO userDAO,
+    public AcceptReceivedWorkoutManager(final SharedWorkoutDAO sharedWorkoutDAO,
+        final UserDAO userDAO,
         final Metrics metrics) {
         this.sharedWorkoutDAO = sharedWorkoutDAO;
         this.userDAO = userDAO;
@@ -48,12 +49,14 @@ public class AcceptReceivedWorkoutManager {
     }
 
     /**
-     * Accepts a friend request and adds the accepted user to the friends list of the active user.
-     * Upon success, a data notification is sent to the accepted user.
+     * Accepts a received workout and adds any exercises that the user doesn't already own to their
+     * owned exercises mapping.
+     * <p>
+     * Accepting a workout is the same as creating a new one, so the same action is used here.
      *
-     * @param activeUser        username of the user that is accepting the friend request.
+     * @param activeUser        username of the user that is accepting the workout.
      * @param workoutIdToAccept id of the received workout that the active user is accepting.
-     * @throws Exception if there are any input errors or if either user does not exist.
+     * @throws Exception if there are any input errors or if user does not exist.
      */
     public AcceptWorkoutResponse acceptReceivedWorkout(final String activeUser,
         final String workoutIdToAccept, final String optionalName)
@@ -64,7 +67,7 @@ public class AcceptReceivedWorkoutManager {
         try {
             final User activeUserObject = this.userDAO.getUser(activeUser);
             final SharedWorkout workoutToAccept = this.sharedWorkoutDAO
-                .getSentWorkout(workoutIdToAccept);
+                .getSharedWorkout(workoutIdToAccept);
             final SharedWorkoutMeta sharedWorkoutMeta = activeUserObject.getReceivedWorkouts()
                 .get(workoutIdToAccept);
 
@@ -130,13 +133,13 @@ public class AcceptReceivedWorkoutManager {
                 .withNameMap(new NameMap()
                     .with("#receivedWorkoutId", workoutIdToAccept)
                     .with("#workoutId", workoutId));
-            // since user is accepting the workout, delete the sent workout from the table - it's no longer needed
-            UpdateItemData updateSentWorkoutData = new UpdateItemData(
+            // since user is accepting the workout, delete the shared workout from the table - it's no longer needed
+            UpdateItemData updateSharedWorkoutData = new UpdateItemData(
                 workoutToAccept.getSentWorkoutId(), SharedWorkoutDAO.SENT_WORKOUT_TABLE_NAME);
 
             List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
-            actions.add(new TransactWriteItem().withDelete(updateSentWorkoutData.asDelete()));
+            actions.add(new TransactWriteItem().withDelete(updateSharedWorkoutData.asDelete()));
             actions.add(new TransactWriteItem()
                 .withPut(new Put().withTableName(WorkoutDAO.WORKOUT_TABLE_NAME).withItem(
                     AttributeValueUtils.convertMapToAttributeValueMap(newWorkout.asMap()))));
@@ -170,17 +173,19 @@ public class AcceptReceivedWorkoutManager {
                 }
             }
         }
-        Set<String> ownedExercises = new HashSet<>();
-        for (String exerciseId : activeUserObject.getOwnedExercises().keySet()) {
-            ownedExercises
-                .add(activeUserObject.getOwnedExercises().get(exerciseId).getExerciseName());
-        }
+
         List<WorkoutMeta> workoutMetas = new ArrayList<>(
             activeUserObject.getUserWorkouts().values());
         for (WorkoutMeta workoutMeta : workoutMetas) {
             if (workoutMeta.getWorkoutName().equals(sharedWorkout.getWorkoutName())) {
                 error.append("Workout with this name already exists.");
             }
+        }
+
+        Set<String> ownedExercises = new HashSet<>();
+        for (String exerciseId : activeUserObject.getOwnedExercises().keySet()) {
+            ownedExercises
+                .add(activeUserObject.getOwnedExercises().get(exerciseId).getExerciseName());
         }
         Set<String> totalExercises = Sets.union(sentWorkoutExercises, ownedExercises);
         if (activeUserObject.getPremiumToken() == null

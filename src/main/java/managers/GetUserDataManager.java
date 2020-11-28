@@ -26,9 +26,8 @@ public class GetUserDataManager {
     /**
      * Returns the data of a given user from the user table.
      *
-     * @param username Username of user that the client is requesting data for.
-     * @return UserResponse of the user's active data (certain fields omitted for client
-     * consumption)
+     * @param username username of user that the client is requesting data for.
+     * @return user object of the given username.
      */
     public User getUserData(final String username)
         throws UserNotFoundException, InvalidAttributeException {
@@ -38,6 +37,7 @@ public class GetUserDataManager {
         try {
             Item user = Optional.ofNullable(this.userDAO.getUserItem(username)).orElseThrow(
                 () -> new UserNotFoundException(String.format("%s not found.", username)));
+            this.metrics.commonClose(true);
             return new User(user);
         } catch (Exception e) {
             this.metrics.commonClose(false);
@@ -67,6 +67,7 @@ public class GetUserDataManager {
                 // user already exists in DB so just return their data
                 user = new User(userItem);
             }
+            this.metrics.commonClose(true);
             return user;
         } catch (Exception e) {
             this.metrics.commonClose(false);

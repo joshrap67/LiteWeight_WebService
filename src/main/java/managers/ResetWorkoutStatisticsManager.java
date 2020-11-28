@@ -28,16 +28,13 @@ public class ResetWorkoutStatisticsManager {
      *
      * @param activeUser user that is resetting the workout statistics.
      * @param workoutId  id of the workout whose statistics are to be reset.
-     * @return User user with updated workout meta mapping.
-     * @throws InvalidAttributeException
-     * @throws UserNotFoundException
+     * @return updated workout meta with all statistics reset.
      */
-    public User resetStatistics(final String activeUser, final String workoutId)
+    public WorkoutMeta resetStatistics(final String activeUser, final String workoutId)
         throws InvalidAttributeException, UserNotFoundException {
-        final String classMethod = this.getClass().getSimpleName() + ".execute";
+        final String classMethod = this.getClass().getSimpleName() + ".resetStatistics";
         this.metrics.commonSetup(classMethod);
 
-        // todo return just the updated meta...
         try {
             final User user = this.userDAO.getUser(activeUser);
 
@@ -53,7 +50,7 @@ public class ResetWorkoutStatisticsManager {
             this.userDAO.updateUser(activeUser, updateUserItemData);
 
             this.metrics.commonClose(true);
-            return user;
+            return workoutMeta;
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

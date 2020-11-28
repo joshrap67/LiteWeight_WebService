@@ -2,6 +2,7 @@ package controllers;
 
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
+import models.WorkoutMeta;
 import utils.ErrorMessage;
 import utils.JsonHelper;
 import utils.Metrics;
@@ -13,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.ResetWorkoutStatisticsManager;
-import models.User;
 import models.Workout;
 import modules.Injector;
 
@@ -37,7 +37,7 @@ public class ResetWorkoutStatisticsController implements ApiRequestController {
                 final String workoutId = (String) json.get(Workout.WORKOUT_ID);
 
                 Injector.getInjector(metrics).inject(this);
-                final User result = this.resetWorkoutStatisticsManager
+                final WorkoutMeta result = this.resetWorkoutStatisticsManager
                     .resetStatistics(activeUser, workoutId);
                 resultStatus = ResultStatus
                     .successful(JsonHelper.serializeMap(result.asResponse()));

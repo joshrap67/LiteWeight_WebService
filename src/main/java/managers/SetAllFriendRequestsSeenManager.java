@@ -9,13 +9,13 @@ import utils.Metrics;
 import javax.inject.Inject;
 import models.User;
 
-public class SetAllRequestsSeenManager {
+public class SetAllFriendRequestsSeenManager {
 
     private final UserDAO userDAO;
     private final Metrics metrics;
 
     @Inject
-    public SetAllRequestsSeenManager(final UserDAO userDAO, final Metrics metrics) {
+    public SetAllFriendRequestsSeenManager(final UserDAO userDAO, final Metrics metrics) {
         this.userDAO = userDAO;
         this.metrics = metrics;
     }
@@ -27,9 +27,9 @@ public class SetAllRequestsSeenManager {
      * @throws InvalidAttributeException if error with user item.
      * @throws UserNotFoundException     if active user is not found.
      */
-    public void setAllRequestsSeen(final String activeUser)
+    public void setAllFriendRequestsSeen(final String activeUser)
         throws InvalidAttributeException, UserNotFoundException {
-        final String classMethod = this.getClass().getSimpleName() + ".setAllRequestsSeen";
+        final String classMethod = this.getClass().getSimpleName() + ".setAllFriendRequestsSeen";
         this.metrics.commonSetup(classMethod);
 
         try {
@@ -41,11 +41,11 @@ public class SetAllRequestsSeenManager {
 
             final UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.FRIEND_REQUESTS + "=:friendRequestsVal")
-                .withValueMap(
-                    new ValueMap().withMap(":friendRequestsVal", user.getFriendRequestsMap()));
+                .withValueMap(new ValueMap().
+                    withMap(":friendRequestsVal", user.getFriendRequestsMap()));
             this.userDAO.updateUser(activeUser, updateActiveUserData);
 
-            this.metrics.commonClose(false);
+            this.metrics.commonClose(true);
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

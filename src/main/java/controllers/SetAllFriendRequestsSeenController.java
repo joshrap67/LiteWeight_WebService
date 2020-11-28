@@ -2,6 +2,7 @@ package controllers;
 
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
+import managers.SetAllFriendRequestsSeenManager;
 import utils.ErrorMessage;
 import utils.Metrics;
 import imports.RequestFields;
@@ -11,13 +12,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import managers.SetAllRequestsSeenManager;
 import modules.Injector;
 
-public class SetAllRequestsSeenController implements ApiRequestController {
+public class SetAllFriendRequestsSeenController implements ApiRequestController {
 
     @Inject
-    public SetAllRequestsSeenManager setAllRequestsSeenManager;
+    public SetAllFriendRequestsSeenManager setAllFriendRequestsSeenManager;
 
     @Override
     public ResultStatus<String> processApiRequest(Map<String, Object> json,
@@ -32,7 +32,7 @@ public class SetAllRequestsSeenController implements ApiRequestController {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
 
                 Injector.getInjector(metrics).inject(this);
-                this.setAllRequestsSeenManager.setAllRequestsSeen(activeUser);
+                this.setAllFriendRequestsSeenManager.setAllFriendRequestsSeen(activeUser);
                 resultStatus = ResultStatus.successful("All requests set to seen successfully.");
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));

@@ -64,7 +64,6 @@ public class NewWorkoutManager {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(errorMessage);
             }
-            // todo restrict number of exercises per day to something reasonable like 30?
             // no error, so go ahead and try and insert this new workout along with updating active user
             final Workout newWorkout = new Workout();
             newWorkout.setCreationDate(creationTime);
@@ -100,7 +99,6 @@ public class NewWorkoutManager {
                     .withMap(":exercisesMap", user.getUserExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateItemData.asUpdate()));
             actions.add(new TransactWriteItem()

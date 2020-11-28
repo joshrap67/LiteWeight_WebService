@@ -77,7 +77,6 @@ public class AcceptFriendRequestManager {
                 .withNameMap(new NameMap().with("#username", activeUser))
                 .withValueMap(new ValueMap().withBoolean(":confirmedVal", true));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(activeUserData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));

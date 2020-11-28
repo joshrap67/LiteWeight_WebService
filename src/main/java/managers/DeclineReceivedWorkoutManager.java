@@ -24,10 +24,10 @@ public class DeclineReceivedWorkoutManager {
     }
 
     /**
-     * This method gets the active user's data. If the active user's data does not exist, we assume
-     * this is their first login and we enter a new user object in the db.
+     * Declines a received workout and deletes it from the shared workout table.
      *
-     * @param activeUser The user that made the api request, trying to get data about themselves.
+     * @param activeUser        user that is declining the workout.
+     * @param declinedWorkoutId id of the workout that is being declined.
      */
     public void declineWorkout(final String activeUser, final String declinedWorkoutId)
         throws Exception {

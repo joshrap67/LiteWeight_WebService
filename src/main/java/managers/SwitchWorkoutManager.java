@@ -65,7 +65,7 @@ public class SwitchWorkoutManager {
                 .withNameMap(new NameMap().with("#newWorkoutId", newWorkoutId));
 
             // persist the current week/day/routine of the old workout
-            syncWorkoutManager.syncWorkout(oldWorkout);
+            this.syncWorkoutManager.syncWorkout(oldWorkout);
 
             this.userDAO.updateUser(activeUser, updateItemSpec);
 

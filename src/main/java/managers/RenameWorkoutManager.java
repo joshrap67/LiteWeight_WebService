@@ -76,7 +76,7 @@ public class RenameWorkoutManager {
                 WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " + Workout.WORKOUT_NAME + "= :workoutNameVal")
                 .withValueMap(new ValueMap().withString(":workoutNameVal", newWorkoutName));
-            // want a transaction since more than one object is being updated at once
+
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateWorkoutItemData.asUpdate()));

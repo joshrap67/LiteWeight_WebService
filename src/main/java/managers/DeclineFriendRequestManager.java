@@ -22,7 +22,8 @@ public class DeclineFriendRequestManager {
     private final Metrics metrics;
 
     @Inject
-    public DeclineFriendRequestManager(final NotificationService notificationService, final UserDAO userDAO,
+    public DeclineFriendRequestManager(final NotificationService notificationService,
+        final UserDAO userDAO,
         final Metrics metrics) {
         this.notificationService = notificationService;
         this.userDAO = userDAO;
@@ -30,12 +31,13 @@ public class DeclineFriendRequestManager {
     }
 
     /**
-     * This method gets the active user's data. If the active user's data does not exist, we assume
-     * this is their first login and we enter a new user object in the db.
+     * Declines a friend request and sends a notification to the user who was declined.
      *
-     * @param activeUser The user that made the api request, trying to get data about themselves.
+     * @param activeUser   user that is declining the request.
+     * @param declinedUser user whose request has been declined.
      */
-    public void declineRequest(final String activeUser, final String declinedUser) throws Exception {
+    public void declineRequest(final String activeUser, final String declinedUser)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".declineRequest";
         this.metrics.commonSetup(classMethod);
 
@@ -62,7 +64,6 @@ public class DeclineFriendRequestManager {
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", activeUser));
 
-            // want a transaction since more than one object is being updated at once
             final List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(activeUserData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateFriendData.asUpdate()));

@@ -52,7 +52,7 @@ public class SetReceivedWorkoutSeenManager {
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
             this.userDAO.updateUser(activeUser, updateActiveUserData);
 
-            this.metrics.commonClose(false);
+            this.metrics.commonClose(true);
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

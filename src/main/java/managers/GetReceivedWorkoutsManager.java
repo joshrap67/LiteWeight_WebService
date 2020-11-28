@@ -44,6 +44,7 @@ public class GetReceivedWorkoutsManager {
             final Map<String, SharedWorkoutMeta> receivedWorkouts = activeUserObject
                 .getReceivedWorkouts();
 
+            this.metrics.commonClose(true);
             return getBatchOfWorkouts(receivedWorkouts, batchNumber);
         } catch (Exception e) {
             this.metrics.commonClose(false);
