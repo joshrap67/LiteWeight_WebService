@@ -1,5 +1,6 @@
-package helpers;
+package utils;
 
+import imports.Globals;
 import java.util.ArrayList;
 import java.util.List;
 import models.OwnedExercise;
@@ -18,7 +19,6 @@ public class Validator {
         StringBuilder error = new StringBuilder();
         if (activeUser.getUserWorkouts().size() >= Globals.MAX_FREE_WORKOUTS
             && activeUser.getPremiumToken() == null) {
-            // TODO need to actually verify that token is good?
             error.append("Max amount of free workouts reached.\n");
         }
         if (activeUser.getPremiumToken() != null

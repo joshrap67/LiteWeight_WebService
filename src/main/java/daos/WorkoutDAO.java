@@ -16,7 +16,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsResult;
 import exceptions.InvalidAttributeException;
 import exceptions.WorkoutNotFoundException;
-import helpers.Config;
+import imports.Config;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,6 @@ import models.Workout;
 public class WorkoutDAO {
 
     public static final String WORKOUT_TABLE_NAME = "workouts";
-
     public static final String WORKOUT_TABLE_PRIMARY_KEY = Workout.WORKOUT_ID;
 
     protected final Table workoutTable;

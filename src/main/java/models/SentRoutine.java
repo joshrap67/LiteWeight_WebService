@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class SentRoutine implements Model, Iterable<Integer> {
 
-    private Map<Integer, SentWeek> weeks;
+    private Map<Integer, SharedWeek> weeks;
 
     public SentRoutine() {
         this.weeks = new HashMap<>();
@@ -21,19 +21,19 @@ public class SentRoutine implements Model, Iterable<Integer> {
     public SentRoutine(final Routine routine, Map<String, OwnedExercise> ownedExerciseMap) {
         this.weeks = new HashMap<>();
         for (Integer week : routine) {
-            final SentWeek sentWeek = new SentWeek();
+            final SharedWeek sharedWeek = new SharedWeek();
             for (Integer day : routine.getWeek(week)) {
-                final SentDay sentDay = new SentDay();
+                final SharedDay sharedDay = new SharedDay();
                 int sortVal = 0;
                 for (RoutineExercise exercise : routine.getExerciseListForDay(week, day)) {
-                    final SentExercise sentExercise = new SentExercise(exercise,
+                    final SharedExercise sharedExercise = new SharedExercise(exercise,
                         ownedExerciseMap.get(exercise.getExerciseId()).getExerciseName());
-                    sentDay.put(sortVal, sentExercise);
+                    sharedDay.put(sortVal, sharedExercise);
                     sortVal++;
                 }
-                sentWeek.put(day, sentDay);
+                sharedWeek.put(day, sharedDay);
             }
-            this.putWeek(week, sentWeek);
+            this.putWeek(week, sharedWeek);
         }
     }
 
@@ -43,29 +43,29 @@ public class SentRoutine implements Model, Iterable<Integer> {
         } else {
             this.weeks = new HashMap<>();
             for (String week : json.keySet()) {
-                SentWeek sentWeek = new SentWeek((Map<String, Object>) json.get(week));
-                this.weeks.put(Integer.parseInt(week), sentWeek);
+                SharedWeek sharedWeek = new SharedWeek((Map<String, Object>) json.get(week));
+                this.weeks.put(Integer.parseInt(week), sharedWeek);
             }
         }
     }
 
-    public List<SentExercise> getExerciseListForDay(int week, int day) {
-        List<SentExercise> exerciseList = new ArrayList<>();
+    public List<SharedExercise> getExerciseListForDay(int week, int day) {
+        List<SharedExercise> exerciseList = new ArrayList<>();
         for (Integer sortVal : this.getWeek(week).getDay(day)) {
             exerciseList.add(this.getDay(week, day).getExercise(sortVal));
         }
         return exerciseList;
     }
 
-    public SentWeek getWeek(int week) {
+    public SharedWeek getWeek(int week) {
         return this.weeks.get(week);
     }
 
-    public SentDay getDay(int week, int day) {
+    public SharedDay getDay(int week, int day) {
         return this.weeks.get(week).getDay(day);
     }
 
-    public void putWeek(int weekIndex, SentWeek week) {
+    public void putWeek(int weekIndex, SharedWeek week) {
         this.weeks.put(weekIndex, week);
     }
 

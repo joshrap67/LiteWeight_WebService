@@ -5,8 +5,8 @@ import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import daos.UserDAO;
 import daos.WorkoutDAO;
-import helpers.Metrics;
-import helpers.WorkoutHelper;
+import utils.Metrics;
+import utils.WorkoutUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -65,7 +65,7 @@ public class DeleteExerciseManager {
             final Workout workout = this.workoutDAO.getWorkout(workoutId);
 
             Routine.deleteExerciseFromRoutine(exerciseId, workout.getRoutine());
-            final String newMostFrequentFocus = WorkoutHelper
+            final String newMostFrequentFocus = WorkoutUtils
                 .findMostFrequentFocus(user, workout.getRoutine());
             workout.setMostFrequentFocus(newMostFrequentFocus);
 

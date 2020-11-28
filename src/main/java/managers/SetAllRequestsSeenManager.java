@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
-import helpers.Metrics;
+import utils.Metrics;
 import javax.inject.Inject;
 import models.User;
 

@@ -1,27 +1,27 @@
 package managers;
 
-import aws.SnsAccess;
+import services.NotificationService;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.sns.model.DeleteEndpointRequest;
 import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
-import helpers.Metrics;
+import utils.Metrics;
 import javax.inject.Inject;
 import models.User;
 
 public class RemoveEndpointTokenManager {
 
     private final UserDAO userDAO;
-    private final SnsAccess snsAccess;
+    private final NotificationService notificationService;
     private final Metrics metrics;
 
     @Inject
-    public RemoveEndpointTokenManager(final UserDAO userDAO, final SnsAccess snsAccess,
+    public RemoveEndpointTokenManager(final UserDAO userDAO, final NotificationService notificationService,
         final Metrics metrics) {
         this.userDAO = userDAO;
-        this.snsAccess = snsAccess;
+        this.notificationService = notificationService;
         this.metrics = metrics;
     }
 
@@ -50,7 +50,7 @@ public class RemoveEndpointTokenManager {
                 // ARN is no longer in DB. Now try and delete the ARN from SNS
                 final DeleteEndpointRequest deleteEndpointRequest = new DeleteEndpointRequest()
                     .withEndpointArn(user.getPushEndpointArn());
-                this.snsAccess.unregisterPlatformEndpoint(deleteEndpointRequest);
+                this.notificationService.unregisterPlatformEndpoint(deleteEndpointRequest);
             }
             this.metrics.commonClose(true);
         } catch (Exception e) {

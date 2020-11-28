@@ -1,6 +1,6 @@
 package responses;
 
-import helpers.RequestFields;
+import imports.RequestFields;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;

@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.List;
@@ -29,9 +29,7 @@ public class BlockUserController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, User.USERNAME);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, User.USERNAME);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {
@@ -45,10 +43,10 @@ public class BlockUserController implements ApiRequestController {
 
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
-                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(meu.getMessage());
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

@@ -2,10 +2,10 @@ package controllers;
 
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +25,6 @@ public class SetAllRequestsSeenController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         final List<String> requiredKeys = Collections.singletonList(RequestFields.ACTIVE_USER);
 
         if (json.keySet().containsAll(requiredKeys)) {
@@ -37,7 +36,7 @@ public class SetAllRequestsSeenController implements ApiRequestController {
                 resultStatus = ResultStatus.successful("All requests set to seen successfully.");
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

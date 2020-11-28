@@ -1,4 +1,4 @@
-package helpers;
+package utils;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import java.util.HashMap;
@@ -26,7 +26,6 @@ public class Metrics {
 
     public Metrics(final String requestId, final LambdaLogger lambdaLogger) {
         this.functionNames = new LinkedList<>();
-
         this.requestId = requestId;
         this.lambdaLogger = lambdaLogger;
         this.countMetrics = new HashMap<>();
@@ -42,14 +41,6 @@ public class Metrics {
         this.requestBody = requestBody;
     }
 
-    public void removeFunctionName() {
-        this.functionNames.pop();
-    }
-
-    public String getRequestId() {
-        return this.requestId;
-    }
-
     public void commonSetup(String functionName) {
         this.setFunctionName(functionName);
         this.initTimeMetric(Metrics.TIME);
@@ -59,7 +50,6 @@ public class Metrics {
     public void commonClose(boolean status) {
         this.addBooleanMetric(status);
         this.finalizeTimeMetric(Metrics.TIME);
-//        this.removeFunctionName();
     }
 
     private void ensureFunctionKeyExists(Map input) {
@@ -87,14 +77,6 @@ public class Metrics {
         }
     }
 
-    public void addIntegerMetric(String metricName) {
-        this.ensureFunctionKeyExists(this.countMetrics);
-
-        if (!this.countMetrics.get(this.functionNames.peek()).containsKey(metricName)) {
-            this.countMetrics.get(this.functionNames.peek()).put(metricName, 0);
-        }
-    }
-
     public void incrementMetric(String metricName) {
         this.ensureFunctionKeyExists(this.countMetrics);
 
@@ -104,16 +86,6 @@ public class Metrics {
                     this.countMetrics.get(this.functionNames.peek()).get(metricName) + 1);
         } else {
             this.addIntegerMetric(metricName, 1); // it's not there -> implies it was 0
-        }
-    }
-
-    public void decrementMetric(String metricName) {
-        this.ensureFunctionKeyExists(this.countMetrics);
-
-        if (this.countMetrics.get(this.functionNames.peek()).containsKey(metricName)) {
-            this.countMetrics.get(this.functionNames.peek())
-                .replace(metricName,
-                    this.countMetrics.get(this.functionNames.peek()).get(metricName) - 1);
         }
     }
 

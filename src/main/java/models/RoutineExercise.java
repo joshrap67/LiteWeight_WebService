@@ -1,6 +1,6 @@
 package models;
 
-import helpers.Parser;
+import utils.Parser;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,14 +32,14 @@ public class RoutineExercise implements Model {
         this.details = (String) json.get(DETAILS);
     }
 
-    public RoutineExercise(final SentExercise sentExercise, final String exerciseId) {
+    public RoutineExercise(final SharedExercise sharedExercise, final String exerciseId) {
         // this constructor is used when converting from an exercise from a sent workout back to a normal workout exercise
         this.completed = false;
         this.exerciseId = exerciseId;
-        this.weight = sentExercise.getWeight();
-        this.sets = sentExercise.getSets();
-        this.reps = sentExercise.getReps();
-        this.details = sentExercise.getDetails();
+        this.weight = sharedExercise.getWeight();
+        this.sets = sharedExercise.getSets();
+        this.reps = sharedExercise.getReps();
+        this.details = sharedExercise.getDetails();
     }
 
 

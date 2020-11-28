@@ -2,11 +2,11 @@ package controllers;
 
 import com.google.common.collect.ImmutableList;
 import exceptions.MissingApiRequestKeyException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Map;
 import javax.inject.Inject;
@@ -31,7 +31,8 @@ public class NewUserController implements ApiRequestController {
             if (json.containsKey(User.USERNAME)) {
                 final String username = (String) json.get(User.USERNAME);
                 final User result = this.newUserManager.createNewUser(username);
-                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asResponse()));
+                resultStatus = ResultStatus
+                    .successful(JsonHelper.serializeMap(result.asResponse()));
             } else {
                 throw new MissingApiRequestKeyException(
                     ImmutableList.of(RequestFields.ACTIVE_USER));

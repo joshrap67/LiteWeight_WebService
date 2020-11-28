@@ -6,7 +6,7 @@ import static java.util.stream.Collectors.toMap;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import exceptions.InvalidAttributeException;
-import helpers.AttributeValueHelper;
+import utils.AttributeValueUtils;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class SentWorkout implements Model {
+public class SharedWorkout implements Model {
 
     public static final String SENT_WORKOUT_ID = "sentWorkoutId";
     public static final String WORKOUT_NAME = "workoutName";
@@ -30,14 +30,14 @@ public class SentWorkout implements Model {
     private String workoutName;
     private String creator;
     private SentRoutine routine;
-    private Map<String, SentWorkoutExercise> exercises;
+    private Map<String, SharedWorkoutExercise> exercises;
 
-    public SentWorkout(final Item userItem)
+    public SharedWorkout(final Item userItem)
         throws InvalidAttributeException {
         this(userItem.asMap());
     }
 
-    public SentWorkout(Map<String, Object> json) throws InvalidAttributeException {
+    public SharedWorkout(Map<String, Object> json) throws InvalidAttributeException {
         this.sentWorkoutId = (String) json.get(SENT_WORKOUT_ID);
         this.workoutName = (String) json.get(WORKOUT_NAME);
         this.creator = (String) json.get(CREATOR);
@@ -45,7 +45,7 @@ public class SentWorkout implements Model {
         this.routine = new SentRoutine((Map<String, Object>) json.get(ROUTINE));
     }
 
-    public SentWorkout(final Workout workout, final User user, final String sentWorkoutId) {
+    public SharedWorkout(final Workout workout, final User user, final String sentWorkoutId) {
         this.sentWorkoutId = sentWorkoutId;
         this.workoutName = workout.getWorkoutName();
         this.creator = workout.getCreator();
@@ -66,7 +66,7 @@ public class SentWorkout implements Model {
             }
         }
         for (String exerciseName : exerciseNames) {
-            this.exercises.putIfAbsent(exerciseName, new SentWorkoutExercise(
+            this.exercises.putIfAbsent(exerciseName, new SharedWorkoutExercise(
                 user.getOwnedExercises().get(exerciseNameToId.get(exerciseName))));
         }
     }
@@ -78,9 +78,9 @@ public class SentWorkout implements Model {
             .putIfAbsent(SENT_WORKOUT_ID, new AttributeValue(this.sentWorkoutId));
         workoutToSendItemValues.putIfAbsent(CREATOR, new AttributeValue(this.creator));
         workoutToSendItemValues.putIfAbsent(ROUTINE, new AttributeValue()
-            .withM(AttributeValueHelper.convertMapToAttributeValueMap(this.routine.asMap())));
+            .withM(AttributeValueUtils.convertMapToAttributeValueMap(this.routine.asMap())));
         workoutToSendItemValues.putIfAbsent(EXERCISES, new AttributeValue()
-            .withM(AttributeValueHelper.convertMapToAttributeValueMap(getExercisesMap())));
+            .withM(AttributeValueUtils.convertMapToAttributeValueMap(getExercisesMap())));
         return workoutToSendItemValues;
     }
 
@@ -90,7 +90,7 @@ public class SentWorkout implements Model {
         } else {
             this.exercises = new HashMap<>();
             for (String exerciseName : json.keySet()) {
-                this.exercises.putIfAbsent(exerciseName, new SentWorkoutExercise(
+                this.exercises.putIfAbsent(exerciseName, new SharedWorkoutExercise(
                     (Map<String, Object>) json.get(exerciseName)));
             }
         }
@@ -114,7 +114,7 @@ public class SentWorkout implements Model {
 
         return this.exercises.entrySet().stream().collect(
             collectingAndThen(toMap(Entry::getKey,
-                (Map.Entry<String, SentWorkoutExercise> e) -> e.getValue().asMap()), HashMap::new));
+                (Map.Entry<String, SharedWorkoutExercise> e) -> e.getValue().asMap()), HashMap::new));
     }
 
     @Override

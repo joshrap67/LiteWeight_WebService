@@ -7,11 +7,11 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
-import helpers.AttributeValueHelper;
-import helpers.Metrics;
-import helpers.UpdateItemData;
-import helpers.Validator;
-import helpers.WorkoutHelper;
+import utils.AttributeValueUtils;
+import utils.Metrics;
+import utils.UpdateItemData;
+import utils.Validator;
+import utils.WorkoutUtils;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class NewWorkoutManager {
             final Workout newWorkout = new Workout();
             newWorkout.setCreationDate(creationTime);
             newWorkout.setCreator(activeUser);
-            newWorkout.setMostFrequentFocus(WorkoutHelper.findMostFrequentFocus(user, routine));
+            newWorkout.setMostFrequentFocus(WorkoutUtils.findMostFrequentFocus(user, routine));
             newWorkout.setWorkoutId(workoutId);
             newWorkout.setWorkoutName(workoutName.trim());
             newWorkout.setRoutine(routine);
@@ -86,7 +86,7 @@ public class NewWorkoutManager {
             user.putNewWorkoutMeta(workoutId, workoutMeta);
 
             // update all the exercises that are now apart of this workout
-            WorkoutHelper.updateUserExercises(user, routine, workoutId, workoutName);
+            WorkoutUtils.updateOwnedExercises(user, routine, workoutId, workoutName);
 
             final UpdateItemData updateItemData = new UpdateItemData(activeUser,
                 UserDAO.USERS_TABLE_NAME)
@@ -105,7 +105,7 @@ public class NewWorkoutManager {
             actions.add(new TransactWriteItem().withUpdate(updateItemData.asUpdate()));
             actions.add(new TransactWriteItem()
                 .withPut(new Put().withTableName(WorkoutDAO.WORKOUT_TABLE_NAME).withItem(
-                    AttributeValueHelper.convertMapToAttributeValueMap(newWorkout.asMap()))));
+                    AttributeValueUtils.convertMapToAttributeValueMap(newWorkout.asMap()))));
             this.workoutDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);

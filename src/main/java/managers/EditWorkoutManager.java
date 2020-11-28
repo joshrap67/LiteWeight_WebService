@@ -6,10 +6,10 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
-import helpers.Metrics;
-import helpers.UpdateItemData;
-import helpers.Validator;
-import helpers.WorkoutHelper;
+import utils.Metrics;
+import utils.UpdateItemData;
+import utils.Validator;
+import utils.WorkoutUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -60,12 +60,12 @@ public class EditWorkoutManager {
             }
 
             // update all the exercises that are now apart of this workout
-            WorkoutHelper.updateUserExercisesOnEdit(user, editedWorkout.getRoutine(),
+            WorkoutUtils.updateOwnedExercisesOnEdit(user, editedWorkout.getRoutine(),
                 oldWorkout.getRoutine(), workoutId,
                 oldWorkout.getWorkoutName());
             // update most frequent focus since exercises have changed
             editedWorkout.setMostFrequentFocus(
-                WorkoutHelper.findMostFrequentFocus(user, editedWorkout.getRoutine()));
+                WorkoutUtils.findMostFrequentFocus(user, editedWorkout.getRoutine()));
 
             // todo confirm the active user owns this just for security reasons?
 

@@ -6,7 +6,7 @@ import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.ManagerExecutionException;
 import exceptions.UserNotFoundException;
-import helpers.Metrics;
+import utils.Metrics;
 import javax.inject.Inject;
 import models.User;
 

@@ -1,7 +1,7 @@
 package modules;
 
-import aws.S3Access;
-import aws.SnsAccess;
+import services.StorageService;
+import services.NotificationService;
 import dagger.Module;
 import dagger.Provides;
 
@@ -10,7 +10,7 @@ import daos.UserDAO;
 import daos.WorkoutDAO;
 import javax.inject.Singleton;
 import lombok.RequiredArgsConstructor;
-import helpers.Metrics;
+import utils.Metrics;
 
 @Module
 @RequiredArgsConstructor
@@ -32,14 +32,14 @@ public class LiteWeightModule {
 
     @Provides
     @Singleton
-    public S3Access provideS3Access() {
-        return new S3Access();
+    public StorageService provideS3Access() {
+        return new StorageService();
     }
 
     @Provides
     @Singleton
-    public SnsAccess provideSnsAccess() {
-        return new SnsAccess();
+    public NotificationService provideSnsAccess() {
+        return new NotificationService();
     }
 
     @Provides

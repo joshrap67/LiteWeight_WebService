@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.toMap;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import exceptions.InvalidAttributeException;
-import helpers.Parser;
+import utils.Parser;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;

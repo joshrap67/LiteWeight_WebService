@@ -1,30 +1,30 @@
 package managers;
 
-import aws.SnsAccess;
-import daos.SentWorkoutDAO;
+import daos.SharedWorkoutDAO;
+import services.NotificationService;
 import daos.UserDAO;
 import daos.WorkoutDAO;
-import helpers.Config;
+import imports.Config;
 import javax.inject.Inject;
-import helpers.Metrics;
+import utils.Metrics;
 
 public class WarmingManager {
 
     private final UserDAO userDAO;
     private final WorkoutDAO workoutDAO;
-    private final SentWorkoutDAO sentWorkoutDAO;
-    private final SnsAccess snsAccess;
+    private final SharedWorkoutDAO sharedWorkoutDAO;
+    private final NotificationService notificationService;
     private final Metrics metrics;
 
     @Inject
     public WarmingManager(final UserDAO userDAO, final WorkoutDAO workoutDAO,
-        final SentWorkoutDAO sentWorkoutDAO, final Metrics metrics,
-        final SnsAccess snsAccess) {
-        this.sentWorkoutDAO = sentWorkoutDAO;
+        final SharedWorkoutDAO sharedWorkoutDAO, final Metrics metrics,
+        final NotificationService notificationService) {
+        this.sharedWorkoutDAO = sharedWorkoutDAO;
         this.userDAO = userDAO;
         this.workoutDAO = workoutDAO;
         this.metrics = metrics;
-        this.snsAccess = snsAccess;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -38,9 +38,9 @@ public class WarmingManager {
 
         try {
             this.userDAO.describeUserTable();
-            this.sentWorkoutDAO.describeSentWorkoutTable();
+            this.sharedWorkoutDAO.describeSentWorkoutTable();
             this.workoutDAO.describeWorkoutTable();
-            this.snsAccess.getPlatformAttributes(Config.PUSH_SNS_PLATFORM_ARN_DEV);
+            this.notificationService.getPlatformAttributes(Config.PUSH_SNS_PLATFORM_ARN);
 
             this.metrics.commonClose(true);
         } catch (Exception e) {

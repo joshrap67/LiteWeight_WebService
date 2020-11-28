@@ -5,8 +5,8 @@ import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import daos.UserDAO;
 import exceptions.ManagerExecutionException;
-import helpers.Globals;
-import helpers.Metrics;
+import imports.Globals;
+import utils.Metrics;
 import javax.inject.Inject;
 import models.User;
 

@@ -3,12 +3,12 @@ package controllers;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.Parser;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import utils.Parser;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,7 +53,7 @@ public class GetReceivedWorkoutsController implements ApiRequestController {
                 throw e;
             } catch (UserNotFoundException | WorkoutNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
-                resultStatus = ResultStatus.failureBadEntity(exception.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
             } catch (final Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

@@ -6,13 +6,13 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
-import helpers.TokenHelper;
-import helpers.WarningMessage;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
+import utils.TokenUtils;
+import utils.WarningMessage;
 import interfaces.ApiRequestController;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import java.util.Map;
 public class ProxyPostController implements
     RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    // all the different actions this service has
+    // all the different actions this web service has
     private static final Map<String, Class<? extends ApiRequestController>> ACTIONS_TO_CONTROLLERS = Maps
         .newHashMap(ImmutableMap.<String, Class<? extends ApiRequestController>>builder()
             .put("getUserData", GetUserDataController.class)
@@ -86,7 +86,7 @@ public class ProxyPostController implements
                     if (!jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                         // get active user from id token passed to API and put it in the request payload
                         jsonMap.put(RequestFields.ACTIVE_USER,
-                            TokenHelper.getActiveUserFromRequest(request, context));
+                            TokenUtils.getActiveUserFromRequest(request, context));
 
                         final Class<? extends ApiRequestController> controller = ACTIONS_TO_CONTROLLERS
                             .get(action);
@@ -130,7 +130,6 @@ public class ProxyPostController implements
         metrics.commonClose(resultStatus.success);
         metrics.logMetrics();
 
-        // todo return 400s not 422s
         return new APIGatewayProxyResponseEvent()
             .withBody(resultStatus.resultMessage)
             .withStatusCode(resultStatus.responseCode);

@@ -6,16 +6,17 @@ import java.util.Map;
 import javax.inject.Inject;
 import managers.WarmingManager;
 import modules.Injector;
-import helpers.ErrorMessage;
-import helpers.Metrics;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.Metrics;
+import imports.ResultStatus;
 
 public class WarmingController implements ApiRequestController {
 
     @Inject
     public WarmingManager warmingManager;
 
-    public ResultStatus<String> processApiRequest(final Map<String, Object> jsonMap, final Metrics metrics)
+    public ResultStatus<String> processApiRequest(final Map<String, Object> jsonMap,
+        final Metrics metrics)
         throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 

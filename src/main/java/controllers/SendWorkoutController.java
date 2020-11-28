@@ -5,18 +5,18 @@ import com.google.common.collect.Maps;
 import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.SendWorkoutManager;
-import models.SentWorkout;
+import models.SharedWorkout;
 import models.User;
 import models.Workout;
 import modules.Injector;
@@ -32,7 +32,6 @@ public class SendWorkoutController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         final List<String> requiredKeys = Arrays
             .asList(RequestFields.ACTIVE_USER, User.USERNAME, Workout.WORKOUT_ID);
 
@@ -48,14 +47,14 @@ public class SendWorkoutController implements ApiRequestController {
                 resultStatus = ResultStatus
                     .successful(JsonHelper.serializeMap(Maps.newHashMap(
                         ImmutableMap.<String, String>builder()
-                            .put(SentWorkout.SENT_WORKOUT_ID, sentWorkoutId)
+                            .put(SharedWorkout.SENT_WORKOUT_ID, sentWorkoutId)
                             .build())));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
-                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(meu.getMessage());
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

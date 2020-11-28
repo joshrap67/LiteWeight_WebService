@@ -1,24 +1,24 @@
 package managers;
 
-import aws.S3Access;
+import services.StorageService;
 import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
-import helpers.Metrics;
+import utils.Metrics;
 import javax.inject.Inject;
 import models.User;
 
 public class UpdateIconManager {
 
     public final UserDAO userDAO;
-    public final S3Access s3Access;
+    public final StorageService storageService;
     public final Metrics metrics;
 
     @Inject
     public UpdateIconManager(final UserDAO userDAO, final Metrics metrics,
-        final S3Access s3Access) {
+        final StorageService storageService) {
         this.userDAO = userDAO;
-        this.s3Access = s3Access;
+        this.storageService = storageService;
         this.metrics = metrics;
     }
 
@@ -40,7 +40,7 @@ public class UpdateIconManager {
             final User user = this.userDAO.getUser(activeUser);
             // same filename is always used. Content is just overwritten
             String fileName = user.getIcon();
-            boolean success = this.s3Access.uploadImage(imageData, fileName, this.metrics);
+            boolean success = this.storageService.uploadImage(imageData, fileName, this.metrics);
 
             this.metrics.commonClose(success);
             return success;

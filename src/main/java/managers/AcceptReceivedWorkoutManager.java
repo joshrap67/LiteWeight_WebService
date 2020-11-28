@@ -5,15 +5,15 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.Put;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.google.common.collect.Sets;
-import daos.SentWorkoutDAO;
+import daos.SharedWorkoutDAO;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
-import helpers.AttributeValueHelper;
-import helpers.Globals;
-import helpers.Metrics;
-import helpers.UpdateItemData;
-import helpers.WorkoutHelper;
+import utils.AttributeValueUtils;
+import imports.Globals;
+import utils.Metrics;
+import utils.UpdateItemData;
+import utils.WorkoutUtils;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,8 +26,8 @@ import javax.inject.Inject;
 import models.OwnedExercise;
 import models.SharedWorkoutMeta;
 import models.Routine;
-import models.SentExercise;
-import models.SentWorkout;
+import models.SharedExercise;
+import models.SharedWorkout;
 import models.User;
 import models.Workout;
 import models.WorkoutMeta;
@@ -36,13 +36,13 @@ import responses.AcceptWorkoutResponse;
 public class AcceptReceivedWorkoutManager {
 
     private final UserDAO userDAO;
-    private final SentWorkoutDAO sentWorkoutDAO;
+    private final SharedWorkoutDAO sharedWorkoutDAO;
     private final Metrics metrics;
 
     @Inject
-    public AcceptReceivedWorkoutManager(final SentWorkoutDAO sentWorkoutDAO, final UserDAO userDAO,
+    public AcceptReceivedWorkoutManager(final SharedWorkoutDAO sharedWorkoutDAO, final UserDAO userDAO,
         final Metrics metrics) {
-        this.sentWorkoutDAO = sentWorkoutDAO;
+        this.sharedWorkoutDAO = sharedWorkoutDAO;
         this.userDAO = userDAO;
         this.metrics = metrics;
     }
@@ -63,7 +63,7 @@ public class AcceptReceivedWorkoutManager {
 
         try {
             final User activeUserObject = this.userDAO.getUser(activeUser);
-            final SentWorkout workoutToAccept = this.sentWorkoutDAO
+            final SharedWorkout workoutToAccept = this.sharedWorkoutDAO
                 .getSentWorkout(workoutIdToAccept);
             final SharedWorkoutMeta sharedWorkoutMeta = activeUserObject.getReceivedWorkouts()
                 .get(workoutIdToAccept);
@@ -112,7 +112,7 @@ public class AcceptReceivedWorkoutManager {
             workoutMeta.setTotalExercisesSum(0);
 
             // update all the exercises that are now apart of this workout
-            WorkoutHelper.updateUserExercises(activeUserObject, routine, workoutId,
+            WorkoutUtils.updateOwnedExercises(activeUserObject, routine, workoutId,
                 workoutToAccept.getWorkoutName());
 
             UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
@@ -132,14 +132,14 @@ public class AcceptReceivedWorkoutManager {
                     .with("#workoutId", workoutId));
             // since user is accepting the workout, delete the sent workout from the table - it's no longer needed
             UpdateItemData updateSentWorkoutData = new UpdateItemData(
-                workoutToAccept.getSentWorkoutId(), SentWorkoutDAO.SENT_WORKOUT_TABLE_NAME);
+                workoutToAccept.getSentWorkoutId(), SharedWorkoutDAO.SENT_WORKOUT_TABLE_NAME);
 
             List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withDelete(updateSentWorkoutData.asDelete()));
             actions.add(new TransactWriteItem()
                 .withPut(new Put().withTableName(WorkoutDAO.WORKOUT_TABLE_NAME).withItem(
-                    AttributeValueHelper.convertMapToAttributeValueMap(newWorkout.asMap()))));
+                    AttributeValueUtils.convertMapToAttributeValueMap(newWorkout.asMap()))));
             this.userDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);
@@ -151,7 +151,7 @@ public class AcceptReceivedWorkoutManager {
         }
     }
 
-    private String validInput(final User activeUserObject, final SentWorkout sentWorkout) {
+    private String validInput(final User activeUserObject, final SharedWorkout sharedWorkout) {
         StringBuilder error = new StringBuilder();
         if (activeUserObject.getPremiumToken() == null
             && activeUserObject.getUserWorkouts().size() >= Globals.MAX_FREE_WORKOUTS) {
@@ -162,11 +162,11 @@ public class AcceptReceivedWorkoutManager {
             error.append("Maximum workouts would be exceeded.");
         }
         Set<String> sentWorkoutExercises = new HashSet<>();
-        for (Integer week : sentWorkout.getRoutine()) {
-            for (Integer day : sentWorkout.getRoutine().getWeek(week)) {
-                for (SentExercise sentExercise : sentWorkout.getRoutine()
+        for (Integer week : sharedWorkout.getRoutine()) {
+            for (Integer day : sharedWorkout.getRoutine().getWeek(week)) {
+                for (SharedExercise sharedExercise : sharedWorkout.getRoutine()
                     .getExerciseListForDay(week, day)) {
-                    sentWorkoutExercises.add(sentExercise.getExerciseName());
+                    sentWorkoutExercises.add(sharedExercise.getExerciseName());
                 }
             }
         }
@@ -178,7 +178,7 @@ public class AcceptReceivedWorkoutManager {
         List<WorkoutMeta> workoutMetas = new ArrayList<>(
             activeUserObject.getUserWorkouts().values());
         for (WorkoutMeta workoutMeta : workoutMetas) {
-            if (workoutMeta.getWorkoutName().equals(sentWorkout.getWorkoutName())) {
+            if (workoutMeta.getWorkoutName().equals(sharedWorkout.getWorkoutName())) {
                 error.append("Workout with this name already exists.");
             }
         }
@@ -197,13 +197,13 @@ public class AcceptReceivedWorkoutManager {
         return error.toString().trim();
     }
 
-    private void addNewExercises(final SentWorkout sentWorkout, final User user) {
-        Set<String> sentWorkoutExercises = new HashSet<>();
-        for (Integer week : sentWorkout.getRoutine()) {
-            for (Integer day : sentWorkout.getRoutine().getWeek(week)) {
-                for (SentExercise sentExercise : sentWorkout.getRoutine()
+    private void addNewExercises(final SharedWorkout sharedWorkout, final User user) {
+        Set<String> sharedWorkoutExercises = new HashSet<>();
+        for (Integer week : sharedWorkout.getRoutine()) {
+            for (Integer day : sharedWorkout.getRoutine().getWeek(week)) {
+                for (SharedExercise sharedExercise : sharedWorkout.getRoutine()
                     .getExerciseListForDay(week, day)) {
-                    sentWorkoutExercises.add(sentExercise.getExerciseName());
+                    sharedWorkoutExercises.add(sharedExercise.getExerciseName());
                 }
             }
         }
@@ -211,11 +211,11 @@ public class AcceptReceivedWorkoutManager {
         for (String exerciseId : user.getOwnedExercises().keySet()) {
             ownedExercises.add(user.getOwnedExercises().get(exerciseId).getExerciseName());
         }
-        Set<String> newExercises = Sets.difference(sentWorkoutExercises, ownedExercises);
+        Set<String> newExercises = Sets.difference(sharedWorkoutExercises, ownedExercises);
         for (String exercise : newExercises) {
             // for each of the exercises that the user doesn't own, make a new entry for them in the owned mapping
             OwnedExercise ownedExercise = new OwnedExercise(
-                sentWorkout.getExercises().get(exercise), exercise);
+                sharedWorkout.getExercises().get(exercise), exercise);
             String exerciseId = UUID.randomUUID().toString();
             user.getOwnedExercises().putIfAbsent(exerciseId, ownedExercise);
         }

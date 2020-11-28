@@ -1,10 +1,10 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
-import helpers.ErrorMessage;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +24,6 @@ public class SendFeedbackController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         final List<String> requiredKeys = Arrays
             .asList(RequestFields.ACTIVE_USER, RequestFields.FEEDBACK_TIME, RequestFields.FEEDBACK);
 

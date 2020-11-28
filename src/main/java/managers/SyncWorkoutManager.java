@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import daos.WorkoutDAO;
-import helpers.Metrics;
+import utils.Metrics;
 import javax.inject.Inject;
 import models.Workout;
 

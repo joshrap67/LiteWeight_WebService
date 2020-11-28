@@ -1,4 +1,4 @@
-package helpers;
+package utils;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -10,13 +10,14 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.common.collect.ImmutableList;
+import imports.RequestFields;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 import java.util.Map;
 
-public class TokenHelper {
+public class TokenUtils {
 
     private static final String PUBLIC_RSA_KEY_URL = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_vLSsBubHd/.well-known/jwks.json";
     private static final List<String> LIVE_FUNCTIONS = ImmutableList.of("ProxyEndpoint");

@@ -8,18 +8,18 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
-public class SentDay implements Iterable<Integer>, Model {
+public class SharedDay implements Iterable<Integer>, Model {
 
-    private Map<Integer, SentExercise> exercises;
+    private Map<Integer, SharedExercise> exercises;
 
-    public SentDay() {
+    public SharedDay() {
         this.exercises = new HashMap<>();
     }
 
-    public SentDay(Map<String, Object> exercisesForDay) throws InvalidAttributeException {
+    public SharedDay(Map<String, Object> exercisesForDay) throws InvalidAttributeException {
         this.exercises = new HashMap<>();
         for (String sortVal : exercisesForDay.keySet()) {
-            SentExercise routineExercise = new SentExercise(
+            SharedExercise routineExercise = new SharedExercise(
                 (Map<String, Object>) exercisesForDay.get(sortVal));
             this.exercises.put(Integer.parseInt(sortVal), routineExercise);
         }
@@ -29,12 +29,12 @@ public class SentDay implements Iterable<Integer>, Model {
         return this.exercises.size();
     }
 
-    public SentExercise getExercise(int sortVal) {
+    public SharedExercise getExercise(int sortVal) {
         return this.exercises.get(sortVal);
     }
 
-    public void put(int sortVal, SentExercise sentExercise) {
-        this.exercises.put(sortVal, sentExercise);
+    public void put(int sortVal, SharedExercise sharedExercise) {
+        this.exercises.put(sortVal, sharedExercise);
     }
 
     @Override

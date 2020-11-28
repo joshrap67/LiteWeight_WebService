@@ -3,11 +3,11 @@ package controllers;
 import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +30,6 @@ public class NewWorkoutController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         final List<String> requiredKeys = Arrays
             .asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_NAME, Workout.ROUTINE);
 
@@ -49,10 +48,10 @@ public class NewWorkoutController implements ApiRequestController {
                     .successful(JsonHelper.serializeMap(userWithWorkout.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
-                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(meu.getMessage());
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

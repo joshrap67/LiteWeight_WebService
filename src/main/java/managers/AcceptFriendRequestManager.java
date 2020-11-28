@@ -1,6 +1,6 @@
 package managers;
 
-import aws.SnsAccess;
+import services.NotificationService;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
@@ -8,9 +8,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import daos.UserDAO;
 import exceptions.ManagerExecutionException;
-import helpers.Globals;
-import helpers.Metrics;
-import helpers.UpdateItemData;
+import imports.Globals;
+import utils.Metrics;
+import utils.UpdateItemData;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -20,14 +20,14 @@ import models.User;
 
 public class AcceptFriendRequestManager {
 
-    private final SnsAccess snsAccess;
+    private final NotificationService notificationService;
     private final UserDAO userDAO;
     private final Metrics metrics;
 
     @Inject
-    public AcceptFriendRequestManager(final SnsAccess snsAccess, final UserDAO userDAO,
+    public AcceptFriendRequestManager(final NotificationService notificationService, final UserDAO userDAO,
         final Metrics metrics) {
-        this.snsAccess = snsAccess;
+        this.notificationService = notificationService;
         this.userDAO = userDAO;
         this.metrics = metrics;
     }
@@ -84,8 +84,8 @@ public class AcceptFriendRequestManager {
             this.userDAO.executeWriteTransaction(actions);
 
             // if this succeeds, go ahead and send a notification to the accepted user (only need to send username)
-            this.snsAccess.sendMessage(userToAccept.getPushEndpointArn(),
-                new NotificationData(SnsAccess.acceptedFriendRequestAction,
+            this.notificationService.sendMessage(userToAccept.getPushEndpointArn(),
+                new NotificationData(NotificationService.acceptedFriendRequestAction,
                     Maps.newHashMap(
                         ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
                             .build())));

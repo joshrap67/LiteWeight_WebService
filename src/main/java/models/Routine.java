@@ -7,9 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 
 @Data
 public class Routine implements Model, Iterable<Integer> {
@@ -40,9 +38,9 @@ public class Routine implements Model, Iterable<Integer> {
             for (Integer day : routine.getWeek(week)) {
                 final RoutineDay routineDay = new RoutineDay();
                 int sortVal = 0;
-                for (SentExercise sentExercise : routine.getExerciseListForDay(week, day)) {
-                    RoutineExercise routineExercise = new RoutineExercise(sentExercise,
-                        exerciseNameToId.get(sentExercise.getExerciseName()));
+                for (SharedExercise sharedExercise : routine.getExerciseListForDay(week, day)) {
+                    RoutineExercise routineExercise = new RoutineExercise(sharedExercise,
+                        exerciseNameToId.get(sharedExercise.getExerciseName()));
                     routineDay.put(sortVal, routineExercise);
                     sortVal++;
                 }

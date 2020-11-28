@@ -1,10 +1,10 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
-import helpers.ErrorMessage;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +25,6 @@ public class SyncWorkoutController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         final List<String> requiredKeys = Collections.singletonList(RequestFields.WORKOUT);
 
         if (jsonBody.keySet().containsAll(requiredKeys)) {

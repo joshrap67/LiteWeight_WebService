@@ -1,4 +1,4 @@
-package helpers;
+package utils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,9 +10,9 @@ import models.RoutineExercise;
 import models.Routine;
 import models.User;
 
-public class WorkoutHelper {
+public class WorkoutUtils {
 
-    public static void updateUserExercises(final User user, final Routine routine,
+    public static void updateOwnedExercises(final User user, final Routine routine,
         final String workoutId,
         final String workoutName) {
         // updates the list of exercises on the user object to include this new workout in all contained exercises
@@ -44,7 +44,7 @@ public class WorkoutHelper {
         }
     }
 
-    public static void updateUserExercisesOnEdit(final User user, final Routine newRoutine,
+    public static void updateOwnedExercisesOnEdit(final User user, final Routine newRoutine,
         final Routine oldRoutine,
         final String workoutId,
         final String workoutName) {

@@ -1,18 +1,18 @@
 package managers;
 
-import daos.SentWorkoutDAO;
-import helpers.Metrics;
+import daos.SharedWorkoutDAO;
+import utils.Metrics;
 import javax.inject.Inject;
-import models.SentWorkout;
+import models.SharedWorkout;
 
 public class GetSentWorkoutManager {
 
-    private final SentWorkoutDAO sentWorkoutDAO;
+    private final SharedWorkoutDAO sharedWorkoutDAO;
     private final Metrics metrics;
 
     @Inject
-    public GetSentWorkoutManager(final SentWorkoutDAO sentWorkoutDAO, final Metrics metrics) {
-        this.sentWorkoutDAO = sentWorkoutDAO;
+    public GetSentWorkoutManager(final SharedWorkoutDAO sharedWorkoutDAO, final Metrics metrics) {
+        this.sharedWorkoutDAO = sharedWorkoutDAO;
         this.metrics = metrics;
     }
 
@@ -25,14 +25,14 @@ public class GetSentWorkoutManager {
      * @return User object and workout object that of the current workout (null if no workouts
      * exist).
      */
-    public SentWorkout getSentWorkout(final String activeUser, final String workoutId)
+    public SharedWorkout getSentWorkout(final String activeUser, final String workoutId)
         throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".getSentWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
             // todo do validation to make sure user actually "owns" the workout??
-            return this.sentWorkoutDAO.getSentWorkout(workoutId);
+            return this.sharedWorkoutDAO.getSentWorkout(workoutId);
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

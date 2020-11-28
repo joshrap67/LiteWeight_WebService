@@ -1,6 +1,6 @@
 package daos;
 
-import aws.UpdateItemTemplate;
+import utils.UpdateItemTemplate;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
@@ -15,7 +15,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsResult;
 import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
-import helpers.Config;
+import imports.Config;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +26,7 @@ public class UserDAO {
 
     public static final String USERS_TABLE_NAME = "users";
     public static final String USERS_PRIMARY_KEY = User.USERNAME;
+
     protected final Table usersTable;
     private final Database database;
 

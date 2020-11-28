@@ -2,11 +2,11 @@ package controllers;
 
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +28,6 @@ public class RestartWorkoutController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         final List<String> requiredKeys = Arrays
             .asList(RequestFields.ACTIVE_USER, RequestFields.WORKOUT);
 
@@ -42,10 +41,11 @@ public class RestartWorkoutController implements ApiRequestController {
                 Injector.getInjector(metrics).inject(this);
                 final UserWithWorkout result = this.restartWorkoutManager
                     .restartWorkout(activeUser, workout);
-                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asResponse()));
+                resultStatus = ResultStatus
+                    .successful(JsonHelper.serializeMap(result.asResponse()));
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

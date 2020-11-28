@@ -6,7 +6,7 @@ import exceptions.InvalidAttributeException;
 import exceptions.UserNotFoundException;
 import java.util.Optional;
 import javax.inject.Inject;
-import helpers.Metrics;
+import utils.Metrics;
 import models.User;
 
 public class GetUserDataManager {

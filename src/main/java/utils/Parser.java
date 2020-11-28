@@ -1,4 +1,4 @@
-package helpers;
+package utils;
 
 public class Parser {
     public static Integer convertObjectToInteger(Object object) {

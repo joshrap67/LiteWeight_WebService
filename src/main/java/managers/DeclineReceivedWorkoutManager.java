@@ -2,11 +2,11 @@ package managers;
 
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
-import daos.SentWorkoutDAO;
+import daos.SharedWorkoutDAO;
 import daos.UserDAO;
 import exceptions.ManagerExecutionException;
-import helpers.Metrics;
-import helpers.UpdateItemData;
+import utils.Metrics;
+import utils.UpdateItemData;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -47,7 +47,7 @@ public class DeclineReceivedWorkoutManager {
 
             // remove workout from sent workout table
             UpdateItemData updateSentWorkoutData = new UpdateItemData(
-                declinedWorkoutId, SentWorkoutDAO.SENT_WORKOUT_TABLE_NAME);
+                declinedWorkoutId, SharedWorkoutDAO.SENT_WORKOUT_TABLE_NAME);
 
             // remove workout from active user
             UpdateItemData activeUserData = new UpdateItemData(

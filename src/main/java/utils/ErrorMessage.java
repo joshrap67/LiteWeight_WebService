@@ -1,4 +1,4 @@
-package helpers;
+package utils;
 
 public class ErrorMessage<T> extends LoggingMessage<T> {
 

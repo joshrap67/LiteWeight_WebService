@@ -1,18 +1,18 @@
 package managers;
 
-import aws.SnsAccess;
-import helpers.Config;
-import helpers.Metrics;
+import services.NotificationService;
+import imports.Config;
+import utils.Metrics;
 import javax.inject.Inject;
 
 public class SendFeedbackManager {
 
-    private final SnsAccess snsAccess;
+    private final NotificationService notificationService;
     private final Metrics metrics;
 
     @Inject
-    public SendFeedbackManager(final SnsAccess snsAccess, final Metrics metrics) {
-        this.snsAccess = snsAccess;
+    public SendFeedbackManager(final NotificationService notificationService, final Metrics metrics) {
+        this.notificationService = notificationService;
         this.metrics = metrics;
     }
 
@@ -31,7 +31,8 @@ public class SendFeedbackManager {
 
         String formattedMessage = getFormattedFeedback(activeUser, feedbackTime, feedback);
         this.metrics.commonClose(true);
-        this.snsAccess.sendEmail(Config.PUSH_EMAIL_PLATFORM_ARN, "New Feedback", formattedMessage);
+        this.notificationService
+            .sendEmail(Config.PUSH_EMAIL_PLATFORM_ARN, "New Feedback", formattedMessage);
     }
 
     public static String getFormattedFeedback(String senderUsername, String feedbackTime,

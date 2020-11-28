@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SentWorkoutExercise implements Model {
+public class SharedWorkoutExercise implements Model {
 
     public static final String FOCUSES = "focuses";
     public static final String VIDEO_URL = "videoUrl";
@@ -19,12 +19,12 @@ public class SentWorkoutExercise implements Model {
     private String videoUrl;
     private List<String> focuses;
 
-    public SentWorkoutExercise(final Map<String, Object> json) {
+    public SharedWorkoutExercise(final Map<String, Object> json) {
         this.videoUrl = (String) json.get(VIDEO_URL);
         this.focuses = (List<String>) json.get(FOCUSES);
     }
 
-    public SentWorkoutExercise(final OwnedExercise ownedExercise) {
+    public SharedWorkoutExercise(final OwnedExercise ownedExercise) {
         this.focuses = ownedExercise.getFocuses();
         this.videoUrl = ownedExercise.getVideoUrl();
     }

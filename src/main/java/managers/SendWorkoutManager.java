@@ -1,18 +1,18 @@
 package managers;
 
-import aws.SnsAccess;
+import services.NotificationService;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.Put;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
-import daos.SentWorkoutDAO;
+import daos.SharedWorkoutDAO;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
-import helpers.Globals;
-import helpers.Metrics;
-import helpers.UpdateItemData;
+import imports.Globals;
+import utils.Metrics;
+import utils.UpdateItemData;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,22 +21,22 @@ import java.util.UUID;
 import javax.inject.Inject;
 import models.NotificationData;
 import models.SharedWorkoutMeta;
-import models.SentWorkout;
+import models.SharedWorkout;
 import models.User;
 import models.Workout;
 
 public class SendWorkoutManager {
 
-    private final SnsAccess snsAccess;
+    private final NotificationService notificationService;
     private final UserDAO userDAO;
     private final WorkoutDAO workoutDAO;
     private final Metrics metrics;
 
     @Inject
-    public SendWorkoutManager(final SnsAccess snsAccess, final UserDAO userDAO,
+    public SendWorkoutManager(final NotificationService notificationService, final UserDAO userDAO,
         final WorkoutDAO workoutDAO,
         final Metrics metrics) {
-        this.snsAccess = snsAccess;
+        this.notificationService = notificationService;
         this.userDAO = userDAO;
         this.workoutDAO = workoutDAO;
         this.metrics = metrics;
@@ -101,7 +101,7 @@ public class SendWorkoutManager {
             sharedWorkoutMeta.setTotalDays(originalWorkout.getRoutine().getTotalNumberOfDays());
             sharedWorkoutMeta.setIcon(activeUserObject.getIcon());
 
-            final SentWorkout workoutToSend = new SentWorkout(originalWorkout, activeUserObject,
+            final SharedWorkout workoutToSend = new SharedWorkout(originalWorkout, activeUserObject,
                 sentWorkoutId);
             final Map<String, AttributeValue> workoutToSendItemValues = workoutToSend
                 .asItemAttributes();
@@ -127,12 +127,12 @@ public class SendWorkoutManager {
             actions.add(new TransactWriteItem().withUpdate(activeUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withPut(new Put()
                 .withItem(workoutToSendItemValues)
-                .withTableName(SentWorkoutDAO.SENT_WORKOUT_TABLE_NAME)));
+                .withTableName(SharedWorkoutDAO.SENT_WORKOUT_TABLE_NAME)));
 
             this.userDAO.executeWriteTransaction(actions);
             // if this succeeds, go ahead and send a notification to the recipient with the workout meta
-            this.snsAccess.sendMessage(recipientUser.getPushEndpointArn(),
-                new NotificationData(SnsAccess.receivedWorkoutAction,
+            this.notificationService.sendMessage(recipientUser.getPushEndpointArn(),
+                new NotificationData(NotificationService.receivedWorkoutAction,
                     sharedWorkoutMeta.asResponse()));
             return sentWorkoutId;
         } catch (Exception e) {

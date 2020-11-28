@@ -1,6 +1,6 @@
 package interfaces;
 
-import helpers.ResultStatus;
+import imports.ResultStatus;
 
 public interface RequestManager {
 

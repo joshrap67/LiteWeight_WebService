@@ -1,4 +1,4 @@
-package aws;
+package utils;
 
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
@@ -7,7 +7,6 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.Delete;
 import com.amazonaws.services.dynamodbv2.model.Update;
 import daos.UserDAO;
-import helpers.AttributeValueHelper;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
@@ -65,7 +64,7 @@ public class UpdateItemTemplate {
         if (this.valueMap != null) {
             for (final String key : this.valueMap.keySet()) {
                 update.addExpressionAttributeValuesEntry(key,
-                    AttributeValueHelper.convertObjectToAttributeValue(valueMap.get(key)));
+                    AttributeValueUtils.convertObjectToAttributeValue(valueMap.get(key)));
             }
         }
 

@@ -1,6 +1,6 @@
 package models;
 
-import helpers.Parser;
+import utils.Parser;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.List;
@@ -59,11 +59,11 @@ public class OwnedExercise implements Model {
         this.workouts = new HashMap<>();
     }
 
-    public OwnedExercise(final SentWorkoutExercise sentWorkoutExercise, final String name) {
-        // used to convert to an owned exercise from a sentWorkoutExercise
+    public OwnedExercise(final SharedWorkoutExercise sharedWorkoutExercise, final String name) {
+        // used to convert to an owned exercise from a sharedWorkoutExercise
         this.exerciseName = name;
-        this.focuses = sentWorkoutExercise.getFocuses();
-        this.videoUrl = sentWorkoutExercise.getVideoUrl();
+        this.focuses = sharedWorkoutExercise.getFocuses();
+        this.videoUrl = sharedWorkoutExercise.getVideoUrl();
         this.defaultWeight = defaultWeightValue;
         this.defaultReps = defaultRepsValue;
         this.defaultSets = defaultSetsValue;

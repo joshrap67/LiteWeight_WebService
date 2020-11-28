@@ -1,10 +1,10 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
-import helpers.ErrorMessage;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +26,6 @@ public class UpdateUserPreferencesController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         final List<String> requiredKeys = Arrays
             .asList(RequestFields.ACTIVE_USER, User.USER_PREFERENCES);
 
@@ -36,7 +35,8 @@ public class UpdateUserPreferencesController implements ApiRequestController {
                 final UserPreferences userPreferences = new UserPreferences(
                     (Map<String, Object>) jsonBody.get(User.USER_PREFERENCES));
                 Injector.getInjector(metrics).inject(this);
-                this.updateUserPreferencesManager.updateUserPreferences(activeUser, userPreferences);
+                this.updateUserPreferencesManager
+                    .updateUserPreferences(activeUser, userPreferences);
                 resultStatus = ResultStatus.successful("User prefs updated successfully.");
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
@@ -45,6 +45,7 @@ public class UpdateUserPreferencesController implements ApiRequestController {
         } else {
             throw new MissingApiRequestKeyException(requiredKeys);
         }
+
         return resultStatus;
     }
 }

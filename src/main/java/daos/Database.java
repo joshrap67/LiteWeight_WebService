@@ -7,7 +7,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactGetItemsResult;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsRequest;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsResult;
-import helpers.Config;
+import imports.Config;
 import java.util.List;
 import javax.inject.Inject;
 
@@ -40,8 +40,8 @@ public class Database {
                 return WorkoutDAO.WORKOUT_TABLE_PRIMARY_KEY;
             case UserDAO.USERS_TABLE_NAME:
                 return UserDAO.USERS_PRIMARY_KEY;
-            case SentWorkoutDAO.SENT_WORKOUT_TABLE_NAME:
-                return SentWorkoutDAO.SENT_WORKOUT_TABLE_PRIMARY_KEY;
+            case SharedWorkoutDAO.SENT_WORKOUT_TABLE_NAME:
+                return SharedWorkoutDAO.SENT_WORKOUT_TABLE_PRIMARY_KEY;
             default:
                 throw new Exception("Invalid table name: " + tableName);
         }

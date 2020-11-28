@@ -1,11 +1,11 @@
 package managers;
 
-import aws.S3Access;
+import services.StorageService;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import daos.UserDAO;
-import helpers.FileReader;
-import helpers.Metrics;
+import utils.FileReader;
+import utils.Metrics;
 import java.util.HashMap;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -16,12 +16,12 @@ public class NewUserManager {
 
     private final UserDAO userDAO;
     private final Metrics metrics;
-    private final S3Access s3Access;
+    private final StorageService storageService;
 
     @Inject
-    public NewUserManager(final UserDAO userDAO, final Metrics metrics, final S3Access s3Access) {
+    public NewUserManager(final UserDAO userDAO, final Metrics metrics, final StorageService storageService) {
         this.userDAO = userDAO;
-        this.s3Access = s3Access;
+        this.storageService = storageService;
         this.metrics = metrics;
     }
 
@@ -40,8 +40,8 @@ public class NewUserManager {
         try {
             // whenever a user is created, give them a unique UUID file path that will always get updated
             final UUID uuid = UUID.randomUUID();
-            final String fileName = uuid.toString() + "." + S3Access.JPG_TYPE;
-            s3Access.uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
+            final String fileName = uuid.toString() + "." + StorageService.JPG_TYPE;
+            storageService.uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
 
             final UserPreferences userPreferences = new UserPreferences();
             userPreferences.setMetricUnits(false);

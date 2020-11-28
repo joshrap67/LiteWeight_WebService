@@ -3,7 +3,7 @@ package managers;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import daos.UserDAO;
 import daos.WorkoutDAO;
-import helpers.Metrics;
+import utils.Metrics;
 import javax.inject.Inject;
 import models.User;
 import models.Workout;

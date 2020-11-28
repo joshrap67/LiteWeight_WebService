@@ -1,4 +1,4 @@
-package helpers;
+package utils;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;

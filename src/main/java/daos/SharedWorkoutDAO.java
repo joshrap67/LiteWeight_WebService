@@ -16,24 +16,23 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsResult;
 import exceptions.InvalidAttributeException;
 import exceptions.WorkoutNotFoundException;
-import helpers.Config;
+import imports.Config;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
-import models.SentWorkout;
+import models.SharedWorkout;
 
-public class SentWorkoutDAO {
+public class SharedWorkoutDAO {
 
     public static final String SENT_WORKOUT_TABLE_NAME = "sentWorkouts";
-
-    public static final String SENT_WORKOUT_TABLE_PRIMARY_KEY = SentWorkout.SENT_WORKOUT_ID;
+    public static final String SENT_WORKOUT_TABLE_PRIMARY_KEY = SharedWorkout.SENT_WORKOUT_ID;
 
     protected final Table sentWorkoutTable;
     private final Database database;
 
     @Inject
-    public SentWorkoutDAO(final Database database) {
+    public SharedWorkoutDAO(final Database database) {
         AmazonDynamoDBClient client = (AmazonDynamoDBClient) AmazonDynamoDBClient.builder()
             .withRegion(Config.REGION)
             .withCredentials(new EnvironmentVariableCredentialsProvider())
@@ -53,13 +52,13 @@ public class SentWorkoutDAO {
             .getItem(new PrimaryKey(SENT_WORKOUT_TABLE_PRIMARY_KEY, currentWorkoutId));
     }
 
-    public SentWorkout getSentWorkout(String workoutId)
+    public SharedWorkout getSentWorkout(String workoutId)
         throws NullPointerException, InvalidAttributeException, WorkoutNotFoundException {
         final Item workoutItem = Optional.ofNullable(this.getSentWorkoutItem(workoutId))
             .orElseThrow(
                 () -> new WorkoutNotFoundException(
                     String.format("Sent Workout with ID: %s not found", workoutId)));
-        return new SentWorkout(workoutItem);
+        return new SharedWorkout(workoutItem);
     }
 
     public UpdateItemOutcome updateSentWorkout(final String workoutId,

@@ -3,17 +3,17 @@ package controllers;
 import com.google.common.collect.ImmutableList;
 import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
-import helpers.JsonHelper;
+import utils.JsonHelper;
 import interfaces.ApiRequestController;
 import java.util.Map;
 import javax.inject.Inject;
 import managers.GetUserDataManager;
 import models.User;
 import modules.Injector;
-import helpers.ErrorMessage;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 
 public class GetUserDataController implements ApiRequestController {
 
@@ -48,7 +48,7 @@ public class GetUserDataController implements ApiRequestController {
             throw e;
         } catch (final ManagerExecutionException meu) {
             metrics.log("Input error: " + meu.getMessage());
-            resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+            resultStatus = ResultStatus.failureBadRequest(meu.getMessage());
         } catch (final Exception e) {
             metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

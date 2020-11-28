@@ -1,6 +1,6 @@
 package modules;
 
-import helpers.Metrics;
+import utils.Metrics;
 
 public class Injector {
 

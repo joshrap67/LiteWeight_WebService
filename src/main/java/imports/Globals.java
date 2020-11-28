@@ -1,4 +1,4 @@
-package helpers;
+package imports;
 
 public class Globals {
 

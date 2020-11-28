@@ -1,6 +1,6 @@
 package managers;
 
-import aws.SnsAccess;
+import services.NotificationService;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
@@ -11,8 +11,8 @@ import daos.UserDAO;
 import exceptions.InvalidAttributeException;
 import exceptions.ManagerExecutionException;
 import exceptions.UserNotFoundException;
-import helpers.Config;
-import helpers.Metrics;
+import imports.Config;
+import utils.Metrics;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,15 +24,15 @@ public class RegisterEndpointTokenManager {
     private static final String USER_DATA_KEY = "CustomUserData";
 
     private final UserDAO userDAO;
-    private final SnsAccess snsAccess;
+    private final NotificationService notificationService;
     private final RemoveEndpointTokenManager removeEndpointTokenManager;
     private final Metrics metrics;
 
     @Inject
-    public RegisterEndpointTokenManager(final UserDAO userDAO, final SnsAccess snsAccess,
+    public RegisterEndpointTokenManager(final UserDAO userDAO, final NotificationService notificationService,
         final RemoveEndpointTokenManager removeEndpointTokenManager, final Metrics metrics) {
         this.userDAO = userDAO;
-        this.snsAccess = snsAccess;
+        this.notificationService = notificationService;
         this.removeEndpointTokenManager = removeEndpointTokenManager;
         this.metrics = metrics;
     }
@@ -67,14 +67,14 @@ public class RegisterEndpointTokenManager {
             // Get the current user associated with the arn and unsubscribe them then subscribe the new user
             final String endpointArn = m.group(1);
 
-            final Map<String, String> endpointAttributes = this.snsAccess
+            final Map<String, String> endpointAttributes = this.notificationService
                 .getEndpointAttributes(endpointArn);
 
             final String oldUsername = endpointAttributes.get(USER_DATA_KEY);
 
             this.removeEndpointTokenManager.unregisterDevice(oldUsername);
             // the user that owned this had their mapping removed but the endpoint still existed, we do this for sanity
-            this.snsAccess.unregisterPlatformEndpoint(
+            this.notificationService.unregisterPlatformEndpoint(
                 new DeleteEndpointRequest().withEndpointArn(endpointArn));
 
             this.attemptToRegisterUserEndpoint(activeUser, deviceToken);
@@ -91,10 +91,10 @@ public class RegisterEndpointTokenManager {
         // first thing to do is register the device token with SNS
         final CreatePlatformEndpointRequest createPlatformEndpointRequest =
             new CreatePlatformEndpointRequest()
-                .withPlatformApplicationArn(Config.PUSH_SNS_PLATFORM_ARN_DEV)
+                .withPlatformApplicationArn(Config.PUSH_SNS_PLATFORM_ARN)
                 .withToken(deviceToken)
                 .withCustomUserData(activeUser);
-        final CreatePlatformEndpointResult createPlatformEndpointResult = this.snsAccess
+        final CreatePlatformEndpointResult createPlatformEndpointResult = this.notificationService
             .registerPlatformEndpoint(createPlatformEndpointRequest);
 
         // this creation will give a new ARN for the sns endpoint associated with the device token

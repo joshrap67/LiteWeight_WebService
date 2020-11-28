@@ -2,11 +2,11 @@ package controllers;
 
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.List;
@@ -27,9 +27,7 @@ public class UpdateIconController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, User.ICON);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, User.ICON);
 
         if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {
@@ -43,11 +41,11 @@ public class UpdateIconController implements ApiRequestController {
                 if (success) {
                     resultStatus = ResultStatus.successful("Picture updated successfully.");
                 } else {
-                    resultStatus = ResultStatus.failureBadEntity("Picture failed to update.");
+                    resultStatus = ResultStatus.failureBadRequest("Picture failed to update.");
                 }
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-                resultStatus = ResultStatus.failureBadEntity(unfe.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
@@ -55,6 +53,7 @@ public class UpdateIconController implements ApiRequestController {
         } else {
             throw new MissingApiRequestKeyException(requiredKeys);
         }
+
         return resultStatus;
     }
 }

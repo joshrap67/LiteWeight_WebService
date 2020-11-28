@@ -1,4 +1,4 @@
-package helpers;
+package utils;
 
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
@@ -64,7 +64,7 @@ public class UpdateItemData {
         if (this.valueMap != null) {
             for (final String key : this.valueMap.keySet()) {
                 update.addExpressionAttributeValuesEntry(key,
-                    AttributeValueHelper.convertObjectToAttributeValue(valueMap.get(key)));
+                    AttributeValueUtils.convertObjectToAttributeValue(valueMap.get(key)));
             }
         }
 

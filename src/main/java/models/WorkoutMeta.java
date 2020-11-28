@@ -1,6 +1,6 @@
 package models;
 
-import helpers.Parser;
+import utils.Parser;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;

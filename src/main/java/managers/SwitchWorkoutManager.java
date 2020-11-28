@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import daos.UserDAO;
 import daos.WorkoutDAO;
-import helpers.Metrics;
+import utils.Metrics;
 import java.time.Instant;
 import javax.inject.Inject;
 import models.User;

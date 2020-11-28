@@ -1,14 +1,14 @@
 package managers;
 
-import aws.SnsAccess;
+import services.NotificationService;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import daos.UserDAO;
 import exceptions.ManagerExecutionException;
-import helpers.Metrics;
-import helpers.UpdateItemData;
+import utils.Metrics;
+import utils.UpdateItemData;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -17,14 +17,14 @@ import models.User;
 
 public class DeclineFriendRequestManager {
 
-    private final SnsAccess snsAccess;
+    private final NotificationService notificationService;
     private final UserDAO userDAO;
     private final Metrics metrics;
 
     @Inject
-    public DeclineFriendRequestManager(final SnsAccess snsAccess, final UserDAO userDAO,
+    public DeclineFriendRequestManager(final NotificationService notificationService, final UserDAO userDAO,
         final Metrics metrics) {
-        this.snsAccess = snsAccess;
+        this.notificationService = notificationService;
         this.userDAO = userDAO;
         this.metrics = metrics;
     }
@@ -69,8 +69,8 @@ public class DeclineFriendRequestManager {
 
             this.userDAO.executeWriteTransaction(actions);
             // if this succeeds, go ahead and send a notification to the declined user (only need to send username)
-            this.snsAccess.sendMessage(declinedUserObject.getPushEndpointArn(),
-                new NotificationData(SnsAccess.declinedFriendRequestAction,
+            this.notificationService.sendMessage(declinedUserObject.getPushEndpointArn(),
+                new NotificationData(NotificationService.declinedFriendRequestAction,
                     Maps.newHashMap(
                         ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
                             .build())));

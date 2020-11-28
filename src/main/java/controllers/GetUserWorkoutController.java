@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableList;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Map;
 import javax.inject.Inject;
@@ -28,7 +28,6 @@ public class GetUserWorkoutController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         try {
             Injector.getInjector(metrics).inject(this);
 
@@ -52,7 +51,7 @@ public class GetUserWorkoutController implements ApiRequestController {
             throw e;
         } catch (UserNotFoundException | WorkoutNotFoundException exception) {
             metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
-            resultStatus = ResultStatus.failureBadEntity(exception.getMessage());
+            resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
         } catch (final Exception e) {
             metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
             resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

@@ -4,11 +4,11 @@ import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +30,6 @@ public class EditWorkoutController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         final List<String> requiredKeys = Arrays
             .asList(RequestFields.ACTIVE_USER, RequestFields.WORKOUT);
 
@@ -42,13 +41,14 @@ public class EditWorkoutController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 UserWithWorkout result = this.editWorkoutManager.editWorkout(activeUser, workout);
-                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(result.asResponse()));
+                resultStatus = ResultStatus
+                    .successful(JsonHelper.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
-                resultStatus = ResultStatus.failureBadEntity(meu.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(meu.getMessage());
             } catch (WorkoutNotFoundException | UserNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
-                resultStatus = ResultStatus.failureBadEntity(exception.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
@@ -56,7 +56,6 @@ public class EditWorkoutController implements ApiRequestController {
         } else {
             throw new MissingApiRequestKeyException(requiredKeys);
         }
-        metrics.commonClose(resultStatus.success);
 
         return resultStatus;
     }

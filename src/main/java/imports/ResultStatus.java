@@ -1,4 +1,4 @@
-package helpers;
+package imports;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,6 @@ public class ResultStatus<T> {
 
     public static final int SUCCESS_CODE = 200;
     public static final int BAD_REQUEST = 400;
-    public static final int BAD_ENTITY = 422;
 
     public Integer responseCode;
     public T data;
@@ -39,9 +38,5 @@ public class ResultStatus<T> {
 
     public static <T> ResultStatus<T> failureBadRequest(final String errorMessage) {
         return new ResultStatus<>(BAD_REQUEST, "Error: " + errorMessage);
-    }
-
-    public static <T> ResultStatus<T> failureBadEntity(final String errorMessage) {
-        return new ResultStatus<>(BAD_ENTITY, "Error: " + errorMessage);
     }
 }

@@ -1,13 +1,13 @@
 package models;
 
-import helpers.Parser;
+import utils.Parser;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
 
 @Data
-public class SentExercise implements Model {
+public class SharedExercise implements Model {
 
     public static final String EXERCISE_NAME = "exerciseName";
     public static final String WEIGHT = "weight";
@@ -21,7 +21,7 @@ public class SentExercise implements Model {
     private Integer reps;
     private String details;
 
-    public SentExercise(final Map<String, Object> json) {
+    public SharedExercise(final Map<String, Object> json) {
         this.exerciseName = (String) json.get(EXERCISE_NAME);
         this.weight = Parser.convertObjectToDouble(json.get(WEIGHT));
         this.sets = Parser.convertObjectToInteger(json.get(SETS));
@@ -29,7 +29,7 @@ public class SentExercise implements Model {
         this.details = (String) json.get(DETAILS);
     }
 
-    public SentExercise(final RoutineExercise routineExercise, final String exerciseName) {
+    public SharedExercise(final RoutineExercise routineExercise, final String exerciseName) {
         this.exerciseName = exerciseName;
         this.weight = routineExercise.getWeight();
         this.sets = routineExercise.getSets();

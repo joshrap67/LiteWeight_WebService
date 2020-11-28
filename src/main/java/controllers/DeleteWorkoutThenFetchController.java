@@ -3,11 +3,11 @@ package controllers;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
+import utils.ErrorMessage;
+import utils.JsonHelper;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
 import interfaces.ApiRequestController;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +29,6 @@ public class DeleteWorkoutThenFetchController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-
         final List<String> requiredKeys = Arrays
             .asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_ID, RequestFields.NEXT_WORKOUT_ID);
 
@@ -46,7 +45,7 @@ public class DeleteWorkoutThenFetchController implements ApiRequestController {
                     .successful(JsonHelper.serializeMap(result.asResponse()));
             } catch (UserNotFoundException | WorkoutNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
-                resultStatus = ResultStatus.failureBadEntity(exception.getMessage());
+                resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

@@ -1,17 +1,16 @@
-package aws;
+package services;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import helpers.Config;
-import helpers.Metrics;
-import helpers.ResultStatus;
+import imports.Config;
+import utils.Metrics;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-public class S3Access {
+public class StorageService {
 
     private final String JPG_MIME = "image/jpeg";
 
@@ -19,7 +18,7 @@ public class S3Access {
     private static final String S3_IMAGE_BUCKET = "liteweight-images";
     public static final String JPG_TYPE = "jpg";
 
-    public S3Access() {
+    public StorageService() {
         this.s3Client = AmazonS3ClientBuilder
             .standard()
             .withRegion(Config.REGION)
