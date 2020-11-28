@@ -49,7 +49,7 @@ public class User implements Model {
     @Setter(AccessLevel.NONE)
     private Map<String, String> blocked;
     @Setter(AccessLevel.NONE)
-    private Map<String, WorkoutMeta> userWorkouts;
+    private Map<String, WorkoutMeta> workoutMetas;
     @Setter(AccessLevel.NONE)
     private Map<String, OwnedExercise> ownedExercises;
     @Setter(AccessLevel.NONE)
@@ -74,7 +74,7 @@ public class User implements Model {
         this.setWorkoutsSent(Parser.convertObjectToInteger(json.get(WORKOUTS_SENT)));
         this.setUserPreferences(new UserPreferences(
             (Map<String, Object>) json.get(USER_PREFERENCES)));
-        this.putNewWorkoutMeta((Map<String, Object>) json.get(WORKOUTS));
+        this.setWorkoutMetas((Map<String, Object>) json.get(WORKOUTS));
         this.setOwnedExercises((Map<String, Object>) json.get(EXERCISES));
         this.setFriends((Map<String, Object>) json.get(FRIENDS));
         this.setFriendRequests((Map<String, Object>) json.get(FRIEND_REQUESTS));
@@ -132,7 +132,7 @@ public class User implements Model {
     }
 
     public void putNewWorkoutMeta(String workoutId, WorkoutMeta workoutMeta) {
-        this.userWorkouts.putIfAbsent(workoutId, workoutMeta);
+        this.workoutMetas.putIfAbsent(workoutId, workoutMeta);
     }
 
     public void setReceivedWorkouts(Map<String, Object> json) {
@@ -147,13 +147,13 @@ public class User implements Model {
         }
     }
 
-    public void putNewWorkoutMeta(Map<String, Object> json) {
+    public void setWorkoutMetas(Map<String, Object> json) {
         if (json == null) {
-            this.userWorkouts = null;
+            this.workoutMetas = null;
         } else {
-            this.userWorkouts = new HashMap<>();
+            this.workoutMetas = new HashMap<>();
             for (String workoutId : json.keySet()) {
-                this.userWorkouts.putIfAbsent(workoutId, new WorkoutMeta(
+                this.workoutMetas.putIfAbsent(workoutId, new WorkoutMeta(
                     (Map<String, Object>) json.get(workoutId)));
             }
         }
@@ -181,8 +181,8 @@ public class User implements Model {
         retVal.putIfAbsent(CURRENT_WORKOUT, this.currentWorkout);
         retVal.putIfAbsent(WORKOUTS_SENT, this.workoutsSent);
         retVal.putIfAbsent(BLOCKED, this.blocked);
-        retVal.putIfAbsent(WORKOUTS, this.getUserWorkoutsMap());
-        retVal.putIfAbsent(EXERCISES, this.getUserExercisesMap());
+        retVal.putIfAbsent(WORKOUTS, this.getWorkoutMetasMap());
+        retVal.putIfAbsent(EXERCISES, this.getOwnedExercisesMap());
         retVal.putIfAbsent(FRIENDS, this.getFriendsMap());
         retVal.putIfAbsent(RECEIVED_WORKOUTS, this.getReceivedWorkoutMetaMap());
         retVal.putIfAbsent(USER_PREFERENCES, this.userPreferences.asMap());
@@ -195,7 +195,7 @@ public class User implements Model {
         Map<String, Object> map = this.asMap();
         map.remove(PUSH_ENDPOINT_ARN);
         map.remove(RECEIVED_WORKOUTS);
-        map.putIfAbsent(RECEIVED_WORKOUTS, getReceivedWorkoutsResponse());
+        map.putIfAbsent(RECEIVED_WORKOUTS, getReceivedWorkoutsResponse()); // is a batch
         map.putIfAbsent(UNSEEN_RECEIVED_WORKOUTS, getUnseenWorkoutsCount());
         map.putIfAbsent(TOTAL_RECEIVED_WORKOUTS, this.receivedWorkouts.size());
         return map;
@@ -222,12 +222,12 @@ public class User implements Model {
         return retVal;
     }
 
-    public Map<String, Map<String, Object>> getUserWorkoutsMap() {
-        if (this.userWorkouts == null) {
+    public Map<String, Map<String, Object>> getWorkoutMetasMap() {
+        if (this.workoutMetas == null) {
             return null;
         }
 
-        return this.userWorkouts.entrySet().stream().collect(
+        return this.workoutMetas.entrySet().stream().collect(
             collectingAndThen(
                 toMap(Entry::getKey, (Map.Entry<String, WorkoutMeta> e) -> e.getValue().asMap()),
                 HashMap::new));
@@ -245,7 +245,7 @@ public class User implements Model {
                 HashMap::new));
     }
 
-    public Map<String, Map<String, Object>> getUserExercisesMap() {
+    public Map<String, Map<String, Object>> getOwnedExercisesMap() {
         if (this.ownedExercises == null) {
             return null;
         }

@@ -3,7 +3,7 @@ package controllers;
 import com.google.common.collect.ImmutableList;
 import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import interfaces.ApiRequestController;
 import java.util.Map;
 import javax.inject.Inject;
@@ -34,12 +34,12 @@ public class GetUserDataController implements ApiRequestController {
                 final String username = (String) jsonMap.get(User.USERNAME);
                 final User result = this.getUserDataManager.getUserData(username);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } else if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
                 final User result = this.getUserDataManager.getActiveUserData(activeUser);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } else {
                 throw new MissingApiRequestKeyException(
                     ImmutableList.of(RequestFields.ACTIVE_USER));

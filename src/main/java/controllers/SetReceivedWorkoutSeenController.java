@@ -27,12 +27,12 @@ public class SetReceivedWorkoutSeenController implements ApiRequestController {
 
         ResultStatus<String> resultStatus;
         final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, SharedWorkout.SENT_WORKOUT_ID);
+            .asList(RequestFields.ACTIVE_USER, SharedWorkout.SHARED_WORKOUT_ID);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
-                final String workoutId = (String) json.get(SharedWorkout.SENT_WORKOUT_ID);
+                final String workoutId = (String) json.get(SharedWorkout.SHARED_WORKOUT_ID);
 
                 Injector.getInjector(metrics).inject(this);
 

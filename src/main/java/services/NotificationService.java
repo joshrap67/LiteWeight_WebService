@@ -16,7 +16,7 @@ import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import imports.Config;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import java.security.InvalidParameterException;
 import java.util.Map;
 import models.NotificationData;
@@ -90,8 +90,8 @@ public class NotificationService {
             )
         );
 
-        final String jsonNotification = JsonHelper
-            .serializeMap(ImmutableMap.of("GCM", JsonHelper.serializeMap(notification)));
+        final String jsonNotification = JsonUtils
+            .serializeMap(ImmutableMap.of("GCM", JsonUtils.serializeMap(notification)));
 
         final PublishRequest publishRequest = new PublishRequest()
             .withTargetArn(arn)

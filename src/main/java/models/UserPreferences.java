@@ -21,7 +21,7 @@ public class UserPreferences implements Model {
     private boolean updateDefaultWeightOnRestart;
     private boolean metricUnits;
 
-    public UserPreferences(Map<String, Object> json) throws InvalidAttributeException {
+    public UserPreferences(Map<String, Object> json) {
         this.setPrivateAccount((Boolean) json.get(PRIVATE_ACCOUNT));
         this.setUpdateDefaultWeightOnRestart((Boolean) json.get(UPDATE_DEFAULT_WEIGHT_ON_RESTART));
         this.setUpdateDefaultWeightOnSave((Boolean) json.get(UPDATE_DEFAULT_WEIGHT_ON_SAVE));

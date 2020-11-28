@@ -51,7 +51,7 @@ public class SwitchWorkoutManager {
 
             user.setCurrentWorkout(newWorkoutId);
             final String timeNow = Instant.now().toString();
-            final WorkoutMeta workoutMetaNew = user.getUserWorkouts().get(newWorkoutId);
+            final WorkoutMeta workoutMetaNew = user.getWorkoutMetas().get(newWorkoutId);
             workoutMetaNew.setDateLast(timeNow);
 
             // update user object with new access time of the newly selected workout

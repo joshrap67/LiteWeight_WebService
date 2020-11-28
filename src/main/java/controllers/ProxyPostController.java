@@ -7,7 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -79,7 +79,7 @@ public class ProxyPostController implements
                 action = splitAction[1]; // the action is after the '/'
 
                 if (ACTIONS_TO_CONTROLLERS.containsKey(action)) {
-                    final Map<String, Object> jsonMap = JsonHelper.deserialize(request.getBody());
+                    final Map<String, Object> jsonMap = JsonUtils.deserialize(request.getBody());
                     metrics
                         .setRequestBody(jsonMap); // attach here for logging before handling action
 

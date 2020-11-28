@@ -4,7 +4,7 @@ import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -42,7 +42,7 @@ public class DeleteWorkoutThenFetchController implements ApiRequestController {
                 final UserWithWorkout result = this.deleteWorkoutThenFetchWorkoutManager
                     .deleteWorkoutThenFetch(activeUser, deletedWorkoutId, nextWorkoutId);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (UserNotFoundException | WorkoutNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
                 resultStatus = ResultStatus.failureBadRequest(exception.getMessage());

@@ -42,7 +42,7 @@ public class Routine implements Model, Iterable<Integer> {
         }
     }
 
-    public Routine(final SentRoutine routine, final Map<String, String> exerciseNameToId) {
+    public Routine(final SharedRoutine routine, final Map<String, String> exerciseNameToId) {
         // this constructor is used to convert from a sent routine back to a normal workout routine
         this.weeks = new HashMap<>();
         for (Integer week : routine) {

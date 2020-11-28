@@ -18,7 +18,6 @@ public class WorkoutMeta implements Model {
     public static final String TOTAL_EXERCISES_SUM = "totalExercisesSum";
 
     private String workoutName;
-
     private String dateLast;
     private Integer timesCompleted;
     private Double averageExercisesCompleted;
@@ -26,7 +25,6 @@ public class WorkoutMeta implements Model {
 
     public WorkoutMeta(Map<String, Object> json) {
         this.workoutName = (String) json.get(WORKOUT_NAME);
-
         this.dateLast = (String) json.get(DATE_LAST);
         this.timesCompleted = Parser.convertObjectToInteger(json.get(TIMES_COMPLETED));
         this.averageExercisesCompleted = Parser

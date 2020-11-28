@@ -48,7 +48,7 @@ public class RestartWorkoutManager {
             final User user = this.userDAO.getUser(activeUser);
 
             final String workoutId = workout.getWorkoutId();
-            final WorkoutMeta workoutMeta = user.getUserWorkouts().get(workoutId);
+            final WorkoutMeta workoutMeta = user.getWorkoutMetas().get(workoutId);
             restartWorkout(workout, workoutMeta, user);
 
             workoutMeta.setTimesCompleted(workoutMeta.getTimesCompleted() + 1);
@@ -75,7 +75,7 @@ public class RestartWorkoutManager {
                     User.EXERCISES + " = :exercisesMap")
                 .withValueMap(new ValueMap()
                     .withMap(":userWorkoutsMap", workoutMeta.asMap())
-                    .withMap(":exercisesMap", user.getUserExercisesMap()))
+                    .withMap(":exercisesMap", user.getOwnedExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 
             final List<TransactWriteItem> actions = new ArrayList<>();

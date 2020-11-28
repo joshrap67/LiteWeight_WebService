@@ -13,7 +13,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 import models.OwnedExercise;
 import models.User;
-import responses.ExerciseUserResponse;
+import responses.OwnedExerciseResponse;
 
 public class NewExerciseManager {
 
@@ -36,7 +36,7 @@ public class NewExerciseManager {
      * @return ExerciseUserResponse the newly created exercise
      * @throws Exception thrown if any input error
      */
-    public ExerciseUserResponse newExercise(final String activeUser, final String exerciseName,
+    public OwnedExerciseResponse newExercise(final String activeUser, final String exerciseName,
         final List<String> focuses) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".newExercise";
         this.metrics.commonSetup(classMethod);
@@ -64,7 +64,7 @@ public class NewExerciseManager {
             this.userDAO.updateUser(user.getUsername(), updateItemSpec);
 
             this.metrics.commonClose(true);
-            return new ExerciseUserResponse(exerciseId, ownedExercise);
+            return new OwnedExerciseResponse(exerciseId, ownedExercise);
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

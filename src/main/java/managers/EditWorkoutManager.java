@@ -72,7 +72,7 @@ public class EditWorkoutManager {
             final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.EXERCISES + "= :exerciseMap")
-                .withValueMap(new ValueMap().withMap(":exerciseMap", user.getUserExercisesMap()));
+                .withValueMap(new ValueMap().withMap(":exerciseMap", user.getOwnedExercisesMap()));
 
             final UpdateItemData updateWorkoutItemData = new UpdateItemData(workoutId,
                 WorkoutDAO.WORKOUT_TABLE_NAME)

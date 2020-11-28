@@ -4,7 +4,7 @@ import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -45,7 +45,7 @@ public class CopyWorkoutController implements ApiRequestController {
                 final UserWithWorkout result = this.copyWorkoutManager
                     .copyWorkout(activeUser, newWorkoutName, oldWorkout);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

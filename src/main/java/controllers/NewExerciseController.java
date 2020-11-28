@@ -4,7 +4,7 @@ import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import managers.NewExerciseManager;
 import models.OwnedExercise;
 import modules.Injector;
-import responses.ExerciseUserResponse;
+import responses.OwnedExerciseResponse;
 
 public class NewExerciseController implements ApiRequestController {
 
@@ -40,10 +40,10 @@ public class NewExerciseController implements ApiRequestController {
                 final List<String> focuses = (List<String>) jsonBody.get(OwnedExercise.FOCUSES);
 
                 Injector.getInjector(metrics).inject(this);
-                final ExerciseUserResponse result = this.newExerciseManager
+                final OwnedExerciseResponse result = this.newExerciseManager
                     .newExercise(activeUser, exerciseName, focuses);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

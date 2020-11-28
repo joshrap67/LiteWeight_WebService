@@ -97,7 +97,7 @@ public class NewWorkoutManager {
                 .withValueMap(new ValueMap()
                     .withString(":currentWorkoutVal", workoutId)
                     .withMap(":workoutUserMap", workoutMeta.asMap())
-                    .withMap(":exercisesMap", user.getUserExercisesMap()))
+                    .withMap(":exercisesMap", user.getOwnedExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 
             final List<TransactWriteItem> actions = new ArrayList<>();

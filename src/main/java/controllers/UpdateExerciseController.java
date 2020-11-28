@@ -4,7 +4,7 @@ import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -44,7 +44,7 @@ public class UpdateExerciseController implements ApiRequestController {
                 final User result = this.updateExerciseManager
                     .updateExercise(activeUser, exerciseId, ownedExercise);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

@@ -3,7 +3,7 @@ package controllers;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -42,7 +42,7 @@ public class RestartWorkoutController implements ApiRequestController {
                 final UserWithWorkout result = this.restartWorkoutManager
                     .restartWorkout(activeUser, workout);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
                 resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());

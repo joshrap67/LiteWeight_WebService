@@ -5,7 +5,7 @@ import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -38,7 +38,7 @@ public class BlockUserController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 final String result = this.blockUserManager.blockUser(activeUser, userToBlock);
-                resultStatus = ResultStatus.successful(JsonHelper
+                resultStatus = ResultStatus.successful(JsonUtils
                     .serializeMap(ImmutableMap.of(User.ICON, result)));
 
             } catch (ManagerExecutionException meu) {

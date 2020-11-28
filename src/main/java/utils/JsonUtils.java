@@ -6,10 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
 
-public class JsonHelper {
+public class JsonUtils {
 
-    public static String serializeMap(Map<String, Object> map)
-        throws JsonProcessingException {
+    public static String serializeMap(Map<String, Object> map) {
         String retVal;
         ObjectMapper mapper = new ObjectMapper();
 
@@ -23,8 +22,7 @@ public class JsonHelper {
 
     public static Map<String, Object> deserialize(String jsonString) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {
-        });
+        return objectMapper.readValue(jsonString, new TypeReference<>() {});
     }
 
     public static byte[] deserializeByteList(String jsonString) throws IOException {

@@ -6,7 +6,7 @@ import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -32,20 +32,20 @@ public class GetSharedWorkoutController implements ApiRequestController {
 
         ResultStatus<String> resultStatus;
         final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, SharedWorkout.SENT_WORKOUT_ID);
+            .asList(RequestFields.ACTIVE_USER, SharedWorkout.SHARED_WORKOUT_ID);
 
         if (jsonMap.keySet().containsAll(requiredKeys)) {
             try {
                 Injector.getInjector(metrics).inject(this);
 
                 final String username = (String) jsonMap.get(User.USERNAME);
-                final String workoutId = (String) jsonMap.get(SharedWorkout.SENT_WORKOUT_ID);
+                final String workoutId = (String) jsonMap.get(SharedWorkout.SHARED_WORKOUT_ID);
                 final SharedWorkout sharedWorkout = this.getSharedWorkoutManager
                     .getSharedWorkout(username, workoutId);
 
                 resultStatus = ResultStatus
                     .successful(
-                        JsonHelper.serializeMap(Maps.newHashMap(sharedWorkout.asResponse())));
+                        JsonUtils.serializeMap(Maps.newHashMap(sharedWorkout.asResponse())));
             } catch (final MissingApiRequestKeyException e) {
                 throw e;
             } catch (ManagerExecutionException meu) {

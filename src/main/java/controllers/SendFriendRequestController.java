@@ -4,7 +4,7 @@ import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -40,7 +40,7 @@ public class SendFriendRequestController implements ApiRequestController {
                 final FriendResponse friendResponse = this.sendFriendRequestManager
                     .sendRequest(activeUser, userToAdd);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(friendResponse.asResponse()));
+                    .successful(JsonUtils.serializeMap(friendResponse.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

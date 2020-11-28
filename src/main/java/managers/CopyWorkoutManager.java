@@ -8,8 +8,6 @@ import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import models.Routine;
 import models.RoutineExercise;
@@ -110,7 +108,7 @@ public class CopyWorkoutManager {
                 .withValueMap(new ValueMap()
                     .withString(":currentWorkoutVal", newWorkout.getWorkoutId())
                     .withMap(":newWorkoutMeta", workoutMeta.asMap())
-                    .withMap(":exercisesMap", activeUserObject.getUserExercisesMap()))
+                    .withMap(":exercisesMap", activeUserObject.getOwnedExercisesMap()))
                 .withNameMap(new NameMap().with("#newWorkoutId", newWorkout.getWorkoutId()));
 
             // persist the current week/day/routine of the old workout

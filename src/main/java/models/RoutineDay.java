@@ -16,7 +16,7 @@ public class RoutineDay implements Iterable<Integer>, Model {
         this.exercises = new HashMap<>();
     }
 
-    public RoutineDay(Map<String, Object> exercisesForDay) throws InvalidAttributeException {
+    public RoutineDay(Map<String, Object> exercisesForDay) {
         this.exercises = new HashMap<>();
         for (String sortVal : exercisesForDay.keySet()) {
             RoutineExercise routineExercise = new RoutineExercise(

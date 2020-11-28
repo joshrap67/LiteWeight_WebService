@@ -6,7 +6,7 @@ import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -45,9 +45,9 @@ public class SendWorkoutController implements ApiRequestController {
                 final String sentWorkoutId = this.sendWorkoutManager
                     .sendWorkout(activeUser, recipientUsername, workoutId);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(Maps.newHashMap(
+                    .successful(JsonUtils.serializeMap(Maps.newHashMap(
                         ImmutableMap.<String, String>builder()
-                            .put(SharedWorkout.SENT_WORKOUT_ID, sentWorkoutId)
+                            .put(SharedWorkout.SHARED_WORKOUT_ID, sentWorkoutId)
                             .build())));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

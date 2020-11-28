@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SharedWorkout implements Model {
 
-    public static final String SENT_WORKOUT_ID = "sentWorkoutId";
+    public static final String SHARED_WORKOUT_ID = "sentWorkoutId"; //todo change
     public static final String WORKOUT_NAME = "workoutName";
     public static final String CREATOR = "creator";
     public static final String ROUTINE = "routine";
@@ -29,7 +29,7 @@ public class SharedWorkout implements Model {
     private String sentWorkoutId;
     private String workoutName;
     private String creator;
-    private SentRoutine routine;
+    private SharedRoutine routine;
     private Map<String, SharedWorkoutExercise> exercises;
 
     public SharedWorkout(final Item userItem)
@@ -38,18 +38,18 @@ public class SharedWorkout implements Model {
     }
 
     public SharedWorkout(Map<String, Object> json) throws InvalidAttributeException {
-        this.sentWorkoutId = (String) json.get(SENT_WORKOUT_ID);
+        this.sentWorkoutId = (String) json.get(SHARED_WORKOUT_ID);
         this.workoutName = (String) json.get(WORKOUT_NAME);
         this.creator = (String) json.get(CREATOR);
         this.setExercises((Map<String, Object>) json.get(EXERCISES));
-        this.routine = new SentRoutine((Map<String, Object>) json.get(ROUTINE));
+        this.routine = new SharedRoutine((Map<String, Object>) json.get(ROUTINE));
     }
 
     public SharedWorkout(final Workout workout, final User user, final String sentWorkoutId) {
         this.sentWorkoutId = sentWorkoutId;
         this.workoutName = workout.getWorkoutName();
         this.creator = workout.getCreator();
-        this.routine = new SentRoutine(workout.getRoutine(), user.getOwnedExercises());
+        this.routine = new SharedRoutine(workout.getRoutine(), user.getOwnedExercises());
         // preserve the focuses and video url of the exercises for user that might accept this workout
         this.exercises = new HashMap<>();
         Set<String> exerciseNames = new HashSet<>();
@@ -75,7 +75,7 @@ public class SharedWorkout implements Model {
         final Map<String, AttributeValue> workoutToSendItemValues = new HashMap<>();
         workoutToSendItemValues.putIfAbsent(WORKOUT_NAME, new AttributeValue(this.workoutName));
         workoutToSendItemValues
-            .putIfAbsent(SENT_WORKOUT_ID, new AttributeValue(this.sentWorkoutId));
+            .putIfAbsent(SHARED_WORKOUT_ID, new AttributeValue(this.sentWorkoutId));
         workoutToSendItemValues.putIfAbsent(CREATOR, new AttributeValue(this.creator));
         workoutToSendItemValues.putIfAbsent(ROUTINE, new AttributeValue()
             .withM(AttributeValueUtils.convertMapToAttributeValueMap(this.routine.asMap())));
@@ -100,7 +100,7 @@ public class SharedWorkout implements Model {
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();
         retVal.putIfAbsent(WORKOUT_NAME, this.workoutName);
-        retVal.putIfAbsent(SENT_WORKOUT_ID, this.sentWorkoutId);
+        retVal.putIfAbsent(SHARED_WORKOUT_ID, this.sentWorkoutId);
         retVal.putIfAbsent(CREATOR, this.creator);
         retVal.putIfAbsent(ROUTINE, this.routine.asMap());
         retVal.putIfAbsent(EXERCISES, this.getExercisesMap());

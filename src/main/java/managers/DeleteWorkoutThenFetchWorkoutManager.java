@@ -50,7 +50,7 @@ public class DeleteWorkoutThenFetchWorkoutManager {
             for (String exerciseId : user.getOwnedExercises().keySet()) {
                 user.getOwnedExercises().get(exerciseId).getWorkouts().remove(deletedWorkoutId);
             }
-            user.getUserWorkouts().remove(deletedWorkoutId);
+            user.getWorkoutMetas().remove(deletedWorkoutId);
 
             Workout nextWorkout = null; // if null then that signals no workouts left
             if (nextWorkoutId != null) {
@@ -66,8 +66,8 @@ public class DeleteWorkoutThenFetchWorkoutManager {
                     User.EXERCISES + "= :exercisesMap")
                 .withValueMap(new ValueMap()
                     .withString(":currentWorkoutVal", nextWorkoutId)
-                    .withMap(":userWorkoutsMap", user.getUserWorkoutsMap())
-                    .withMap(":exercisesMap", user.getUserExercisesMap()));
+                    .withMap(":userWorkoutsMap", user.getWorkoutMetasMap())
+                    .withMap(":exercisesMap", user.getOwnedExercisesMap()));
 
             final UpdateItemData updateWorkoutItemData = new UpdateItemData(deletedWorkoutId,
                 WorkoutDAO.WORKOUT_TABLE_NAME);

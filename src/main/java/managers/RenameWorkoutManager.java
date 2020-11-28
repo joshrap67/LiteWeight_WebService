@@ -59,7 +59,7 @@ public class RenameWorkoutManager {
             workout.setWorkoutName(newWorkoutName);
             // update all the exercises that are apart of this newly renamed workout
             updateUserExercises(user, workoutId, newWorkoutName);
-            WorkoutMeta workoutMeta = user.getUserWorkouts().get(workoutId);
+            WorkoutMeta workoutMeta = user.getWorkoutMetas().get(workoutId);
             workoutMeta.setWorkoutName(newWorkoutName);
 
             final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
@@ -69,7 +69,7 @@ public class RenameWorkoutManager {
                     User.EXERCISES + "= :exercisesMap")
                 .withValueMap(new ValueMap()
                     .withMap(":workoutMap", workoutMeta.asMap())
-                    .withMap(":exercisesMap", user.getUserExercisesMap()))
+                    .withMap(":exercisesMap", user.getOwnedExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 
             final UpdateItemData updateWorkoutItemData = new UpdateItemData(workoutId,

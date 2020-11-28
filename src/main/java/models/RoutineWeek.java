@@ -16,7 +16,7 @@ public class RoutineWeek implements Iterable<Integer>, Model {
         this.days = new HashMap<>();
     }
 
-    public RoutineWeek(Map<String, Object> daysForWeek) throws InvalidAttributeException {
+    public RoutineWeek(Map<String, Object> daysForWeek) {
         this.days = new HashMap<>();
         for (String day : daysForWeek.keySet()) {
             RoutineDay routineDay = new RoutineDay((Map<String, Object>) daysForWeek.get(day));

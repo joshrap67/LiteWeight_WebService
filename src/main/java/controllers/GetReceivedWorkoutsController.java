@@ -4,7 +4,7 @@ import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import utils.Parser;
 import imports.RequestFields;
@@ -48,7 +48,7 @@ public class GetReceivedWorkoutsController implements ApiRequestController {
                     retMap.putIfAbsent(workoutId, receivedWorkouts.get(workoutId).asResponse());
                 }
 
-                resultStatus = ResultStatus.successful(JsonHelper.serializeMap(retMap));
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(retMap));
             } catch (final MissingApiRequestKeyException e) {
                 throw e;
             } catch (UserNotFoundException | WorkoutNotFoundException exception) {

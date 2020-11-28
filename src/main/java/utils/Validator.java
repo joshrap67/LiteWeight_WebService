@@ -17,12 +17,12 @@ public class Validator {
         final Routine routine) {
 
         StringBuilder error = new StringBuilder();
-        if (activeUser.getUserWorkouts().size() >= Globals.MAX_FREE_WORKOUTS
+        if (activeUser.getWorkoutMetas().size() >= Globals.MAX_FREE_WORKOUTS
             && activeUser.getPremiumToken() == null) {
             error.append("Max amount of free workouts reached.\n");
         }
         if (activeUser.getPremiumToken() != null
-            && activeUser.getUserWorkouts().size() >= Globals.MAX_WORKOUTS) {
+            && activeUser.getWorkoutMetas().size() >= Globals.MAX_WORKOUTS) {
             error.append("Maximum workouts would be exceeded.");
         }
         if (workoutName.length() > Globals.MAX_WORKOUT_NAME_LENGTH) {
@@ -77,8 +77,8 @@ public class Validator {
     public static String validWorkoutName(final String workoutName, final User user) {
         StringBuilder error = new StringBuilder();
         boolean repeat = false;
-        for (String workoutId : user.getUserWorkouts().keySet()) {
-            if (user.getUserWorkouts().get(workoutId).getWorkoutName()
+        for (String workoutId : user.getWorkoutMetas().keySet()) {
+            if (user.getWorkoutMetas().get(workoutId).getWorkoutName()
                 .equals(workoutName.trim())) {
                 repeat = true;
                 break;

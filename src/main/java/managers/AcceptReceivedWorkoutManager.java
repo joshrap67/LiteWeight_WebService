@@ -129,7 +129,7 @@ public class AcceptReceivedWorkoutManager {
                     .withString(":currentWorkoutVal",
                         updateCurrentWorkout ? workoutId : activeUserObject.getCurrentWorkout())
                     .withMap(":workoutUserMap", workoutMeta.asMap())
-                    .withMap(":exercisesMap", activeUserObject.getUserExercisesMap()))
+                    .withMap(":exercisesMap", activeUserObject.getOwnedExercisesMap()))
                 .withNameMap(new NameMap()
                     .with("#receivedWorkoutId", workoutIdToAccept)
                     .with("#workoutId", workoutId));
@@ -157,11 +157,11 @@ public class AcceptReceivedWorkoutManager {
     private String validInput(final User activeUserObject, final SharedWorkout sharedWorkout) {
         StringBuilder error = new StringBuilder();
         if (activeUserObject.getPremiumToken() == null
-            && activeUserObject.getUserWorkouts().size() >= Globals.MAX_FREE_WORKOUTS) {
+            && activeUserObject.getWorkoutMetas().size() >= Globals.MAX_FREE_WORKOUTS) {
             error.append("Maximum free workouts would be exceeded.");
         }
         if (activeUserObject.getPremiumToken() != null
-            && activeUserObject.getUserWorkouts().size() >= Globals.MAX_WORKOUTS) {
+            && activeUserObject.getWorkoutMetas().size() >= Globals.MAX_WORKOUTS) {
             error.append("Maximum workouts would be exceeded.");
         }
         Set<String> sentWorkoutExercises = new HashSet<>();
@@ -175,7 +175,7 @@ public class AcceptReceivedWorkoutManager {
         }
 
         List<WorkoutMeta> workoutMetas = new ArrayList<>(
-            activeUserObject.getUserWorkouts().values());
+            activeUserObject.getWorkoutMetas().values());
         for (WorkoutMeta workoutMeta : workoutMetas) {
             if (workoutMeta.getWorkoutName().equals(sharedWorkout.getWorkoutName())) {
                 error.append("Workout with this name already exists.");

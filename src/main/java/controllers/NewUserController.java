@@ -3,7 +3,7 @@ package controllers;
 import com.google.common.collect.ImmutableList;
 import exceptions.MissingApiRequestKeyException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -32,7 +32,7 @@ public class NewUserController implements ApiRequestController {
                 final String username = (String) json.get(User.USERNAME);
                 final User result = this.newUserManager.createNewUser(username);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } else {
                 throw new MissingApiRequestKeyException(
                     ImmutableList.of(RequestFields.ACTIVE_USER));

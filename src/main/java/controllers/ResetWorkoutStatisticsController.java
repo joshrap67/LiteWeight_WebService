@@ -4,7 +4,7 @@ import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import models.WorkoutMeta;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -40,7 +40,7 @@ public class ResetWorkoutStatisticsController implements ApiRequestController {
                 final WorkoutMeta result = this.resetWorkoutStatisticsManager
                     .resetStatistics(activeUser, workoutId);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
                 resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());

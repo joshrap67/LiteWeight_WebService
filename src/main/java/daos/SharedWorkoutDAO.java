@@ -25,8 +25,8 @@ import models.SharedWorkout;
 
 public class SharedWorkoutDAO {
 
-    public static final String SENT_WORKOUT_TABLE_NAME = "sentWorkouts";
-    public static final String SENT_WORKOUT_TABLE_PRIMARY_KEY = SharedWorkout.SENT_WORKOUT_ID;
+    public static final String SENT_WORKOUT_TABLE_NAME = "sentWorkouts"; //todo change
+    public static final String SENT_WORKOUT_TABLE_PRIMARY_KEY = SharedWorkout.SHARED_WORKOUT_ID;
 
     protected final Table sentWorkoutTable;
     private final Database database;

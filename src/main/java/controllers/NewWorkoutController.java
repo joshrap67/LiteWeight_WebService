@@ -4,7 +4,7 @@ import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -45,7 +45,7 @@ public class NewWorkoutController implements ApiRequestController {
                 final UserWithWorkout userWithWorkout = this.newWorkoutManager
                     .createNewWorkout(activeUser, workoutName, routine);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(userWithWorkout.asResponse()));
+                    .successful(JsonUtils.serializeMap(userWithWorkout.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

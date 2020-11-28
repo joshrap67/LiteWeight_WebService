@@ -38,7 +38,7 @@ public class ResetWorkoutStatisticsManager {
         try {
             final User user = this.userDAO.getUser(activeUser);
 
-            final WorkoutMeta workoutMeta = user.getUserWorkouts().get(workoutId);
+            final WorkoutMeta workoutMeta = user.getWorkoutMetas().get(workoutId);
             workoutMeta.setAverageExercisesCompleted(0.0);
             workoutMeta.setTimesCompleted(0);
             workoutMeta.setTotalExercisesSum(0);

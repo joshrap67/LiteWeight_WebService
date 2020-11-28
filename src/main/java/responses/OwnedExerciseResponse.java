@@ -8,12 +8,12 @@ import lombok.Data;
 import models.OwnedExercise;
 
 @Data
-public class ExerciseUserResponse implements Model {
+public class OwnedExerciseResponse implements Model {
 
     private String exerciseId;
     private OwnedExercise ownedExercise;
 
-    public ExerciseUserResponse(String exerciseId, OwnedExercise ownedExercise) {
+    public OwnedExerciseResponse(String exerciseId, OwnedExercise ownedExercise) {
         this.exerciseId = exerciseId;
         this.ownedExercise = ownedExercise;
     }

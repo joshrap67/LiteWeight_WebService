@@ -4,7 +4,7 @@ import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -31,12 +31,12 @@ public class AcceptReceivedWorkoutController implements ApiRequestController {
 
         ResultStatus<String> resultStatus;
         final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, SharedWorkout.SENT_WORKOUT_ID);
+            .asList(RequestFields.ACTIVE_USER, SharedWorkout.SHARED_WORKOUT_ID);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
-                final String workoutId = (String) json.get(SharedWorkout.SENT_WORKOUT_ID);
+                final String workoutId = (String) json.get(SharedWorkout.SHARED_WORKOUT_ID);
                 String optionalName = null;
                 if (json.containsKey(Workout.WORKOUT_NAME)) {
                     optionalName = (String) json.get(Workout.WORKOUT_NAME);
@@ -46,7 +46,7 @@ public class AcceptReceivedWorkoutController implements ApiRequestController {
                 AcceptWorkoutResponse result = this.acceptReceivedWorkoutManager
                     .acceptReceivedWorkout(activeUser, workoutId, optionalName);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(result.asResponse()));
+                    .successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

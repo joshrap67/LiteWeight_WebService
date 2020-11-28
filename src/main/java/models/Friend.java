@@ -18,11 +18,6 @@ public class Friend implements Model {
         this.confirmed = (boolean) json.get(CONFIRMED);
     }
 
-    public Friend(User user) {
-        this.icon = user.getIcon();
-        this.confirmed = false;
-    }
-
     public Friend(User user, boolean confirmed) {
         this.icon = user.getIcon();
         this.confirmed = confirmed;

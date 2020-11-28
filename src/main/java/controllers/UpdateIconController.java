@@ -3,7 +3,7 @@ package controllers;
 import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -33,7 +33,7 @@ public class UpdateIconController implements ApiRequestController {
             try {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
                 final String imageData = (String) jsonBody.get(User.ICON);
-                byte[] imageBytes = JsonHelper.deserializeByteList(imageData);
+                byte[] imageBytes = JsonUtils.deserializeByteList(imageData);
 
                 Injector.getInjector(metrics).inject(this);
                 boolean success = this.updateIconManager

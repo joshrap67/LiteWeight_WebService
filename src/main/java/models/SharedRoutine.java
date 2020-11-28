@@ -10,15 +10,15 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
-public class SentRoutine implements Model, Iterable<Integer> {
+public class SharedRoutine implements Model, Iterable<Integer> {
 
     private Map<Integer, SharedWeek> weeks;
 
-    public SentRoutine() {
+    public SharedRoutine() {
         this.weeks = new HashMap<>();
     }
 
-    public SentRoutine(final Routine routine, Map<String, OwnedExercise> ownedExerciseMap) {
+    public SharedRoutine(final Routine routine, Map<String, OwnedExercise> ownedExerciseMap) {
         this.weeks = new HashMap<>();
         for (Integer week : routine) {
             final SharedWeek sharedWeek = new SharedWeek();
@@ -37,7 +37,7 @@ public class SentRoutine implements Model, Iterable<Integer> {
         }
     }
 
-    public SentRoutine(Map<String, Object> json) throws InvalidAttributeException {
+    public SharedRoutine(Map<String, Object> json) throws InvalidAttributeException {
         if (json == null) {
             this.weeks = null;
         } else {

@@ -49,7 +49,7 @@ public class DeleteExerciseManager {
 
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.EXERCISES + "= :exerciseMap")
-                .withValueMap(new ValueMap().withMap(":exerciseMap", user.getUserExercisesMap()));
+                .withValueMap(new ValueMap().withMap(":exerciseMap", user.getOwnedExercisesMap()));
             this.userDAO.updateUser(user.getUsername(), updateItemSpec);
             this.metrics.commonClose(true);
         } catch (Exception e) {

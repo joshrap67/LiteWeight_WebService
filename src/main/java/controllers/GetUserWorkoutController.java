@@ -5,7 +5,7 @@ import exceptions.MissingApiRequestKeyException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
 import utils.ErrorMessage;
-import utils.JsonHelper;
+import utils.JsonUtils;
 import utils.Metrics;
 import imports.RequestFields;
 import imports.ResultStatus;
@@ -36,13 +36,13 @@ public class GetUserWorkoutController implements ApiRequestController {
                 final UserWithWorkout userWithWorkout = this.getUserWorkoutManager
                     .getUserWithWorkout(username);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(userWithWorkout.asResponse()));
+                    .successful(JsonUtils.serializeMap(userWithWorkout.asResponse()));
             } else if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
                 final UserWithWorkout userWithWorkout = this.getUserWorkoutManager
                     .getUserWithWorkout(activeUser);
                 resultStatus = ResultStatus
-                    .successful(JsonHelper.serializeMap(userWithWorkout.asResponse()));
+                    .successful(JsonUtils.serializeMap(userWithWorkout.asResponse()));
             } else {
                 throw new MissingApiRequestKeyException(
                     ImmutableList.of(RequestFields.ACTIVE_USER));
