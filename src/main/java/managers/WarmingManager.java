@@ -38,7 +38,7 @@ public class WarmingManager {
 
         try {
             this.userDAO.describeUserTable();
-            this.sharedWorkoutDAO.describeSentWorkoutTable();
+            this.sharedWorkoutDAO.describeSharedWorkoutsTable();
             this.workoutDAO.describeWorkoutTable();
             this.notificationService.getPlatformAttributes(Config.PUSH_SNS_PLATFORM_ARN);
 

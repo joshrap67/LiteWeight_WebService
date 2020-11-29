@@ -135,7 +135,7 @@ public class AcceptReceivedWorkoutManager {
                     .with("#workoutId", workoutId));
             // since user is accepting the workout, delete the shared workout from the table - it's no longer needed
             UpdateItemData updateSharedWorkoutData = new UpdateItemData(
-                workoutToAccept.getSentWorkoutId(), SharedWorkoutDAO.SENT_WORKOUT_TABLE_NAME);
+                workoutToAccept.getSharedWorkoutId(), SharedWorkoutDAO.SHARED_WORKOUTS_TABLE_NAME);
 
             List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
@@ -164,12 +164,12 @@ public class AcceptReceivedWorkoutManager {
             && activeUserObject.getWorkoutMetas().size() >= Globals.MAX_WORKOUTS) {
             error.append("Maximum workouts would be exceeded.");
         }
-        Set<String> sentWorkoutExercises = new HashSet<>();
+        Set<String> sharedWorkoutExercises = new HashSet<>();
         for (Integer week : sharedWorkout.getRoutine()) {
             for (Integer day : sharedWorkout.getRoutine().getWeek(week)) {
                 for (SharedExercise sharedExercise : sharedWorkout.getRoutine()
                     .getExerciseListForDay(week, day)) {
-                    sentWorkoutExercises.add(sharedExercise.getExerciseName());
+                    sharedWorkoutExercises.add(sharedExercise.getExerciseName());
                 }
             }
         }
@@ -187,7 +187,7 @@ public class AcceptReceivedWorkoutManager {
             ownedExercises
                 .add(activeUserObject.getOwnedExercises().get(exerciseId).getExerciseName());
         }
-        Set<String> totalExercises = Sets.union(sentWorkoutExercises, ownedExercises);
+        Set<String> totalExercises = Sets.union(sharedWorkoutExercises, ownedExercises);
         if (activeUserObject.getPremiumToken() == null
             && totalExercises.size() > Globals.MAX_FREE_EXERCISES) {
             error.append(

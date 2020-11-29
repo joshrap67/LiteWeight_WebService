@@ -65,13 +65,7 @@ public class LoggingMessage<T> {
         }
 
         if (this.input != null) {
-            try {
-                retString +=
-                    "\n\tinput: " + JsonUtils
-                        .serializeMap((Map<String, Object>) this.input);
-            } catch (JsonProcessingException e) {
-                retString += "Error";
-            }
+            retString += "\n\tinput: " + JsonUtils.serializeMap((Map<String, Object>) this.input);
         }
 
         if (this.developerMessage != null) {

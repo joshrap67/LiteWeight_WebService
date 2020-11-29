@@ -42,12 +42,12 @@ public class SendWorkoutController implements ApiRequestController {
                 final String workoutId = (String) json.get(Workout.WORKOUT_ID);
 
                 Injector.getInjector(metrics).inject(this);
-                final String sentWorkoutId = this.sendWorkoutManager
+                final String sharedWorkoutId = this.sendWorkoutManager
                     .sendWorkout(activeUser, recipientUsername, workoutId);
                 resultStatus = ResultStatus
                     .successful(JsonUtils.serializeMap(Maps.newHashMap(
                         ImmutableMap.<String, String>builder()
-                            .put(SharedWorkout.SHARED_WORKOUT_ID, sentWorkoutId)
+                            .put(SharedWorkout.SHARED_WORKOUT_ID, sharedWorkoutId)
                             .build())));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

@@ -25,10 +25,10 @@ import models.SharedWorkout;
 
 public class SharedWorkoutDAO {
 
-    public static final String SENT_WORKOUT_TABLE_NAME = "sentWorkouts"; //todo change
-    public static final String SENT_WORKOUT_TABLE_PRIMARY_KEY = SharedWorkout.SHARED_WORKOUT_ID;
+    public static final String SHARED_WORKOUTS_TABLE_NAME = "sharedWorkouts";
+    public static final String SHARED_WORKOUTS_TABLE_PRIMARY_KEY = SharedWorkout.SHARED_WORKOUT_ID;
 
-    protected final Table sentWorkoutTable;
+    protected final Table sharedWorkoutsTable;
     private final Database database;
 
     @Inject
@@ -40,31 +40,31 @@ public class SharedWorkoutDAO {
         final DynamoDB dynamoDb = new DynamoDB(client);
 
         this.database = database;
-        this.sentWorkoutTable = dynamoDb.getTable(SENT_WORKOUT_TABLE_NAME);
+        this.sharedWorkoutsTable = dynamoDb.getTable(SHARED_WORKOUTS_TABLE_NAME);
     }
 
-    public PutItemOutcome putSentWorkout(final Item workout) {
-        return this.sentWorkoutTable.putItem(workout);
+    public PutItemOutcome putSharedWorkout(final Item workout) {
+        return this.sharedWorkoutsTable.putItem(workout);
     }
 
-    public Item getSentWorkoutItem(String currentWorkoutId) {
-        return this.sentWorkoutTable
-            .getItem(new PrimaryKey(SENT_WORKOUT_TABLE_PRIMARY_KEY, currentWorkoutId));
+    public Item getSharedWorkoutItem(String currentWorkoutId) {
+        return this.sharedWorkoutsTable
+            .getItem(new PrimaryKey(SHARED_WORKOUTS_TABLE_PRIMARY_KEY, currentWorkoutId));
     }
 
     public SharedWorkout getSharedWorkout(String workoutId)
         throws NullPointerException, InvalidAttributeException, WorkoutNotFoundException {
-        final Item workoutItem = Optional.ofNullable(this.getSentWorkoutItem(workoutId))
+        final Item workoutItem = Optional.ofNullable(this.getSharedWorkoutItem(workoutId))
             .orElseThrow(
                 () -> new WorkoutNotFoundException(
                     String.format("Sent Workout with ID: %s not found", workoutId)));
         return new SharedWorkout(workoutItem);
     }
 
-    public UpdateItemOutcome updateSentWorkout(final String workoutId,
+    public UpdateItemOutcome updateSharedWorkout(final String workoutId,
         final UpdateItemSpec updateItemSpec) {
-        updateItemSpec.withPrimaryKey(SENT_WORKOUT_TABLE_PRIMARY_KEY, workoutId);
-        return this.sentWorkoutTable.updateItem(updateItemSpec);
+        updateItemSpec.withPrimaryKey(SHARED_WORKOUTS_TABLE_PRIMARY_KEY, workoutId);
+        return this.sharedWorkoutsTable.updateItem(updateItemSpec);
     }
 
     //transactions
@@ -78,15 +78,15 @@ public class SharedWorkoutDAO {
     }
 
     //for cold start mitigation
-    public List<TableDescription> describeSentWorkoutTable() {
+    public List<TableDescription> describeSharedWorkoutsTable() {
         final ArrayList<TableDescription> descriptions = new ArrayList<>();
-        descriptions.add(this.sentWorkoutTable.describe());
+        descriptions.add(this.sharedWorkoutsTable.describe());
         return descriptions;
     }
 
     public static String getKeyIndex(final String tableName) throws Exception {
-        if (tableName.equals(SENT_WORKOUT_TABLE_NAME)) {
-            return SENT_WORKOUT_TABLE_PRIMARY_KEY;
+        if (tableName.equals(SHARED_WORKOUTS_TABLE_NAME)) {
+            return SHARED_WORKOUTS_TABLE_PRIMARY_KEY;
         } else {
             throw new Exception("Invalid table name: " + tableName);
         }

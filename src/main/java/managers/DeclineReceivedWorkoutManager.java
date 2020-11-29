@@ -46,8 +46,8 @@ public class DeclineReceivedWorkoutManager {
             }
 
             // remove workout from sent workout table
-            UpdateItemData updateSentWorkoutData = new UpdateItemData(
-                declinedWorkoutId, SharedWorkoutDAO.SENT_WORKOUT_TABLE_NAME);
+            UpdateItemData updateSharedWorkoutData = new UpdateItemData(
+                declinedWorkoutId, SharedWorkoutDAO.SHARED_WORKOUTS_TABLE_NAME);
 
             // remove workout from active user
             UpdateItemData activeUserData = new UpdateItemData(
@@ -57,7 +57,7 @@ public class DeclineReceivedWorkoutManager {
 
             List<TransactWriteItem> actions = new ArrayList<>();
             actions.add(new TransactWriteItem().withUpdate(activeUserData.asUpdate()));
-            actions.add(new TransactWriteItem().withDelete(updateSentWorkoutData.asDelete()));
+            actions.add(new TransactWriteItem().withDelete(updateSharedWorkoutData.asDelete()));
             this.userDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);

@@ -74,7 +74,7 @@ public class SendWorkoutManager {
             }
 
             final Workout originalWorkout = this.workoutDAO.getWorkout(workoutId);
-            String sentWorkoutId = null;
+            String sharedWorkoutId = null;
 
             for (String workoutIdMeta : recipientUser.getReceivedWorkouts().keySet()) {
                 final SharedWorkoutMeta meta = recipientUser.getReceivedWorkouts()
@@ -82,18 +82,18 @@ public class SendWorkoutManager {
                 if (meta.getWorkoutName().equals(originalWorkout.getWorkoutName()) && meta
                     .getSender().equals(activeUser)) {
                     // sender has already sent a workout with this name
-                    sentWorkoutId = meta.getWorkoutId();
+                    sharedWorkoutId = meta.getWorkoutId();
                     break;
                 }
             }
-            if (sentWorkoutId == null) {
+            if (sharedWorkoutId == null) {
                 // this is the first time this workout has been sent by the active user with this workout name, so we need an id
-                sentWorkoutId = UUID.randomUUID().toString();
+                sharedWorkoutId = UUID.randomUUID().toString();
             }
 
             final SharedWorkoutMeta sharedWorkoutMeta = new SharedWorkoutMeta();
             sharedWorkoutMeta.setDateSent(Instant.now().toString());
-            sharedWorkoutMeta.setWorkoutId(sentWorkoutId);
+            sharedWorkoutMeta.setWorkoutId(sharedWorkoutId);
             sharedWorkoutMeta.setSeen(false);
             sharedWorkoutMeta.setSender(activeUser);
             sharedWorkoutMeta.setMostFrequentFocus(originalWorkout.getMostFrequentFocus());
@@ -102,7 +102,7 @@ public class SendWorkoutManager {
             sharedWorkoutMeta.setIcon(activeUserObject.getIcon());
 
             final SharedWorkout workoutToSend = new SharedWorkout(originalWorkout, activeUserObject,
-                sentWorkoutId);
+                sharedWorkoutId);
             final Map<String, AttributeValue> workoutToSendItemValues = workoutToSend
                 .asItemAttributes();
 
@@ -113,7 +113,7 @@ public class SendWorkoutManager {
                     + User.RECEIVED_WORKOUTS + ".#workoutId= :workoutMetaVal")
                 .withValueMap(new ValueMap()
                     .withMap(":workoutMetaVal", sharedWorkoutMeta.asMap()))
-                .withNameMap(new NameMap().with("#workoutId", sentWorkoutId));
+                .withNameMap(new NameMap().with("#workoutId", sharedWorkoutId));
             // need to update the number of sent workouts for the active user
             final UpdateItemData activeUserItemData = new UpdateItemData(
                 activeUser, UserDAO.USERS_TABLE_NAME)
@@ -126,7 +126,7 @@ public class SendWorkoutManager {
             actions.add(new TransactWriteItem().withUpdate(activeUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withPut(new Put()
                 .withItem(workoutToSendItemValues)
-                .withTableName(SharedWorkoutDAO.SENT_WORKOUT_TABLE_NAME)));
+                .withTableName(SharedWorkoutDAO.SHARED_WORKOUTS_TABLE_NAME)));
 
             this.userDAO.executeWriteTransaction(actions);
             // if this succeeds, go ahead and send a notification to the recipient with the workout meta
@@ -135,7 +135,7 @@ public class SendWorkoutManager {
                     sharedWorkoutMeta.asResponse()));
 
             this.metrics.commonClose(true);
-            return sentWorkoutId;
+            return sharedWorkoutId;
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

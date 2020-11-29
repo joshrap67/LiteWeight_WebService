@@ -40,8 +40,8 @@ public class Database {
                 return WorkoutDAO.WORKOUT_TABLE_PRIMARY_KEY;
             case UserDAO.USERS_TABLE_NAME:
                 return UserDAO.USERS_PRIMARY_KEY;
-            case SharedWorkoutDAO.SENT_WORKOUT_TABLE_NAME:
-                return SharedWorkoutDAO.SENT_WORKOUT_TABLE_PRIMARY_KEY;
+            case SharedWorkoutDAO.SHARED_WORKOUTS_TABLE_NAME:
+                return SharedWorkoutDAO.SHARED_WORKOUTS_TABLE_PRIMARY_KEY;
             default:
                 throw new Exception("Invalid table name: " + tableName);
         }
