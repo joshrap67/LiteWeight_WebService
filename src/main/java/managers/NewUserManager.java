@@ -2,7 +2,6 @@ package managers;
 
 import services.StorageService;
 import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import daos.UserDAO;
 import utils.FileReader;
 import utils.Metrics;
@@ -63,10 +62,10 @@ public class NewUserManager {
                 .withMap(User.FRIEND_REQUESTS, new HashMap<>())
                 .withMap(User.RECEIVED_WORKOUTS, new HashMap<>())
                 .withMap(User.EXERCISES, FileReader.getDefaultExercises());
-            PutItemOutcome outcome = this.userDAO.putUser(user);
+            this.userDAO.putUser(user);
 
             this.metrics.commonClose(true);
-            return new User(outcome.getItem().asMap());
+            return new User(user);
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

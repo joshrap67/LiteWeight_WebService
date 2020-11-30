@@ -1,0 +1,1 @@
+tar -cf lambda_package.zip "C:\Users\Josh\github\LiteWeight_WebService\auto_confirm_users\Lib\site-packages"
