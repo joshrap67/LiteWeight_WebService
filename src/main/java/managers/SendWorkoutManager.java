@@ -146,11 +146,16 @@ public class SendWorkoutManager {
         StringBuilder stringBuilder = new StringBuilder();
         String activeUserUsername = activeUser.getUsername();
         String otherUserUsername = otherUser.getUsername();
-        if (otherUser.getUserPreferences().isPrivateAccount() || otherUser.getBlocked()
-            .containsKey(activeUserUsername)) {
+        if (otherUser.getBlocked().containsKey(activeUserUsername)) {
             stringBuilder.append("Unable to send workout to: ").append(otherUserUsername)
                 .append(".\n");
         }
+        if (otherUser.getUserPreferences().isPrivateAccount() && !otherUser.getFriends()
+            .containsKey(activeUser.getUsername())) {
+            stringBuilder.append("Unable to send workout to: ").append(otherUserUsername)
+                .append(".\n");
+        }
+
         if (activeUser.getBlocked().containsKey(otherUserUsername)) {
             stringBuilder.append("You are currently blocking this user.\n");
         }

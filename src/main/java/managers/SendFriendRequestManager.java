@@ -105,7 +105,7 @@ public class SendFriendRequestManager {
         }
         if (otherUser.getUserPreferences().isPrivateAccount() || otherUser.getBlocked()
             .containsKey(activeUserUsername)) {
-            stringBuilder.append("Unable to add").append(otherUserUsername).append(".\n");
+            stringBuilder.append("Unable to add ").append(otherUserUsername).append(".\n");
         }
         if (activeUser.getBlocked().containsKey(otherUserUsername)) {
             stringBuilder.append("You are currently blocking this user.\n");
