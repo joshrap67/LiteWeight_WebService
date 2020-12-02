@@ -17,7 +17,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import managers.GetSharedWorkoutManager;
 import models.SharedWorkout;
-import models.User;
 import modules.Injector;
 
 public class GetSharedWorkoutController implements ApiRequestController {
@@ -38,7 +37,7 @@ public class GetSharedWorkoutController implements ApiRequestController {
             try {
                 Injector.getInjector(metrics).inject(this);
 
-                final String username = (String) jsonMap.get(User.USERNAME);
+                final String username = (String) jsonMap.get(RequestFields.ACTIVE_USER);
                 final String workoutId = (String) jsonMap.get(SharedWorkout.SHARED_WORKOUT_ID);
                 final SharedWorkout sharedWorkout = this.getSharedWorkoutManager
                     .getSharedWorkout(username, workoutId);
