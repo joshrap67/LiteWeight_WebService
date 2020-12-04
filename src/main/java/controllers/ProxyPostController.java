@@ -6,13 +6,13 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import helpers.ErrorMessage;
-import helpers.JsonHelper;
-import helpers.Metrics;
-import helpers.RequestFields;
-import helpers.ResultStatus;
-import helpers.TokenHelper;
-import helpers.WarningMessage;
+import utils.ErrorMessage;
+import utils.JsonUtils;
+import utils.Metrics;
+import imports.RequestFields;
+import imports.ResultStatus;
+import utils.TokenUtils;
+import utils.WarningMessage;
 import interfaces.ApiRequestController;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -21,77 +21,117 @@ import java.util.Map;
 public class ProxyPostController implements
     RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-  // all the different actions this service has
-  private static final Map<String, Class<? extends ApiRequestController>> ACTIONS_TO_CONTROLLERS = Maps
-      .newHashMap(ImmutableMap.<String, Class<? extends ApiRequestController>>builder()
-          .put("getUserData", GetUserDataController.class)
-          .build());
+    // all the different actions this web service has
+    private static final Map<String, Class<? extends ApiRequestController>> ACTIONS_TO_CONTROLLERS = Maps
+        .newHashMap(ImmutableMap.<String, Class<? extends ApiRequestController>>builder()
+            .put("getUserData", GetUserDataController.class)
+            .put("newUser", NewUserController.class)
+            .put("newWorkout", NewWorkoutController.class)
+            .put("warmingEndpoint", WarmingController.class)
+            .put("getUserWorkout", GetUserWorkoutController.class)
+            .put("switchWorkout", SwitchWorkoutController.class)
+            .put("copyWorkout", CopyWorkoutController.class)
+            .put("renameWorkout", RenameWorkoutController.class)
+            .put("deleteWorkoutThenFetch", DeleteWorkoutThenFetchController.class)
+            .put("resetWorkoutStatistics", ResetWorkoutStatisticsController.class)
+            .put("editWorkout", EditWorkoutController.class)
+            .put("updateExercise", UpdateExerciseController.class)
+            .put("newExercise", NewExerciseController.class)
+            .put("syncWorkout", SyncWorkoutController.class)
+            .put("restartWorkout", RestartWorkoutController.class)
+            .put("deleteExercise", DeleteExerciseController.class)
+            .put("updateIcon", UpdateIconController.class)
+            .put("updateEndpointId", RegisterEndpointTokenController.class)
+            .put("removeEndpointId", RemoveEndpointTokenController.class)
+            .put("sendFriendRequest", SendFriendRequestController.class)
+            .put("cancelFriendRequest", CancelFriendRequestController.class)
+            .put("setAllFriendRequestsSeen", SetAllFriendRequestsSeenController.class)
+            .put("updateUserPreferences", UpdateUserPreferencesController.class)
+            .put("acceptFriendRequest", AcceptFriendRequestController.class)
+            .put("removeFriend", RemoveFriendController.class)
+            .put("declineFriendRequest", DeclineFriendRequestController.class)
+            .put("blockUser", BlockUserController.class)
+            .put("unblockUser", UnblockUserController.class)
+            .put("sendWorkout", SendWorkoutController.class)
+            .put("getReceivedWorkouts", GetReceivedWorkoutsController.class)
+            .put("getSharedWorkout", GetSharedWorkoutController.class)
+            .put("setAllReceivedWorkoutsSeen", SetAllReceivedWorkoutsSeenController.class)
+            .put("setReceivedWorkoutSeen", SetReceivedWorkoutSeenController.class)
+            .put("acceptReceivedWorkout", AcceptReceivedWorkoutController.class)
+            .put("declineReceivedWorkout", DeclineReceivedWorkoutController.class)
+            .put("sendFeedback", SendFeedbackController.class)
+            .build());
 
-  public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
-      Context context) {
-    final String classMethod = "ProxyPostController.handleRequest";
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
+        Context context) {
+        final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
-    final Metrics metrics = new Metrics(context.getAwsRequestId(), context.getLogger());
-    metrics.commonSetup(classMethod);
+        final Metrics metrics = new Metrics(context.getAwsRequestId(), context.getLogger());
+        metrics.commonSetup(classMethod);
 
-    ResultStatus<String> resultStatus;
+        ResultStatus<String> resultStatus;
 
-    try {
-      String action = request.getPath(); // this should be of the form '/action'
-      String[] splitAction = action.split("/"); // remove the prefixed slash
+        try {
+            String action = request.getPath(); // in the form '/action'
+            String[] splitAction = action.split("/"); // remove the prefixed slash
 
-      if (splitAction.length == 2) {
-        action = splitAction[1]; // the action is after the '/'
+            if (splitAction.length == 2) {
+                action = splitAction[1]; // the action is after the '/'
 
-        if (ACTIONS_TO_CONTROLLERS.containsKey(action)) {
-          final Map<String, Object> jsonMap = JsonHelper.parseInput(request.getBody());
-          metrics.setRequestBody(jsonMap); // attach here for logging before handling action
+                if (ACTIONS_TO_CONTROLLERS.containsKey(action)) {
+                    final Map<String, Object> jsonMap = JsonUtils.deserialize(request.getBody());
+                    metrics
+                        .setRequestBody(jsonMap); // attach here for logging before handling action
 
-          if (!jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
-            //get the active user from the authorization header and put it in the request payload
-            jsonMap.put(RequestFields.ACTIVE_USER,
-                TokenHelper.getActiveUserFromRequest(request, context));
+                    if (!jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
+                        // get active user from id token passed to API and put it in the request payload
+                        jsonMap.put(RequestFields.ACTIVE_USER,
+                            TokenUtils.getActiveUserFromRequest(request, context));
 
-            final Class<? extends ApiRequestController> manager = ACTIONS_TO_CONTROLLERS
-                .get(action);
-            final Constructor c = manager.getConstructor();
-            final ApiRequestController apiRequestManager = (ApiRequestController) c.newInstance();
-            resultStatus = apiRequestManager.processApiRequest(jsonMap, metrics);
-          } else {
-            //bad request body
-            resultStatus = ResultStatus.failure("Bad request body.");
-          }
-        } else {
-          metrics.log(new WarningMessage(
-              new HashMap<String, Object>() {{
-                put("path", request.getPath());
-                put("body", request.getBody());
-              }},
-              classMethod, "Unknown action."));
-          resultStatus = ResultStatus.failure("Unknown action.");
+                        final Class<? extends ApiRequestController> controller = ACTIONS_TO_CONTROLLERS
+                            .get(action);
+                        final Constructor c = controller.getConstructor();
+                        final ApiRequestController apiRequestController = (ApiRequestController) c
+                            .newInstance();
+                        resultStatus = apiRequestController.processApiRequest(jsonMap, metrics);
+                    } else {
+                        resultStatus = ResultStatus
+                            .failureBadRequest("Bad request body. Missing active user.");
+                    }
+                } else {
+                    metrics.log(new WarningMessage(
+                        new HashMap<String, Object>() {{
+                            put("path", request.getPath());
+                            put("body", request.getBody());
+                        }},
+                        classMethod, "Unknown action."));
+                    resultStatus = ResultStatus.failureBadRequest("Unknown action.");
+                }
+            } else {
+                metrics.log(new WarningMessage<>(
+                    new HashMap<String, Object>() {{
+                        put("path", request.getPath());
+                        put("body", request.getBody());
+                    }},
+                    classMethod, "Bad request format."));
+                resultStatus = ResultStatus.failureBadRequest("Bad request format.");
+            }
+        } catch (final Exception e) {
+            metrics.log(new ErrorMessage(
+                new HashMap<String, Object>() {{
+                    put("path", request.getPath());
+                    put("body", request.getBody());
+                }},
+                classMethod, e));
+            resultStatus = ResultStatus
+                .failureBadRequest("Exception occurred." + request.getBody() + " " + e.toString());
         }
-      } else {
-        metrics.log(new WarningMessage<>(
-            new HashMap<String, Object>() {{
-              put("path", request.getPath());
-              put("body", request.getBody());
-            }},
-            classMethod, "Bad request format."));
-        resultStatus = ResultStatus.failure("Bad request format.");
-      }
-    } catch (final Exception e) {
-      metrics.log(new ErrorMessage(
-          new HashMap<String, Object>() {{
-            put("path", request.getPath());
-            put("body", request.getBody());
-          }},
-          classMethod, e));
-      resultStatus = ResultStatus.failure("Exception occurred.");
+
+        metrics.commonClose(resultStatus.success);
+        metrics.logMetrics();
+
+        return new APIGatewayProxyResponseEvent()
+            .withBody(resultStatus.resultMessage)
+            .withStatusCode(resultStatus.responseCode);
     }
-
-    metrics.commonClose(resultStatus.success);
-    metrics.logMetrics();
-
-    return new APIGatewayProxyResponseEvent().withBody(resultStatus.toString());
-  }
 }
