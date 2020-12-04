@@ -1,4 +1,5 @@
 .idea/
 target
 LiteWeight_WebService.iml
+auto_confirm_users/site-packages/*
 *.zip
