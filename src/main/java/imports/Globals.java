@@ -13,5 +13,5 @@ public class Globals {
     public static final int MAX_BLOCKED = 200;
     public static final int MAX_FREE_EXERCISES = 100;
     public static final int MAX_PREMIUM_EXERCISES = 200;
-    public static final int MAX_FREE_WORKOUTS_SENT = 200; // todo change once done with dev work
+    public static final int MAX_FREE_WORKOUTS_SENT = 50;
 }
