@@ -8,7 +8,7 @@ import com.google.common.collect.Maps;
 import daos.UserDAO;
 import exceptions.ManagerExecutionException;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -53,13 +53,13 @@ public class RemoveFriendManager {
             }
 
             // remove friend from active user
-            final UpdateItemData activeUserData = new UpdateItemData(activeUser,
+            UpdateItemTemplate activeUserData = new UpdateItemTemplate(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", usernameToRemove));
 
             // remove active user from friend's mapping
-            final UpdateItemData updateFriendData = new UpdateItemData(usernameToRemove,
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(usernameToRemove,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", activeUser));

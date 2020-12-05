@@ -7,7 +7,7 @@ import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import utils.Validator;
 import utils.WorkoutUtils;
 import java.util.ArrayList;
@@ -69,12 +69,12 @@ public class EditWorkoutManager {
 
             // Need to determine if the current week/day is valid (frontend's responsibility is updating them)
             confirmValidCurrentDayAndWeek(editedWorkout);
-            final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.EXERCISES + "= :exerciseMap")
                 .withValueMap(new ValueMap().withMap(":exerciseMap", user.getOwnedExercisesMap()));
 
-            final UpdateItemData updateWorkoutItemData = new UpdateItemData(workoutId,
+            UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId,
                 WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " +
                     Workout.MOST_FREQUENT_FOCUS + " = :mostFrequentFocusVal, " +

@@ -41,7 +41,7 @@ public class SetAllReceivedWorkoutsSeenManager {
                 receivedWorkouts.get(workoutId).setSeen(true);
             }
 
-            final UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
+            UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.RECEIVED_WORKOUTS + "=:receivedWorkoutsVal")
                 .withValueMap(new ValueMap()
                     .withMap(":receivedWorkoutsVal", user.getReceivedWorkoutMetaMap()));

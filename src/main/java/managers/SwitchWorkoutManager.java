@@ -55,7 +55,7 @@ public class SwitchWorkoutManager {
             workoutMetaNew.setDateLast(timeNow);
 
             // update user object with new access time of the newly selected workout
-            final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
                     User.WORKOUTS + ".#newWorkoutId= :newWorkoutMeta")

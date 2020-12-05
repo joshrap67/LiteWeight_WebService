@@ -7,7 +7,7 @@ import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import utils.Validator;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,7 @@ public class RenameWorkoutManager {
             WorkoutMeta workoutMeta = user.getWorkoutMetas().get(workoutId);
             workoutMeta.setWorkoutName(newWorkoutName);
 
-            final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.WORKOUTS + ".#workoutId = :workoutMap, " +
@@ -72,7 +72,7 @@ public class RenameWorkoutManager {
                     .withMap(":exercisesMap", user.getOwnedExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 
-            final UpdateItemData updateWorkoutItemData = new UpdateItemData(workoutId,
+            UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId,
                 WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " + Workout.WORKOUT_NAME + "= :workoutNameVal")
                 .withValueMap(new ValueMap().withString(":workoutNameVal", newWorkoutName));

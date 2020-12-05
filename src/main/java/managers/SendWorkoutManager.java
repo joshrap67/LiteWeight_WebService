@@ -12,7 +12,7 @@ import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
 import imports.Globals;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +107,7 @@ public class SendWorkoutManager {
                 .asItemAttributes();
 
             // if meta is already there with this workout name, we just overwrite it for recipient
-            final UpdateItemData recipientItemData = new UpdateItemData(
+            UpdateItemTemplate recipientItemData = new UpdateItemTemplate(
                 recipientUsername, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set "
                     + User.RECEIVED_WORKOUTS + ".#workoutId= :workoutMetaVal")
@@ -115,7 +115,7 @@ public class SendWorkoutManager {
                     .withMap(":workoutMetaVal", sharedWorkoutMeta.asMap()))
                 .withNameMap(new NameMap().with("#workoutId", sharedWorkoutId));
             // need to update the number of sent workouts for the active user
-            final UpdateItemData activeUserItemData = new UpdateItemData(
+            UpdateItemTemplate activeUserItemData = new UpdateItemTemplate(
                 activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.WORKOUTS_SENT + "= :sentVal")
                 .withValueMap(
@@ -165,7 +165,7 @@ public class SendWorkoutManager {
         }
         if (activeUser.getWorkoutsSent() >= Globals.MAX_FREE_WORKOUTS_SENT) {
             stringBuilder.append(
-                "You have reached the max number of workouts that you can send without premium.");
+                "You have reached the max number of workouts that you can send.");
         }
         if (activeUserUsername.equals(otherUserUsername)) {
             stringBuilder.append("Cannot send workout to yourself.\n");

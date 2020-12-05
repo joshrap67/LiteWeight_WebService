@@ -76,7 +76,7 @@ public class ProxyPostController implements
             String[] splitAction = action.split("/"); // remove the prefixed slash
 
             if (splitAction.length == 2) {
-                action = splitAction[1]; // the action is after the '/'
+                action = splitAction[1];
 
                 if (ACTIONS_TO_CONTROLLERS.containsKey(action)) {
                     final Map<String, Object> jsonMap = JsonUtils.deserialize(request.getBody());

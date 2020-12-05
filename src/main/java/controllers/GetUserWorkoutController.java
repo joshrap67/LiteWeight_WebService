@@ -31,13 +31,7 @@ public class GetUserWorkoutController implements ApiRequestController {
         try {
             Injector.getInjector(metrics).inject(this);
 
-            if (jsonMap.containsKey(User.USERNAME)) {
-                final String username = (String) jsonMap.get(User.USERNAME);
-                final UserWithWorkout userWithWorkout = this.getUserWorkoutManager
-                    .getUserWithWorkout(username);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(userWithWorkout.asResponse()));
-            } else if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
+            if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
                 final UserWithWorkout userWithWorkout = this.getUserWorkoutManager
                     .getUserWithWorkout(activeUser);

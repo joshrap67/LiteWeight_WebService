@@ -57,7 +57,7 @@ public class NewExerciseManager {
                 OwnedExercise.defaultVideoValue, focusList);
             String exerciseId = UUID.randomUUID().toString();
 
-            final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.EXERCISES + ".#exerciseId= :exerciseMap")
                 .withNameMap(new NameMap().with("#exerciseId", exerciseId))
                 .withValueMap(new ValueMap().withMap(":exerciseMap", ownedExercise.asMap()));

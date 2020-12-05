@@ -6,7 +6,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -56,7 +56,7 @@ public class RestartWorkoutManager {
             workout.setCurrentWeek(0);
 
             // update the newly restarted workout (routine and current day/week)
-            final UpdateItemData updateWorkoutData = new UpdateItemData(workoutId,
+            UpdateItemTemplate updateWorkoutData = new UpdateItemTemplate(workoutId,
                 WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " +
                     Workout.CURRENT_DAY + " =:currentDay, " +
@@ -68,7 +68,7 @@ public class RestartWorkoutManager {
                     .withMap(":routineMap", workout.getRoutine().asMap()))
                 .withNameMap(new NameMap().with("#routine", Workout.ROUTINE));
 
-            final UpdateItemData updateUserData = new UpdateItemData(activeUser,
+            UpdateItemTemplate updateUserData = new UpdateItemTemplate(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.WORKOUTS + ".#workoutId= :userWorkoutsMap, " +

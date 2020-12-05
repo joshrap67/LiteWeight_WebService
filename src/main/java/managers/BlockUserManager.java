@@ -53,7 +53,7 @@ public class BlockUserManager {
             if (activeUserObject.getBlocked().size() >= Globals.MAX_BLOCKED) {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(
-                    String.format("User %s has exceeded blocked limit", activeUser));
+                    String.format("User %s has exceeded blocked limit.", activeUser));
             }
 
             if (activeUserObject.getFriendRequests().containsKey(userToBlock)) {

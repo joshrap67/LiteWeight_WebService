@@ -10,7 +10,7 @@ import daos.UserDAO;
 import exceptions.ManagerExecutionException;
 import imports.Globals;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -50,19 +50,19 @@ public class AcceptFriendRequestManager {
             final User userToAccept = this.userDAO.getUser(usernameToAccept);
 
             if (!activeUserObject.getFriendRequests().containsKey(usernameToAccept)) {
+                // sanity check to make sure that the request is still there
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(
                     String.format("User %s no longer has this friend request.", usernameToAccept));
             }
             if (activeUserObject.getFriends().size() >= Globals.MAX_NUMBER_FRIENDS) {
-                // sanity check to make sure that the request is still there
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException("Max number of friends reached.");
             }
 
             // remove request from active user and add the new friend
             Friend newFriend = new Friend(userToAccept, true);
-            final UpdateItemData activeUserData = new UpdateItemData(
+            UpdateItemTemplate activeUserData = new UpdateItemTemplate(
                 activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.FRIENDS + ".#username = :friendVal " +
                     "remove " + User.FRIEND_REQUESTS + ".#username")
@@ -70,7 +70,7 @@ public class AcceptFriendRequestManager {
                 .withValueMap(new ValueMap().withMap(":friendVal", newFriend.asMap()));
 
             // update the active user to be confirmed in the newly accepted friends mapping
-            final UpdateItemData updateFriendData = new UpdateItemData(
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(
                 usernameToAccept, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression(
                     "set " + User.FRIENDS + ".#username." + Friend.CONFIRMED + " = :confirmedVal")

@@ -8,7 +8,7 @@ import com.google.common.collect.Maps;
 import daos.UserDAO;
 import exceptions.ManagerExecutionException;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -53,13 +53,13 @@ public class DeclineFriendRequestManager {
             }
 
             // remove friend from active user
-            final UpdateItemData activeUserData = new UpdateItemData(
+            UpdateItemTemplate activeUserData = new UpdateItemTemplate(
                 activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIEND_REQUESTS + ".#username")
                 .withNameMap(new NameMap().with("#username", declinedUser));
 
             // remove the (unconfirmed) active user from friend's mapping
-            final UpdateItemData updateFriendData = new UpdateItemData(
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(
                 declinedUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", activeUser));

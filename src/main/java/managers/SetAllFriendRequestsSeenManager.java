@@ -39,7 +39,7 @@ public class SetAllFriendRequestsSeenManager {
                 user.getFriendRequests().get(username).setSeen(true);
             }
 
-            final UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
+            UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.FRIEND_REQUESTS + "=:friendRequestsVal")
                 .withValueMap(new ValueMap().
                     withMap(":friendRequestsVal", user.getFriendRequestsMap()));

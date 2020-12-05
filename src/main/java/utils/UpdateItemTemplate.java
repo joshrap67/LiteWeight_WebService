@@ -6,7 +6,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.Delete;
 import com.amazonaws.services.dynamodbv2.model.Update;
-import daos.UserDAO;
+import daos.Database;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
@@ -43,7 +43,7 @@ public class UpdateItemTemplate {
 
     public UpdateItemSpec asUpdateItemSpec() throws Exception {
         final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-            .withPrimaryKey(UserDAO.getKeyIndex(this.tableName), this.keyValue)
+            .withPrimaryKey(Database.getKeyIndex(this.tableName), this.keyValue)
             .withUpdateExpression(this.updateExpression);
 
         if (this.valueMap != null) {
@@ -83,10 +83,10 @@ public class UpdateItemTemplate {
     }
 
     private Map<String, AttributeValue> getKeyMap() throws Exception {
-        final String keyIndex = UserDAO.getKeyIndex(this.tableName);
-        final String keyValueCopy = this.keyValue;
-        return new HashMap<String, AttributeValue>() {{
-            put(keyIndex, new AttributeValue().withS(keyValueCopy));
+        final String keyIndex = Database.getKeyIndex(this.tableName);
+        return new HashMap<>() {{
+            put(keyIndex, new AttributeValue().withS(
+                UpdateItemTemplate.this.keyValue));
         }};
     }
 }

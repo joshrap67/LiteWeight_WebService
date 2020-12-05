@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import daos.UserDAO;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -44,12 +44,12 @@ public class CancelFriendRequestManager {
             final User userToCancel = this.userDAO.getUser(usernameToCancel);
 
             // for canceled user, remove the friend request
-            final UpdateItemData updateFriendData = new UpdateItemData(
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(
                 usernameToCancel, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIEND_REQUESTS + ".#username")
                 .withNameMap(new NameMap().with("#username", activeUser));
             // for active user, remove the (unconfirmed) user from their friends mapping
-            final UpdateItemData updateActiveUserData = new UpdateItemData(
+            UpdateItemTemplate updateActiveUserData = new UpdateItemTemplate(
                 activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", usernameToCancel));

@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -58,7 +58,7 @@ public class DeleteWorkoutThenFetchWorkoutManager {
             }
             user.setCurrentWorkout(nextWorkoutId);
 
-            final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
@@ -69,7 +69,7 @@ public class DeleteWorkoutThenFetchWorkoutManager {
                     .withMap(":userWorkoutsMap", user.getWorkoutMetasMap())
                     .withMap(":exercisesMap", user.getOwnedExercisesMap()));
 
-            final UpdateItemData updateWorkoutItemData = new UpdateItemData(deletedWorkoutId,
+            UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(deletedWorkoutId,
                 WorkoutDAO.WORKOUT_TABLE_NAME);
 
             final List<TransactWriteItem> actions = new ArrayList<>();

@@ -13,7 +13,7 @@ import models.Routine;
 import models.RoutineExercise;
 import utils.AttributeValueUtils;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -99,7 +99,7 @@ public class CopyWorkoutManager {
                 newWorkoutName);
 
             // update user object with this newly copied workout
-            final UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
@@ -112,7 +112,7 @@ public class CopyWorkoutManager {
                 .withNameMap(new NameMap().with("#newWorkoutId", newWorkout.getWorkoutId()));
 
             // persist the current week/day/routine of the old workout
-            final UpdateItemData updateOldWorkoutItemData = new UpdateItemData(oldWorkoutId,
+            UpdateItemTemplate updateOldWorkoutItemData = new UpdateItemTemplate(oldWorkoutId,
                 WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " +
                     Workout.CURRENT_DAY + " = :currentDay, " +

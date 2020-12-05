@@ -37,7 +37,7 @@ public class UpdateUserPreferencesManager {
 
         try {
             // right now just overwrite values in DB with these new ones
-            final UpdateItemSpec updateItemSpec = new UpdateItemSpec().withUpdateExpression(
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec().withUpdateExpression(
                 "set " + User.USER_PREFERENCES + " =:userPrefsVal")
                 .withValueMap(new ValueMap().withMap(":userPrefsVal", userPrefs.asMap()));
             this.userDAO.updateUser(activeUser, updateItemSpec);

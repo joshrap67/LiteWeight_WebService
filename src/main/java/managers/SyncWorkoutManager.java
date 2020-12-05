@@ -34,7 +34,7 @@ public class SyncWorkoutManager {
             confirmValidCurrentDayAndWeek(workout);
 
             // persist the current workout (routine and current day/week)
-            final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " +
                     Workout.CURRENT_DAY + " =:currentDayVal, " +
                     Workout.CURRENT_WEEK + " =:currentWeekVal, " +

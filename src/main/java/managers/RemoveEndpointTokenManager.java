@@ -42,7 +42,7 @@ public class RemoveEndpointTokenManager {
             final User user = this.userDAO.getUser(activeUser);
 
             if (user.getPushEndpointArn() != null) {
-                final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+                UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                     .withUpdateExpression("set " + User.PUSH_ENDPOINT_ARN + " =:arn")
                     .withValueMap(new ValueMap().withNull(":arn"));
                 this.userDAO.updateUser(activeUser, updateItemSpec);

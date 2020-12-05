@@ -78,8 +78,7 @@ public class NotificationService {
      * @param notificationData This contains the action and payload information to be used by the
      *                         front end.
      */
-    public PublishResult sendMessage(final String arn, final NotificationData notificationData)
-        throws JsonProcessingException {
+    public PublishResult sendMessage(final String arn, final NotificationData notificationData) {
         if (arn == null) {
             return null;
         }

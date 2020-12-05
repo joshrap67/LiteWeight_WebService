@@ -61,7 +61,7 @@ public class UpdateExerciseManager {
             }
 
             // all input is valid so go ahead and just replace old exercise in db with updated one
-            final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.EXERCISES + ".#exerciseId= :exerciseMap")
                 .withValueMap(new ValueMap().withMap(":exerciseMap", updatedExercise.asMap()))
                 .withNameMap(new NameMap().with("#exerciseId", exerciseId));

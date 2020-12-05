@@ -6,11 +6,11 @@ import daos.SharedWorkoutDAO;
 import daos.UserDAO;
 import exceptions.ManagerExecutionException;
 import utils.Metrics;
-import utils.UpdateItemData;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import models.User;
+import utils.UpdateItemTemplate;
 
 public class DeclineReceivedWorkoutManager {
 
@@ -46,11 +46,11 @@ public class DeclineReceivedWorkoutManager {
             }
 
             // remove workout from sent workout table
-            UpdateItemData updateSharedWorkoutData = new UpdateItemData(
+            UpdateItemTemplate updateSharedWorkoutData = new UpdateItemTemplate(
                 declinedWorkoutId, SharedWorkoutDAO.SHARED_WORKOUTS_TABLE_NAME);
 
             // remove workout from active user
-            UpdateItemData activeUserData = new UpdateItemData(
+            UpdateItemTemplate activeUserData = new UpdateItemTemplate(
                 activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.RECEIVED_WORKOUTS + ".#workoutId")
                 .withNameMap(new NameMap().with("#workoutId", declinedWorkoutId));

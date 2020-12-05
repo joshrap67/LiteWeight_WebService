@@ -9,7 +9,7 @@ import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
 import utils.AttributeValueUtils;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import utils.Validator;
 import utils.WorkoutUtils;
 import java.time.Instant;
@@ -84,11 +84,10 @@ public class NewWorkoutManager {
             // need to set it here so frontend gets updated user item back
             user.putNewWorkoutMeta(workoutId, workoutMeta);
             user.setCurrentWorkout(workoutId);
-
             // update all the exercises that are now apart of this workout
             WorkoutUtils.updateOwnedExercises(user, routine, workoutId, workoutName);
 
-            final UpdateItemData updateItemData = new UpdateItemData(activeUser,
+            UpdateItemTemplate updateItemData = new UpdateItemTemplate(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +

@@ -18,7 +18,8 @@ public class NewUserManager {
     private final StorageService storageService;
 
     @Inject
-    public NewUserManager(final UserDAO userDAO, final Metrics metrics, final StorageService storageService) {
+    public NewUserManager(final UserDAO userDAO, final Metrics metrics,
+        final StorageService storageService) {
         this.userDAO = userDAO;
         this.storageService = storageService;
         this.metrics = metrics;
@@ -39,8 +40,10 @@ public class NewUserManager {
         try {
             // whenever a user is created, give them a unique UUID file path that will always get updated
             final UUID uuid = UUID.randomUUID();
-            final String fileName = uuid.toString() + "." + StorageService.JPG_TYPE;
-            storageService.uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
+            final String fileName = String
+                .format("%s.%s", uuid.toString(), StorageService.JPG_TYPE);
+            storageService
+                .uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
 
             final UserPreferences userPreferences = new UserPreferences();
             userPreferences.setMetricUnits(false);
@@ -48,7 +51,7 @@ public class NewUserManager {
             userPreferences.setUpdateDefaultWeightOnRestart(true);
             userPreferences.setUpdateDefaultWeightOnSave(true);
 
-            final Item user = new Item()
+            Item user = new Item()
                 .withString(User.USERNAME, username)
                 .withNull(User.PREMIUM_TOKEN)
                 .withString(User.ICON, fileName)

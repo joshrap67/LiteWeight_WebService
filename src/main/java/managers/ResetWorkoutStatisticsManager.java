@@ -43,7 +43,7 @@ public class ResetWorkoutStatisticsManager {
             workoutMeta.setTimesCompleted(0);
             workoutMeta.setTotalExercisesSum(0);
 
-            final UpdateItemSpec updateUserItemData = new UpdateItemSpec()
+            UpdateItemSpec updateUserItemData = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.WORKOUTS + ".#workoutId= :workoutsMap")
                 .withValueMap(new ValueMap().withMap(":workoutsMap", workoutMeta.asMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));

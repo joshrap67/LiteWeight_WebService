@@ -139,7 +139,7 @@ public class Validator {
 
         if (activeUser.getPremiumToken() == null
             && activeUser.getOwnedExercises().size() >= Globals.MAX_FREE_EXERCISES) {
-            error.append("Max free exercise limit reached.\n");
+            error.append("Max exercise limit reached.\n");
         } else if (activeUser.getPremiumToken() != null
             && activeUser.getOwnedExercises().size() >= Globals.MAX_PREMIUM_EXERCISES) {
             error.append("Max exercise limit reached.\n");

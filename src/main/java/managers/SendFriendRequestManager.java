@@ -8,7 +8,7 @@ import daos.UserDAO;
 import exceptions.ManagerExecutionException;
 import imports.Globals;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +64,7 @@ public class SendFriendRequestManager {
                 Instant.now().toString());
 
             // the active user needs to have this (unconfirmed) friend added to its friends list
-            final UpdateItemData updateFriendData = new UpdateItemData(
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(
                 usernameToAdd, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression(
                     "set " + User.FRIEND_REQUESTS + ".#username= :requestsVal")
@@ -72,7 +72,7 @@ public class SendFriendRequestManager {
                     new ValueMap().withMap(":requestsVal", friendRequest.asMap()))
                 .withNameMap(new NameMap().with("#username", activeUser));
             // friend to add needs to have the friend request added to its friend request list
-            final UpdateItemData updateActiveUserData = new UpdateItemData(
+            UpdateItemTemplate updateActiveUserData = new UpdateItemTemplate(
                 activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.FRIENDS + ".#username= :friendsVal")
                 .withValueMap(new ValueMap().withMap(":friendsVal", friendToAdd.asMap()))

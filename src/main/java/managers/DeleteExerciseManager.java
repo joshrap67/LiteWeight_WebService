@@ -47,7 +47,7 @@ public class DeleteExerciseManager {
             updateWorkouts(exerciseId, workoutsToUpdate, user);
             user.getOwnedExercises().remove(exerciseId);
 
-            final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.EXERCISES + "= :exerciseMap")
                 .withValueMap(new ValueMap().withMap(":exerciseMap", user.getOwnedExercisesMap()));
             this.userDAO.updateUser(user.getUsername(), updateItemSpec);

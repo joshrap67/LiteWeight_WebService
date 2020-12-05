@@ -7,6 +7,6 @@ import imports.ResultStatus;
 
 public interface ApiRequestController {
 
-    ResultStatus processApiRequest(final Map<String, Object> requestBody, final Metrics metrics)
+    ResultStatus<String> processApiRequest(final Map<String, Object> requestBody, final Metrics metrics)
         throws MissingApiRequestKeyException;
 }

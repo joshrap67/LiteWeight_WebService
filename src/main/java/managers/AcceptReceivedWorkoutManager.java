@@ -12,7 +12,7 @@ import exceptions.ManagerExecutionException;
 import utils.AttributeValueUtils;
 import imports.Globals;
 import utils.Metrics;
-import utils.UpdateItemData;
+import utils.UpdateItemTemplate;
 import utils.WorkoutUtils;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -56,6 +56,7 @@ public class AcceptReceivedWorkoutManager {
      *
      * @param activeUser        username of the user that is accepting the workout.
      * @param workoutIdToAccept id of the received workout that the active user is accepting.
+     * @param optionalName      if present, the user is changing the name before accepting it.
      * @throws Exception if there are any input errors or if user does not exist.
      */
     public AcceptWorkoutResponse acceptReceivedWorkout(final String activeUser,
@@ -118,7 +119,7 @@ public class AcceptReceivedWorkoutManager {
             WorkoutUtils.updateOwnedExercises(activeUserObject, routine, workoutId,
                 workoutToAccept.getWorkoutName());
 
-            UpdateItemData updateUserItemData = new UpdateItemData(activeUser,
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
                 UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
@@ -134,7 +135,7 @@ public class AcceptReceivedWorkoutManager {
                     .with("#receivedWorkoutId", workoutIdToAccept)
                     .with("#workoutId", workoutId));
             // since user is accepting the workout, delete the shared workout from the table - it's no longer needed
-            UpdateItemData updateSharedWorkoutData = new UpdateItemData(
+            UpdateItemTemplate updateSharedWorkoutData = new UpdateItemTemplate(
                 workoutToAccept.getSharedWorkoutId(), SharedWorkoutDAO.SHARED_WORKOUTS_TABLE_NAME);
 
             List<TransactWriteItem> actions = new ArrayList<>();
@@ -158,7 +159,7 @@ public class AcceptReceivedWorkoutManager {
         StringBuilder error = new StringBuilder();
         if (activeUserObject.getPremiumToken() == null
             && activeUserObject.getWorkoutMetas().size() >= Globals.MAX_FREE_WORKOUTS) {
-            error.append("Maximum free workouts would be exceeded.");
+            error.append("Maximum workouts would be exceeded.");
         }
         if (activeUserObject.getPremiumToken() != null
             && activeUserObject.getWorkoutMetas().size() >= Globals.MAX_WORKOUTS) {
@@ -191,7 +192,7 @@ public class AcceptReceivedWorkoutManager {
         if (activeUserObject.getPremiumToken() == null
             && totalExercises.size() > Globals.MAX_FREE_EXERCISES) {
             error.append(
-                "Accepting this workout would put you above the amount of free exercises allowed.");
+                "Accepting this workout would put you above the amount of exercises allowed.");
         }
         if (activeUserObject.getPremiumToken() != null
             && totalExercises.size() > Globals.MAX_PREMIUM_EXERCISES) {
