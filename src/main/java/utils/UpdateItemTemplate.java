@@ -58,8 +58,8 @@ public class UpdateItemTemplate {
     }
 
     public Update asUpdate() throws Exception {
-        final Update update = new Update().withUpdateExpression(this.updateExpression)
-            .withTableName(this.tableName).withKey(this.getKeyMap());
+        final Update update = new Update().withUpdateExpression(this.updateExpression).withTableName(this.tableName)
+            .withKey(this.getKeyMap());
 
         if (this.valueMap != null) {
             for (final String key : this.valueMap.keySet()) {
@@ -70,8 +70,7 @@ public class UpdateItemTemplate {
 
         if (this.nameMap != null) {
             for (final Map.Entry entry : this.nameMap.entrySet()) {
-                update.addExpressionAttributeNamesEntry(entry.getKey().toString(),
-                    entry.getValue().toString());
+                update.addExpressionAttributeNamesEntry(entry.getKey().toString(), entry.getValue().toString());
             }
         }
 
@@ -85,8 +84,7 @@ public class UpdateItemTemplate {
     private Map<String, AttributeValue> getKeyMap() throws Exception {
         final String keyIndex = Database.getKeyIndex(this.tableName);
         return new HashMap<>() {{
-            put(keyIndex, new AttributeValue().withS(
-                UpdateItemTemplate.this.keyValue));
+            put(keyIndex, new AttributeValue().withS(UpdateItemTemplate.this.keyValue));
         }};
     }
 }

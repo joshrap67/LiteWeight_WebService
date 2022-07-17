@@ -21,8 +21,8 @@ public class SyncWorkoutController implements ApiRequestController {
     public SyncWorkoutManager syncWorkoutManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;

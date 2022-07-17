@@ -30,16 +30,14 @@ public class RemoveFriendManager {
     }
 
     /**
-     * Removes a friend from the active user and removed user's friends list. Upon success, a data
-     * notification is sent to the removed user with a payload consisting of the active user's
-     * username.
+     * Removes a friend from the active user and removed user's friends list. Upon success, a data notification is sent
+     * to the removed user with a payload consisting of the active user's username.
      *
      * @param activeUser       user that is making the request.
      * @param usernameToRemove user that the active user is removing as a friend.
      * @throws Exception if either user is not found or if the two are no longer friends.
      */
-    public void removeFriend(final String activeUser, final String usernameToRemove)
-        throws Exception {
+    public void removeFriend(final String activeUser, final String usernameToRemove) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".removeFriend";
         this.metrics.commonSetup(classMethod);
 
@@ -48,19 +46,16 @@ public class RemoveFriendManager {
             final User userToRemove = this.userDAO.getUser(usernameToRemove);
             if (!activeUserObject.getFriends().containsKey(usernameToRemove)) {
                 this.metrics.commonClose(false);
-                throw new ManagerExecutionException(
-                    String.format("User %s no longer has this friend.", usernameToRemove));
+                throw new ManagerExecutionException(String.format("User %s no longer has this friend.", activeUser));
             }
 
             // remove friend from active user
-            UpdateItemTemplate activeUserData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate activeUserData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", usernameToRemove));
 
             // remove active user from friend's mapping
-            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(usernameToRemove,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(usernameToRemove, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", activeUser));
 
@@ -72,9 +67,8 @@ public class RemoveFriendManager {
             // if this succeeds, go ahead and send a notification to the accepted user (only need to send username)
             this.notificationService.sendMessage(userToRemove.getPushEndpointArn(),
                 new NotificationData(NotificationService.removedAsFriendAction,
-                    Maps.newHashMap(
-                        ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
-                            .build())));
+                    Maps.newHashMap(ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
+                        .build())));
             this.metrics.commonClose(true);
         } catch (Exception e) {
             this.metrics.commonClose(false);

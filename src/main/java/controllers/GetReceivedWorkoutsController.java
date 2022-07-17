@@ -25,23 +25,21 @@ public class GetReceivedWorkoutsController implements ApiRequestController {
     public GetReceivedWorkoutsManager getReceivedWorkoutsManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> jsonMap,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonMap, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, RequestFields.BATCH_NUMBER);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, RequestFields.BATCH_NUMBER);
 
         if (jsonMap.keySet().containsAll(requiredKeys)) {
             try {
                 Injector.getInjector(metrics).inject(this);
 
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
-                final Integer batchNumber = Parser
-                    .convertObjectToInteger(jsonMap.get(RequestFields.BATCH_NUMBER));
-                final Map<String, SharedWorkoutMeta> receivedWorkouts = this.getReceivedWorkoutsManager
-                    .getReceivedWorkouts(activeUser, batchNumber);
+                final Integer batchNumber = Parser.convertObjectToInteger(jsonMap.get(RequestFields.BATCH_NUMBER));
+                final Map<String, SharedWorkoutMeta> receivedWorkouts = this.getReceivedWorkoutsManager.getReceivedWorkouts(
+                    activeUser, batchNumber);
 
                 Map<String, Object> retMap = new HashMap<>();
                 for (String workoutId : receivedWorkouts.keySet()) {

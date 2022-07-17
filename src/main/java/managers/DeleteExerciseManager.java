@@ -65,8 +65,7 @@ public class DeleteExerciseManager {
             final Workout workout = this.workoutDAO.getWorkout(workoutId);
 
             Routine.deleteExerciseFromRoutine(exerciseId, workout.getRoutine());
-            final String newMostFrequentFocus = WorkoutUtils
-                .findMostFrequentFocus(user, workout.getRoutine());
+            final String newMostFrequentFocus = WorkoutUtils.findMostFrequentFocus(user, workout.getRoutine());
             workout.setMostFrequentFocus(newMostFrequentFocus);
 
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec()

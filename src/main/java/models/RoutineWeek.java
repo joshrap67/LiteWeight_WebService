@@ -1,6 +1,5 @@
 package models;
 
-import exceptions.InvalidAttributeException;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Iterator;

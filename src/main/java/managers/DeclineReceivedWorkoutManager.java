@@ -41,17 +41,15 @@ public class DeclineReceivedWorkoutManager {
                 // sanity check to make sure that the friend request is still there
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(
-                    String.format("Received workout with id %s no longer present.",
-                        declinedWorkoutId));
+                    String.format("Received workout with id %s no longer present.", declinedWorkoutId));
             }
 
             // remove workout from sent workout table
-            UpdateItemTemplate updateSharedWorkoutData = new UpdateItemTemplate(
-                declinedWorkoutId, SharedWorkoutDAO.SHARED_WORKOUTS_TABLE_NAME);
+            UpdateItemTemplate updateSharedWorkoutData = new UpdateItemTemplate(declinedWorkoutId,
+                SharedWorkoutDAO.SHARED_WORKOUTS_TABLE_NAME);
 
             // remove workout from active user
-            UpdateItemTemplate activeUserData = new UpdateItemTemplate(
-                activeUser, UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate activeUserData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.RECEIVED_WORKOUTS + ".#workoutId")
                 .withNameMap(new NameMap().with("#workoutId", declinedWorkoutId));
 

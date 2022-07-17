@@ -62,8 +62,7 @@ public class ProxyPostController implements
             .put("sendFeedback", SendFeedbackController.class)
             .build());
 
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request,
-        Context context) {
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         final Metrics metrics = new Metrics(context.getAwsRequestId(), context.getLogger());
@@ -80,31 +79,25 @@ public class ProxyPostController implements
 
                 if (ACTIONS_TO_CONTROLLERS.containsKey(action)) {
                     final Map<String, Object> jsonMap = JsonUtils.deserialize(request.getBody());
-                    metrics
-                        .setRequestBody(jsonMap); // attach here for logging before handling action
+                    metrics.setRequestBody(jsonMap); // attach here for logging before handling action
 
                     if (!jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                         // get active user from id token passed to API and put it in the request payload
-                        jsonMap.put(RequestFields.ACTIVE_USER,
-                            TokenUtils.getActiveUserFromRequest(request, context));
+                        jsonMap.put(RequestFields.ACTIVE_USER, TokenUtils.getActiveUserFromRequest(request, context));
 
-                        final Class<? extends ApiRequestController> controller = ACTIONS_TO_CONTROLLERS
-                            .get(action);
+                        final Class<? extends ApiRequestController> controller = ACTIONS_TO_CONTROLLERS.get(action);
                         final Constructor c = controller.getConstructor();
-                        final ApiRequestController apiRequestController = (ApiRequestController) c
-                            .newInstance();
+                        final ApiRequestController apiRequestController = (ApiRequestController) c.newInstance();
                         resultStatus = apiRequestController.processApiRequest(jsonMap, metrics);
                     } else {
-                        resultStatus = ResultStatus
-                            .failureBadRequest("Bad request body. Missing active user.");
+                        resultStatus = ResultStatus.failureBadRequest("Bad request body. Missing active user.");
                     }
                 } else {
                     metrics.log(new WarningMessage(
                         new HashMap<String, Object>() {{
                             put("path", request.getPath());
                             put("body", request.getBody());
-                        }},
-                        classMethod, "Unknown action."));
+                        }}, classMethod, "Unknown action."));
                     resultStatus = ResultStatus.failureBadRequest("Unknown action.");
                 }
             } else {
@@ -112,8 +105,7 @@ public class ProxyPostController implements
                     new HashMap<String, Object>() {{
                         put("path", request.getPath());
                         put("body", request.getBody());
-                    }},
-                    classMethod, "Bad request format."));
+                    }}, classMethod, "Bad request format."));
                 resultStatus = ResultStatus.failureBadRequest("Bad request format.");
             }
         } catch (final Exception e) {
@@ -121,10 +113,8 @@ public class ProxyPostController implements
                 new HashMap<String, Object>() {{
                     put("path", request.getPath());
                     put("body", request.getBody());
-                }},
-                classMethod, e));
-            resultStatus = ResultStatus
-                .failureBadRequest("Exception occurred." + request.getBody() + " " + e.toString());
+                }}, classMethod, e));
+            resultStatus = ResultStatus.failureBadRequest("Exception occurred." + request.getBody() + " " + e);
         }
 
         metrics.commonClose(resultStatus.success);

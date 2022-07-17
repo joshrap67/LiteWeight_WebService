@@ -25,13 +25,12 @@ public class AcceptReceivedWorkoutController implements ApiRequestController {
     public AcceptReceivedWorkoutManager acceptReceivedWorkoutManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, SharedWorkout.SHARED_WORKOUT_ID);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, SharedWorkout.SHARED_WORKOUT_ID);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {
@@ -43,10 +42,9 @@ public class AcceptReceivedWorkoutController implements ApiRequestController {
                 }
 
                 Injector.getInjector(metrics).inject(this);
-                AcceptWorkoutResponse result = this.acceptReceivedWorkoutManager
-                    .acceptReceivedWorkout(activeUser, workoutId, optionalName);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
+                AcceptWorkoutResponse result = this.acceptReceivedWorkoutManager.acceptReceivedWorkout(activeUser,
+                    workoutId, optionalName);
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

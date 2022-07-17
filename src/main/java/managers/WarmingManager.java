@@ -28,8 +28,8 @@ public class WarmingManager {
     }
 
     /**
-     * Warms all the endpoints that this API interacts with. This ensures that whenever a client
-     * engages this API, there is already an instance of the service running in lambda.
+     * Warms all the endpoints that this API interacts with. This ensures that whenever a client engages this API, there
+     * is already an instance of the service running in lambda.
      */
     public void warmEndpoints() {
         final String classMethod = this.getClass().getSimpleName() + ".warmEndpoints";

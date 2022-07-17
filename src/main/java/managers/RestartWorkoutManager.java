@@ -29,18 +29,15 @@ public class RestartWorkoutManager {
     }
 
     /**
-     * Resets all exercises in a workout to be not completed and sets the current day and current
-     * week to the first day/week of the workout. Also updates the statistics of this workout given
-     * the workout before it was restarted.
+     * Resets all exercises in a workout to be not completed and sets the current day and current week to the first
+     * day/week of the workout. Also updates the statistics of this workout given the workout before it was restarted.
      *
      * @param activeUser user that is restarting their workout.
      * @param workout    the workout that is to be restarted.
-     * @return UserWithWorkout with the workout being reset and the updated statistics added to the
-     * user object.
+     * @return UserWithWorkout with the workout being reset and the updated statistics added to the user object.
      * @throws Exception if the user or workout does not exist.
      */
-    public UserWithWorkout restartWorkout(final String activeUser, final Workout workout)
-        throws Exception {
+    public UserWithWorkout restartWorkout(final String activeUser, final Workout workout) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".execute";
         this.metrics.commonSetup(classMethod);
 
@@ -56,8 +53,7 @@ public class RestartWorkoutManager {
             workout.setCurrentWeek(0);
 
             // update the newly restarted workout (routine and current day/week)
-            UpdateItemTemplate updateWorkoutData = new UpdateItemTemplate(workoutId,
-                WorkoutDAO.WORKOUT_TABLE_NAME)
+            UpdateItemTemplate updateWorkoutData = new UpdateItemTemplate(workoutId, WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " +
                     Workout.CURRENT_DAY + " =:currentDay, " +
                     Workout.CURRENT_WEEK + " =:currentWeek, " +
@@ -68,8 +64,7 @@ public class RestartWorkoutManager {
                     .withMap(":routineMap", workout.getRoutine().asMap()))
                 .withNameMap(new NameMap().with("#routine", Workout.ROUTINE));
 
-            UpdateItemTemplate updateUserData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateUserData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.WORKOUTS + ".#workoutId= :userWorkoutsMap, " +
                     User.EXERCISES + " = :exercisesMap")
@@ -91,13 +86,11 @@ public class RestartWorkoutManager {
         }
     }
 
-    private void restartWorkout(final Workout workout, final WorkoutMeta workoutMeta,
-        final User user) {
+    private void restartWorkout(final Workout workout, final WorkoutMeta workoutMeta, final User user) {
         // reset each exercise to not completed and update average accordingly
         for (Integer week : workout.getRoutine()) {
             for (Integer day : workout.getRoutine().getWeek(week)) {
-                for (RoutineExercise routineExercise : workout.getRoutine()
-                    .getExerciseListForDay(week, day)) {
+                for (RoutineExercise routineExercise : workout.getRoutine().getExerciseListForDay(week, day)) {
                     if (routineExercise.isCompleted()) {
                         // update new average since this exercise was indeed completed
                         workoutMeta.setAverageExercisesCompleted(

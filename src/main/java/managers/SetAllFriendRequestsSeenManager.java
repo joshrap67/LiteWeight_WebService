@@ -41,8 +41,7 @@ public class SetAllFriendRequestsSeenManager {
 
             UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.FRIEND_REQUESTS + "=:friendRequestsVal")
-                .withValueMap(new ValueMap().
-                    withMap(":friendRequestsVal", user.getFriendRequestsMap()));
+                .withValueMap(new ValueMap().withMap(":friendRequestsVal", user.getFriendRequestsMap()));
             this.userDAO.updateUser(activeUser, updateActiveUserData);
 
             this.metrics.commonClose(true);

@@ -82,8 +82,7 @@ public class Metrics {
 
         if (this.countMetrics.get(this.functionNames.peek()).containsKey(metricName)) {
             this.countMetrics.get(this.functionNames.peek())
-                .replace(metricName,
-                    this.countMetrics.get(this.functionNames.peek()).get(metricName) + 1);
+                .replace(metricName, this.countMetrics.get(this.functionNames.peek()).get(metricName) + 1);
         } else {
             this.addIntegerMetric(metricName, 1); // it's not there -> implies it was 0
         }
@@ -93,8 +92,7 @@ public class Metrics {
         this.ensureFunctionKeyExists(this.timeMetrics);
 
         if (!this.timeMetrics.get(this.functionNames.peek()).containsKey(metricName)) {
-            this.timeMetrics.get(this.functionNames.peek())
-                .put(metricName, System.currentTimeMillis());
+            this.timeMetrics.get(this.functionNames.peek()).put(metricName, System.currentTimeMillis());
         }
     }
 
@@ -102,10 +100,8 @@ public class Metrics {
         this.ensureFunctionKeyExists(this.timeMetrics);
 
         if (this.timeMetrics.get(this.functionNames.peek()).containsKey(metricName)) {
-            this.timeMetrics.get(this.functionNames.peek())
-                .replace(metricName,
-                    System.currentTimeMillis() - this.timeMetrics.get(this.functionNames.peek())
-                        .get(metricName));
+            this.timeMetrics.get(this.functionNames.peek()).replace(metricName,
+                System.currentTimeMillis() - this.timeMetrics.get(this.functionNames.peek()).get(metricName));
         }
     }
 
@@ -118,26 +114,23 @@ public class Metrics {
     }
 
     public void logWithBody(final LoggingMessage<Map> descriptor) {
-        this.lambdaLogger
-            .log(descriptor.withInput(this.requestBody).withRequestId(this.requestId).toString());
+        this.lambdaLogger.log(descriptor.withInput(this.requestBody).withRequestId(this.requestId).toString());
     }
 
     public void logMetrics() {
         if (this.printMetrics) {
             for (String funcName : this.countMetrics.keySet()) {
                 for (String metricName : this.countMetrics.get(funcName).keySet()) {
-                    this.lambdaLogger.log(String
-                        .format("%s %s %s %s %s", this.requestId, METRIC_MARKER, funcName,
-                            metricName,
+                    this.lambdaLogger.log(
+                        String.format("%s %s %s %s %s", this.requestId, METRIC_MARKER, funcName, metricName,
                             this.countMetrics.get(funcName).get(metricName)));
                 }
             }
 
             for (String funcName : this.timeMetrics.keySet()) {
                 for (String metricName : this.timeMetrics.get(funcName).keySet()) {
-                    this.lambdaLogger.log(String
-                        .format("%s %s %s %s %s", this.requestId, METRIC_MARKER, funcName,
-                            metricName,
+                    this.lambdaLogger.log(
+                        String.format("%s %s %s %s %s", this.requestId, METRIC_MARKER, funcName, metricName,
                             this.timeMetrics.get(funcName).get(metricName)));
                 }
             }

@@ -24,13 +24,13 @@ public class UpdateExerciseController implements ApiRequestController {
     public UpdateExerciseManager updateExerciseManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, RequestFields.EXERCISE, RequestFields.EXERCISE_ID);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, RequestFields.EXERCISE,
+            RequestFields.EXERCISE_ID);
 
         if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {

@@ -24,8 +24,8 @@ public class SendFriendRequestController implements ApiRequestController {
     public SendFriendRequestManager sendFriendRequestManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
@@ -37,10 +37,8 @@ public class SendFriendRequestController implements ApiRequestController {
                 final String userToAdd = (String) json.get(User.USERNAME);
 
                 Injector.getInjector(metrics).inject(this);
-                final FriendResponse friendResponse = this.sendFriendRequestManager
-                    .sendRequest(activeUser, userToAdd);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(friendResponse.asResponse()));
+                final FriendResponse friendResponse = this.sendFriendRequestManager.sendRequest(activeUser, userToAdd);
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(friendResponse.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

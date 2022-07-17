@@ -10,6 +10,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.common.collect.ImmutableList;
+import imports.Config;
 import imports.RequestFields;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,13 +20,14 @@ import java.util.Map;
 
 public class TokenUtils {
 
-    private static final String PUBLIC_RSA_KEY_URL = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_vLSsBubHd/.well-known/jwks.json";
+    private static final String PUBLIC_RSA_KEY_URL = String.format(
+        "https://cognito-idp.us-east-1.amazonaws.com/%s/.well-known/jwks.json", Config.COGNITO_USER_POOL);
+
     private static final List<String> LIVE_FUNCTIONS = ImmutableList.of("ProxyEndpoint");
     private static final String EMULATED_ACTIVE_USER_KEY = "EMULATED_ACTIVE_USER";
     private static final String cognitoClaim = "cognito:username";
 
-    public static String getActiveUserFromRequest(APIGatewayProxyRequestEvent request,
-        Context context)
+    public static String getActiveUserFromRequest(APIGatewayProxyRequestEvent request, Context context)
         throws JwkException, MalformedURLException {
         String functionName = context.getFunctionName();
 

@@ -25,13 +25,13 @@ public class SwitchWorkoutController implements ApiRequestController {
     public SwitchWorkoutManager switchWorkoutManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_ID, RequestFields.WORKOUT);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_ID,
+            RequestFields.WORKOUT);
 
         if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {

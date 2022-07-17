@@ -35,10 +35,10 @@ public class GetUserDataManager {
         this.metrics.commonSetup(classMethod);
 
         try {
-            Item user = Optional.ofNullable(this.userDAO.getUserItem(username)).orElseThrow(
-                () -> new UserNotFoundException(String.format("%s not found.", username)));
+            User user = this.userDAO.getUser(username);
+
             this.metrics.commonClose(true);
-            return new User(user);
+            return user;
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;
@@ -46,12 +46,11 @@ public class GetUserDataManager {
     }
 
     /**
-     * Returns the active user's data from the user table. If the active user's data does not exist,
-     * it is assumed this is their first login and they are created into the user table.
+     * Returns the active user's data from the user table. If the active user's data does not exist, it is assumed this
+     * is their first login, and they are created into the user table.
      *
      * @param activeUser The user that made the api request, trying to get data about themselves.
-     * @return UserResponse of the user's active data (certain fields omitted for client
-     * consumption)
+     * @return UserResponse of the user's active data (certain fields omitted for client consumption)
      */
     public User getActiveUserData(final String activeUser) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".getActiveUserData";
@@ -59,13 +58,13 @@ public class GetUserDataManager {
 
         try {
             User user;
-            Item userItem = this.userDAO.getUserItem(activeUser);
-            if (userItem == null) {
+            boolean userExists = this.userDAO.userExists(activeUser);
+            if (!userExists) {
                 // user has not been added yet in the DB, so create an entry for them
                 user = this.newUserManager.createNewUser(activeUser);
             } else {
                 // user already exists in DB so just return their data
-                user = new User(userItem);
+                user = this.userDAO.getUser(activeUser);
             }
             this.metrics.commonClose(true);
             return user;

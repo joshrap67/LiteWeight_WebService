@@ -45,8 +45,8 @@ public class NotificationService {
     /**
      * This method is used to create a new platform endpoint to be used for SNS.
      *
-     * @param createPlatformEndpointRequest A request containing the details of the platform
-     *                                      endpoint that is to be created.
+     * @param createPlatformEndpointRequest A request containing the details of the platform endpoint that is to be
+     *                                      created.
      */
     public CreatePlatformEndpointResult registerPlatformEndpoint(
         final CreatePlatformEndpointRequest createPlatformEndpointRequest)
@@ -55,8 +55,8 @@ public class NotificationService {
     }
 
     public Map<String, String> getEndpointAttributes(final String endpointArn) {
-        return this.client.getEndpointAttributes(new GetEndpointAttributesRequest()
-            .withEndpointArn(endpointArn)).getAttributes();
+        return this.client.getEndpointAttributes(new GetEndpointAttributesRequest().withEndpointArn(endpointArn))
+            .getAttributes();
     }
 
     /**
@@ -64,19 +64,17 @@ public class NotificationService {
      *
      * @param deleteEndpointRequest A request containing the details of the endpoint to be deleted.
      */
-    public DeleteEndpointResult unregisterPlatformEndpoint(
-        final DeleteEndpointRequest deleteEndpointRequest) throws InvalidParameterException {
+    public DeleteEndpointResult unregisterPlatformEndpoint(final DeleteEndpointRequest deleteEndpointRequest)
+        throws InvalidParameterException {
         return this.client.deleteEndpoint(deleteEndpointRequest);
     }
 
     /**
-     * This method is used to send a message to a front end device. Note that the frontend is
-     * responsible for creating the push notification itself, this messages sent only contains the
-     * data the frontend requires.
+     * This method is used to send a message to a front end device. Note that the frontend is responsible for creating
+     * the push notification itself, this messages sent only contains the data the frontend requires.
      *
      * @param arn              The arn of the target of this message.
-     * @param notificationData This contains the action and payload information to be used by the
-     *                         front end.
+     * @param notificationData This contains the action and payload information to be used by the front end.
      */
     public PublishResult sendMessage(final String arn, final NotificationData notificationData) {
         if (arn == null) {
@@ -89,8 +87,8 @@ public class NotificationService {
             )
         );
 
-        final String jsonNotification = JsonUtils
-            .serializeMap(ImmutableMap.of("GCM", JsonUtils.serializeMap(notification)));
+        final String jsonNotification = JsonUtils.serializeMap(
+            ImmutableMap.of("GCM", JsonUtils.serializeMap(notification)));
 
         final PublishRequest publishRequest = new PublishRequest()
             .withTargetArn(arn)
@@ -114,9 +112,8 @@ public class NotificationService {
      */
     public GetPlatformApplicationAttributesResult getPlatformAttributes(final String platformArn) {
         return this.client
-            .getPlatformApplicationAttributes(
-                new GetPlatformApplicationAttributesRequest()
-                    .withPlatformApplicationArn(platformArn));
+            .getPlatformApplicationAttributes(new GetPlatformApplicationAttributesRequest()
+                .withPlatformApplicationArn(platformArn));
     }
 
     public PublishResult sendEmail(final String arn, final String subject, final String body) {

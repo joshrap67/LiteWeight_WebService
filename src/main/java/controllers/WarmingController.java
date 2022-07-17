@@ -15,8 +15,7 @@ public class WarmingController implements ApiRequestController {
     @Inject
     public WarmingManager warmingManager;
 
-    public ResultStatus<String> processApiRequest(final Map<String, Object> jsonMap,
-        final Metrics metrics)
+    public ResultStatus<String> processApiRequest(final Map<String, Object> jsonMap, final Metrics metrics)
         throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 

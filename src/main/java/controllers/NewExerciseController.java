@@ -24,8 +24,8 @@ public class NewExerciseController implements ApiRequestController {
     public NewExerciseManager newExerciseManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
@@ -43,20 +43,18 @@ public class NewExerciseController implements ApiRequestController {
 
         if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {
-                // todo trim all inputs
-                final String activeUser = ((String) jsonBody.get(RequestFields.ACTIVE_USER)).trim();
-                final String exerciseName = ((String) jsonBody.get(OwnedExercise.EXERCISE_NAME)).trim();
+                final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
+                final String exerciseName = (String) jsonBody.get(OwnedExercise.EXERCISE_NAME);
                 final double defaultWeight = (double) jsonBody.get(OwnedExercise.DEFAULT_WEIGHT);
                 final int defaultSets = (int) jsonBody.get(OwnedExercise.DEFAULT_SETS);
                 final int defaultReps = (int) jsonBody.get(OwnedExercise.DEFAULT_REPS);
-                final String defaultDetails = ((String) jsonBody.get(OwnedExercise.DEFAULT_DETAILS)).trim();
-                final String videoURL = ((String) jsonBody.get(OwnedExercise.VIDEO_URL)).trim();
+                final String defaultDetails = (String) jsonBody.get(OwnedExercise.DEFAULT_DETAILS);
+                final String videoURL = (String) jsonBody.get(OwnedExercise.VIDEO_URL);
                 final List<String> focuses = (List<String>) jsonBody.get(OwnedExercise.FOCUSES);
 
                 Injector.getInjector(metrics).inject(this);
-                final OwnedExerciseResponse result = this.newExerciseManager
-                    .newExercise(activeUser, exerciseName, defaultWeight, defaultSets, defaultReps,
-                        defaultDetails, videoURL, focuses);
+                final OwnedExerciseResponse result = this.newExerciseManager.newExercise(activeUser, exerciseName,
+                    defaultWeight, defaultSets, defaultReps, defaultDetails, videoURL, focuses);
                 resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());

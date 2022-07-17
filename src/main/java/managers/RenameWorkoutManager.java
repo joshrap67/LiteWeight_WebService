@@ -68,8 +68,7 @@ public class RenameWorkoutManager {
             WorkoutMeta workoutMeta = user.getWorkoutMetas().get(workoutId);
             workoutMeta.setWorkoutName(newWorkoutName);
 
-            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.WORKOUTS + ".#workoutId = :workoutMap, " +
                     User.EXERCISES + "= :exercisesMap")
@@ -78,8 +77,7 @@ public class RenameWorkoutManager {
                     .withMap(":exercisesMap", user.getOwnedExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 
-            UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId,
-                WorkoutDAO.WORKOUT_TABLE_NAME)
+            UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId, WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " + Workout.WORKOUT_NAME + "= :workoutNameVal")
                 .withValueMap(new ValueMap().withString(":workoutNameVal", newWorkoutName));
 
@@ -96,14 +94,11 @@ public class RenameWorkoutManager {
         }
     }
 
-    private static void updateUserExercises(final User user, final String workoutId,
-        final String newWorkoutName) {
-        // loops through all user exercises and updates the old workout name with the newly renamed one
+    private static void updateUserExercises(final User user, final String workoutId, final String newWorkoutName) {
         for (String exerciseId : user.getOwnedExercises().keySet()) {
             if (user.getOwnedExercises().get(exerciseId).getWorkouts().containsKey(workoutId)) {
-                // old workout name found, replace it
-                user.getOwnedExercises().get(exerciseId).getWorkouts()
-                    .put(workoutId, newWorkoutName);
+                // old workout name found, replace it newly named one
+                user.getOwnedExercises().get(exerciseId).getWorkouts().put(workoutId, newWorkoutName);
             }
         }
     }

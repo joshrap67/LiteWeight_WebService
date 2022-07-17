@@ -47,9 +47,8 @@ public class WorkoutDAO {
         return this.workoutTable.putItem(workout);
     }
 
-    public Item getWorkoutItem(String workoutId) {
-        return this.workoutTable
-            .getItem(new PrimaryKey(WORKOUT_TABLE_PRIMARY_KEY, workoutId));
+    private Item getWorkoutItem(String workoutId) {
+        return this.workoutTable.getItem(new PrimaryKey(WORKOUT_TABLE_PRIMARY_KEY, workoutId));
     }
 
     public Workout getWorkout(String workoutId)
@@ -72,8 +71,7 @@ public class WorkoutDAO {
         return this.database.executeWriteTransaction(actions);
     }
 
-    public TransactGetItemsResult executeGetTransaction(
-        final TransactGetItemsRequest transactGetItemsRequest) {
+    public TransactGetItemsResult executeGetTransaction(final TransactGetItemsRequest transactGetItemsRequest) {
         return this.database.executeGetTransaction(transactGetItemsRequest);
     }
 

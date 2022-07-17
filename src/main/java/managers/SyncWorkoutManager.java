@@ -68,8 +68,7 @@ public class SyncWorkoutManager {
             workout.setCurrentWeek(0);
         }
 
-        if (currentDay >= 0 && currentDay >= workout.getRoutine().getWeek(currentWeek)
-            .getNumberOfDays()) {
+        if (currentDay >= 0 && currentDay >= workout.getRoutine().getWeek(currentWeek).getNumberOfDays()) {
             // frontend incorrectly set the current day, so just set it to 0
             workout.setCurrentDay(0);
         }

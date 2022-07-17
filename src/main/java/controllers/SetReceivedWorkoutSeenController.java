@@ -21,13 +21,12 @@ public class SetReceivedWorkoutSeenController implements ApiRequestController {
     public SetReceivedWorkoutSeenManager setReceivedWorkoutSeenManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, SharedWorkout.SHARED_WORKOUT_ID);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, SharedWorkout.SHARED_WORKOUT_ID);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {

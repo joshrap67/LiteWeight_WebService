@@ -38,9 +38,9 @@ public class NewWorkoutManager {
     }
 
     /**
-     * Creates a new workout if all input is valid and if the user has not already reached the max
-     * number of workouts allowed. Updates all exercises that are apart of the newly created workout
-     * to have this workout listed in their workout maps.
+     * Creates a new workout if all input is valid and if the user has not already reached the max number of workouts
+     * allowed. Updates all exercises that are apart of the newly created workout to have this workout listed in their
+     * workout maps.
      *
      * @param activeUser  user that is creating this new workout.
      * @param workoutName name of the workout that is to be created.
@@ -48,8 +48,8 @@ public class NewWorkoutManager {
      * @return UserWithWorkout the newly created workout and updated user object.
      * @throws Exception thrown if there exists input validation.
      */
-    public UserWithWorkout createNewWorkout(final String activeUser, final String workoutName,
-        final Routine routine) throws Exception {
+    public UserWithWorkout createNewWorkout(final String activeUser, final String workoutName, final Routine routine)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".createNewWorkout";
         this.metrics.commonSetup(classMethod);
 
@@ -88,8 +88,7 @@ public class NewWorkoutManager {
             // update all the exercises that are now a part of this workout
             WorkoutUtils.updateOwnedExercises(user, routine, workoutId, workoutName);
 
-            UpdateItemTemplate updateItemData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateItemData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
                     User.WORKOUTS + ".#workoutId= :workoutUserMap, " +

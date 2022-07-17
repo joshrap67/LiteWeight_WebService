@@ -22,8 +22,8 @@ public class UpdateIconController implements ApiRequestController {
     public UpdateIconManager updateIconManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
@@ -36,8 +36,7 @@ public class UpdateIconController implements ApiRequestController {
                 byte[] imageBytes = JsonUtils.deserializeByteList(imageData);
 
                 Injector.getInjector(metrics).inject(this);
-                boolean success = this.updateIconManager
-                    .updateIcon(activeUser, imageBytes);
+                boolean success = this.updateIconManager.updateIcon(activeUser, imageBytes);
                 if (success) {
                     resultStatus = ResultStatus.successful("Picture updated successfully.");
                 } else {

@@ -26,17 +26,16 @@ public class UpdateUserPreferencesController implements ApiRequestController {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, User.USER_PREFERENCES);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, User.USER_PREFERENCES);
 
         if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
                 final UserPreferences userPreferences = new UserPreferences(
                     (Map<String, Object>) jsonBody.get(User.USER_PREFERENCES));
+
                 Injector.getInjector(metrics).inject(this);
-                this.updateUserPreferencesManager
-                    .updateUserPreferences(activeUser, userPreferences);
+                this.updateUserPreferencesManager.updateUserPreferences(activeUser, userPreferences);
                 resultStatus = ResultStatus.successful("User prefs updated successfully.");
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));

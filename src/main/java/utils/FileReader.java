@@ -31,15 +31,13 @@ public class FileReader {
         BufferedReader reader;
         try {
             reader = new BufferedReader(
-                new InputStreamReader(
-                    FileReader.class.getResourceAsStream(DEFAULT_EXERCISES_FILE)));
+                new InputStreamReader(FileReader.class.getResourceAsStream(DEFAULT_EXERCISES_FILE)));
             String line;
             while ((line = reader.readLine()) != null) {
                 String uuid = UUID.randomUUID().toString();
                 String name = line.split(EXERCISE_SPLIT_DELIM)[NAME_INDEX];
                 String video = line.split(EXERCISE_SPLIT_DELIM)[VIDEO_INDEX];
-                String[] focuses = line.split(EXERCISE_SPLIT_DELIM)[FOCUS_INDEX_FILE]
-                    .split(FOCUS_DELIM);
+                String[] focuses = line.split(EXERCISE_SPLIT_DELIM)[FOCUS_INDEX_FILE].split(FOCUS_DELIM);
 
                 List<String> focusList = new ArrayList<>(Arrays.asList(focuses));
                 OwnedExercise ownedExercise = new OwnedExercise(name, video, focusList);
@@ -53,8 +51,7 @@ public class FileReader {
     }
 
     public static byte[] getDefaultProfilePicture() throws IOException {
-        BufferedImage originalImage = ImageIO
-            .read(FileReader.class.getResource(DEFAULT_PROFILE_PICTURE_FILE));
+        BufferedImage originalImage = ImageIO.read(FileReader.class.getResource(DEFAULT_PROFILE_PICTURE_FILE));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(originalImage, "jpg", baos);
         byte[] imageInByte = baos.toByteArray();

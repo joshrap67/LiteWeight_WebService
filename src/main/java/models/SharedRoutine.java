@@ -69,18 +69,6 @@ public class SharedRoutine implements Model, Iterable<Integer> {
         this.weeks.put(weekIndex, week);
     }
 
-    public int getNumberOfWeeks() {
-        return this.weeks.size();
-    }
-
-    public int getTotalNumberOfDays() {
-        int days = 0;
-        for (Integer week : this.weeks.keySet()) {
-            days += this.weeks.get(week).getNumberOfDays();
-        }
-        return days;
-    }
-
     @Override
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();

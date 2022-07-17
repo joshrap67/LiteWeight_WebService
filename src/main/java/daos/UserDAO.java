@@ -26,7 +26,6 @@ public class UserDAO {
 
     public static final String USERS_TABLE_NAME = "users";
     public static final String USERS_PRIMARY_KEY = User.USERNAME;
-
     protected final Table usersTable;
     private final Database database;
 
@@ -54,12 +53,15 @@ public class UserDAO {
         return new User(userItem);
     }
 
-    public Item getUserItem(final String username) throws NullPointerException {
+    private Item getUserItem(final String username) throws NullPointerException {
         return this.usersTable.getItem(new PrimaryKey(USERS_PRIMARY_KEY, username));
     }
 
-    public UpdateItemOutcome updateUser(final String username,
-        final UpdateItemSpec updateItemSpec) {
+    public boolean userExists(final String username) {
+        return this.getUserItem(username) != null;
+    }
+
+    public UpdateItemOutcome updateUser(final String username, final UpdateItemSpec updateItemSpec) {
         updateItemSpec.withPrimaryKey(USERS_PRIMARY_KEY, username);
         return this.usersTable.updateItem(updateItemSpec);
     }

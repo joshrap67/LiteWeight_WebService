@@ -39,12 +39,12 @@ public class GetUserWorkoutManager {
         this.metrics.commonSetup(classMethod);
 
         try {
-            Item userItem = this.userDAO.getUserItem(activeUser);
+            boolean userExists = this.userDAO.userExists(activeUser);
             UserWithWorkout userWithWorkout;
 
-            if (userItem != null) {
+            if (userExists) {
                 // user is indeed in DB, so fetch the current workout if it exists
-                final User user = new User(userItem);
+                final User user = this.userDAO.getUser(activeUser);
                 final String currentWorkoutId = user.getCurrentWorkout();
 
                 if (currentWorkoutId == null) {

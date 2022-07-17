@@ -24,8 +24,8 @@ public class GetUserWorkoutController implements ApiRequestController {
     public GetUserWorkoutManager getUserWorkoutManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> jsonMap,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonMap, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
@@ -37,8 +37,7 @@ public class GetUserWorkoutController implements ApiRequestController {
                 final UserWithWorkout userWithWorkout = this.getUserWorkoutManager.getUserWithWorkout(activeUser);
                 resultStatus = ResultStatus.successful(JsonUtils.serializeMap(userWithWorkout.asResponse()));
             } else {
-                throw new MissingApiRequestKeyException(
-                    ImmutableList.of(RequestFields.ACTIVE_USER));
+                throw new MissingApiRequestKeyException(ImmutableList.of(RequestFields.ACTIVE_USER));
             }
         } catch (final MissingApiRequestKeyException e) {
             throw e;

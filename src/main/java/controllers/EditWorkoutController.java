@@ -26,13 +26,12 @@ public class EditWorkoutController implements ApiRequestController {
     EditWorkoutManager editWorkoutManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, RequestFields.WORKOUT);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, RequestFields.WORKOUT);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {

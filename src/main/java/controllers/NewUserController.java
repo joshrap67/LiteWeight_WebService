@@ -20,8 +20,8 @@ public class NewUserController implements ApiRequestController {
     public NewUserManager newUserManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
@@ -31,11 +31,9 @@ public class NewUserController implements ApiRequestController {
             if (json.containsKey(User.USERNAME)) {
                 final String username = (String) json.get(User.USERNAME);
                 final User result = this.newUserManager.createNewUser(username);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
             } else {
-                throw new MissingApiRequestKeyException(
-                    ImmutableList.of(RequestFields.ACTIVE_USER));
+                throw new MissingApiRequestKeyException(ImmutableList.of(RequestFields.ACTIVE_USER));
             }
         } catch (final MissingApiRequestKeyException e) {
             throw e;

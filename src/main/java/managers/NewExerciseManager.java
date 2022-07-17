@@ -45,8 +45,8 @@ public class NewExerciseManager {
             final User user = this.userDAO.getUser(activeUser);
 
             List<String> focusList = new ArrayList<>(focuses);
-            final String errorMessage = Validator.validNewExercise(user, exerciseName, weight, sets,
-                reps, details, videUrl, focusList);
+            final String errorMessage = Validator.validNewExercise(user, exerciseName, weight, sets, reps, details,
+                videUrl, focusList);
 
             if (!errorMessage.isEmpty()) {
                 this.metrics.commonClose(false);
@@ -54,8 +54,8 @@ public class NewExerciseManager {
             }
 
             // all input is valid so go ahead and make the new exercise
-            OwnedExercise ownedExercise = new OwnedExercise(exerciseName, weight, sets, reps,
-                details, videUrl, focusList);
+            OwnedExercise ownedExercise = new OwnedExercise(exerciseName, weight, sets, reps, details, videUrl,
+                focusList);
             String exerciseId = UUID.randomUUID().toString();
 
             UpdateItemSpec updateItemSpec = new UpdateItemSpec()

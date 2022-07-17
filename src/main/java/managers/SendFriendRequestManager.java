@@ -36,8 +36,8 @@ public class SendFriendRequestManager {
     }
 
     /**
-     * Sends a friend request to the desired user if all input is valid and the max number of
-     * friends for both have not been reached.
+     * Sends a friend request to the desired user if all input is valid and the max number of friends for both have not
+     * been reached.
      *
      * @param activeUser    user that is sending the friend request.
      * @param usernameToAdd user that the active user is adding.
@@ -60,20 +60,15 @@ public class SendFriendRequestManager {
             }
 
             Friend friendToAdd = new Friend(userToAdd, false);
-            FriendRequest friendRequest = new FriendRequest(activeUserObject,
-                Instant.now().toString());
+            FriendRequest friendRequest = new FriendRequest(activeUserObject, Instant.now().toString());
 
             // the active user needs to have this (unconfirmed) friend added to its friends list
-            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(
-                usernameToAdd, UserDAO.USERS_TABLE_NAME)
-                .withUpdateExpression(
-                    "set " + User.FRIEND_REQUESTS + ".#username= :requestsVal")
-                .withValueMap(
-                    new ValueMap().withMap(":requestsVal", friendRequest.asMap()))
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(usernameToAdd, UserDAO.USERS_TABLE_NAME)
+                .withUpdateExpression("set " + User.FRIEND_REQUESTS + ".#username= :requestsVal")
+                .withValueMap(new ValueMap().withMap(":requestsVal", friendRequest.asMap()))
                 .withNameMap(new NameMap().with("#username", activeUser));
             // friend to add needs to have the friend request added to its friend request list
-            UpdateItemTemplate updateActiveUserData = new UpdateItemTemplate(
-                activeUser, UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateActiveUserData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.FRIENDS + ".#username= :friendsVal")
                 .withValueMap(new ValueMap().withMap(":friendsVal", friendToAdd.asMap()))
                 .withNameMap(new NameMap().with("#username", usernameToAdd));
@@ -111,17 +106,15 @@ public class SendFriendRequestManager {
             stringBuilder.append("You are currently blocking this user.\n");
         }
         if (otherUser.getFriendRequests().size() >= Globals.MAX_FRIEND_REQUESTS) {
-            stringBuilder.append(otherUserUsername).append(" has too many pending requests.\n")
-                .append("\n");
+            stringBuilder.append(otherUserUsername).append(" has too many pending requests.\n");
         }
-        if (activeUser.getFriends().containsKey(otherUserUsername)
-            && !activeUser.getFriends().get(otherUserUsername).isConfirmed()) {
+        if (activeUser.getFriends().containsKey(otherUserUsername) && !activeUser.getFriends().get(otherUserUsername)
+            .isConfirmed()) {
             stringBuilder.append("Request already sent.\n");
         }
-        if (activeUser.getFriends().containsKey(otherUserUsername)
-            && activeUser.getFriends().get(otherUserUsername).isConfirmed()) {
-            stringBuilder.append("You are already friends with ").append(otherUserUsername)
-                .append("\n");
+        if (activeUser.getFriends().containsKey(otherUserUsername) && activeUser.getFriends().get(otherUserUsername)
+            .isConfirmed()) {
+            stringBuilder.append("You are already friends with ").append(otherUserUsername).append("\n");
         }
         if (otherUser.getFriendRequests().containsKey(activeUserUsername)) {
             stringBuilder.append("This user has already sent you a friend request.\n");

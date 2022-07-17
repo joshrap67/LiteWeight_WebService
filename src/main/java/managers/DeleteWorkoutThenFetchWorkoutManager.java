@@ -66,8 +66,7 @@ public class DeleteWorkoutThenFetchWorkoutManager {
             }
             user.setCurrentWorkout(nextWorkoutId);
 
-            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
                     User.WORKOUTS + "= :userWorkoutsMap, " +

@@ -26,8 +26,8 @@ public class NewUserManager {
     }
 
     /**
-     * Creates a new user item and puts it in the user table. Note this is where the user's random
-     * url for their icon is generated.
+     * Creates a new user item and puts it in the user table. Note this is where the user's random url for their icon is
+     * generated.
      *
      * @param username username of the user that is to be created.
      * @return User the newly created user.
@@ -40,10 +40,9 @@ public class NewUserManager {
         try {
             // whenever a user is created, give them a unique UUID file path that will always get updated
             final UUID uuid = UUID.randomUUID();
-            final String fileName = String
-                .format("%s.%s", uuid.toString(), StorageService.JPG_TYPE);
-            storageService
-                .uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
+            final String fileName = String.format("%s.%s", uuid, StorageService.JPG_TYPE);
+            // TODO this should really not happen, make a private bucket for this image and download it from there to get the jar smaller
+            storageService.uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
 
             final UserPreferences userPreferences = new UserPreferences();
             userPreferences.setMetricUnits(false);
