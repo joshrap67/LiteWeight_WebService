@@ -57,20 +57,21 @@ public class NewWorkoutManager {
             final User user = this.userDAO.getUser(activeUser);
 
             final String workoutId = UUID.randomUUID().toString();
-            final String creationTime = Instant.now().toString();
             final String errorMessage = Validator.validNewWorkoutInput(workoutName, user, routine);
 
             if (!errorMessage.isEmpty()) {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(errorMessage);
             }
+            final String creationTime = Instant.now().toString();
+
             // no error, so go ahead and try and insert this new workout along with updating active user
             final Workout newWorkout = new Workout();
             newWorkout.setCreationDate(creationTime);
             newWorkout.setCreator(activeUser);
             newWorkout.setMostFrequentFocus(WorkoutUtils.findMostFrequentFocus(user, routine));
             newWorkout.setWorkoutId(workoutId);
-            newWorkout.setWorkoutName(workoutName.trim());
+            newWorkout.setWorkoutName(workoutName);
             newWorkout.setRoutine(routine);
             newWorkout.setCurrentDay(0);
             newWorkout.setCurrentWeek(0);
@@ -84,7 +85,7 @@ public class NewWorkoutManager {
             // need to set it here so frontend gets updated user item back
             user.putNewWorkoutMeta(workoutId, workoutMeta);
             user.setCurrentWorkout(workoutId);
-            // update all the exercises that are now apart of this workout
+            // update all the exercises that are now a part of this workout
             WorkoutUtils.updateOwnedExercises(user, routine, workoutId, workoutName);
 
             UpdateItemTemplate updateItemData = new UpdateItemTemplate(activeUser,

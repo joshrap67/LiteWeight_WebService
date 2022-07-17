@@ -59,6 +59,18 @@ public class OwnedExercise implements Model {
         this.workouts = new HashMap<>();
     }
 
+    public OwnedExercise(String exerciseName, double weight, int sets, int reps, String details,
+        String videUrl, List<String> focuses) {
+        this.exerciseName = exerciseName;
+        this.videoUrl = videUrl;
+        this.focuses = focuses;
+        this.defaultWeight = weight;
+        this.defaultReps = reps;
+        this.defaultSets = sets;
+        this.defaultDetails = details;
+        this.workouts = new HashMap<>();
+    }
+
     public OwnedExercise(final SharedWorkoutExercise sharedWorkoutExercise, final String name) {
         // used to convert to an owned exercise from a sharedWorkoutExercise
         this.exerciseName = name;

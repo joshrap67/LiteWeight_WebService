@@ -1,6 +1,7 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UnauthorizedException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
 import utils.ErrorMessage;
@@ -39,11 +40,10 @@ public class DeleteWorkoutThenFetchController implements ApiRequestController {
                 final String nextWorkoutId = (String) json.get(RequestFields.NEXT_WORKOUT_ID);
 
                 Injector.getInjector(metrics).inject(this);
-                final UserWithWorkout result = this.deleteWorkoutThenFetchWorkoutManager
-                    .deleteWorkoutThenFetch(activeUser, deletedWorkoutId, nextWorkoutId);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
-            } catch (UserNotFoundException | WorkoutNotFoundException exception) {
+                final UserWithWorkout result = this.deleteWorkoutThenFetchWorkoutManager.deleteWorkoutThenFetch(
+                    activeUser, deletedWorkoutId, nextWorkoutId);
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
+            } catch (UserNotFoundException | UnauthorizedException | WorkoutNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
                 resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
             } catch (Exception e) {

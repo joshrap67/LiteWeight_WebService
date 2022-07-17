@@ -13,8 +13,7 @@ import models.User;
 public class WorkoutUtils {
 
     public static void updateOwnedExercises(final User user, final Routine routine,
-        final String workoutId,
-        final String workoutName) {
+        final String workoutId, final String workoutName) {
         // updates the list of exercises on the user object to include this new workout in all contained exercises
 
         boolean updateDefaultWeight = user.getUserPreferences().isUpdateDefaultWeightOnSave();
@@ -26,7 +25,8 @@ public class WorkoutUtils {
                     .getExerciseListForDay(week, day);
                 for (RoutineExercise routineExercise : exerciseListForDay) {
                     String exerciseId = routineExercise.getExerciseId();
-                    if (updateDefaultWeight && routineExercise.getWeight() > user.getOwnedExercises()
+                    if (updateDefaultWeight
+                        && routineExercise.getWeight() > user.getOwnedExercises()
                         .get(exerciseId).getDefaultWeight()) {
                         // if user wants to update default weight on save and this exercise has a greater
                         // weight than the current default, then update the default
@@ -45,9 +45,7 @@ public class WorkoutUtils {
     }
 
     public static void updateOwnedExercisesOnEdit(final User user, final Routine newRoutine,
-        final Routine oldRoutine,
-        final String workoutId,
-        final String workoutName) {
+        final Routine oldRoutine, final String workoutId, final String workoutName) {
         // updates the list of exercises on the user object to include this new workout in all contained exercises
 
         boolean updateDefaultWeight = user.getUserPreferences().isUpdateDefaultWeightOnSave();
@@ -59,7 +57,8 @@ public class WorkoutUtils {
                     .getExerciseListForDay(week, day);
                 for (RoutineExercise routineExercise : exerciseListForDay) {
                     String exerciseId = routineExercise.getExerciseId();
-                    if (updateDefaultWeight && routineExercise.getWeight() > user.getOwnedExercises()
+                    if (updateDefaultWeight
+                        && routineExercise.getWeight() > user.getOwnedExercises()
                         .get(exerciseId).getDefaultWeight()) {
                         // if user wants to update default weight on save and this exercise has a greater
                         // weight than the current default, then update the default
@@ -97,9 +96,8 @@ public class WorkoutUtils {
         }
     }
 
-    public static String findMostFrequentFocus(final User user,
-        final Routine routine) {
-
+    public static String findMostFrequentFocus(final User user, final Routine routine) {
+        // todo smh move this to the frontend
         Map<String, Integer> focusCount = new HashMap<>();
         for (Integer week : routine) {
             for (Integer day : routine.getWeek(week)) {

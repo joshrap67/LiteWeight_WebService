@@ -36,15 +36,12 @@ public class UpdateExerciseController implements ApiRequestController {
             try {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
                 final String exerciseId = (String) jsonBody.get(RequestFields.EXERCISE_ID);
-                final Map<String, Object> exerciseUserMap = (Map<String, Object>) jsonBody
-                    .get(RequestFields.EXERCISE);
+                final Map<String, Object> exerciseUserMap = (Map<String, Object>) jsonBody.get(RequestFields.EXERCISE);
                 final OwnedExercise ownedExercise = new OwnedExercise(exerciseUserMap);
 
                 Injector.getInjector(metrics).inject(this);
-                final User result = this.updateExerciseManager
-                    .updateExercise(activeUser, exerciseId, ownedExercise);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
+                final User result = this.updateExerciseManager.updateExercise(activeUser, exerciseId, ownedExercise);
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

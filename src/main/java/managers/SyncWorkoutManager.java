@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import daos.WorkoutDAO;
+import exceptions.UnauthorizedException;
 import utils.Metrics;
 import javax.inject.Inject;
 import models.Workout;
@@ -20,16 +21,21 @@ public class SyncWorkoutManager {
     }
 
     /**
-     * Syncs a workout in the workout table by updating the current week/day and routine from the
-     * values found in the passed in workout.
+     * Syncs a workout in the workout table by updating the current week/day and routine from the values found in the
+     * workout.
      *
      * @param workout workout that is to be synced.
      */
-    public void syncWorkout(final Workout workout) {
+    public void syncWorkout(final String activeUser, final Workout workout) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".syncWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
+            if (!workout.getCreator().equals(activeUser)) {
+                // prevents someone from trying to sync a workout that is not theirs.
+                throw new UnauthorizedException("User does not have permissions to view this workout.");
+            }
+
             String workoutId = workout.getWorkoutId();
             confirmValidCurrentDayAndWeek(workout);
 

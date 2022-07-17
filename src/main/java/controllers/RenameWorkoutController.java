@@ -2,6 +2,7 @@ package controllers;
 
 import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UnauthorizedException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
 import utils.JsonUtils;
@@ -39,16 +40,14 @@ public class RenameWorkoutController implements ApiRequestController {
                 final String workoutId = (String) json.get(Workout.WORKOUT_ID);
 
                 Injector.getInjector(metrics).inject(this);
-                final User result = this.renameWorkoutManager
-                    .renameWorkout(activeUser, workoutId, workoutName);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
+                final User result = this.renameWorkoutManager.renameWorkout(activeUser, workoutId, workoutName.trim());
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());
-            } catch (UserNotFoundException unfe) {
-                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-                resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());
+            } catch (UserNotFoundException | UnauthorizedException exception) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
+                resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

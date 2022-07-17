@@ -30,8 +30,8 @@ public class DeleteExerciseManager {
     }
 
     /**
-     * This method deletes an exercise from a user's owned exercise mapping. It also removes this
-     * exercise from any workout that contains it.
+     * This method deletes an exercise from a user's owned exercise mapping. It also removes this exercise from any
+     * workout that contains it.
      *
      * @param exerciseId Id of the exercise that is to be deleted
      */

@@ -2,6 +2,7 @@ package controllers;
 
 import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UnauthorizedException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
 import utils.ErrorMessage;
@@ -36,17 +37,15 @@ public class EditWorkoutController implements ApiRequestController {
         if (json.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
-                final Workout workout = new Workout((Map<String, Object>) json
-                    .get(RequestFields.WORKOUT));
+                final Workout workout = new Workout((Map<String, Object>) json.get(RequestFields.WORKOUT));
 
                 Injector.getInjector(metrics).inject(this);
                 UserWithWorkout result = this.editWorkoutManager.editWorkout(activeUser, workout);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());
-            } catch (WorkoutNotFoundException | UserNotFoundException exception) {
+            } catch (WorkoutNotFoundException | UnauthorizedException | UserNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
                 resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
             } catch (Exception e) {

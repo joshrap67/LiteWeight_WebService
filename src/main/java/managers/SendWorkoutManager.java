@@ -1,5 +1,6 @@
 package managers;
 
+import exceptions.UnauthorizedException;
 import services.NotificationService;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
@@ -43,11 +44,11 @@ public class SendWorkoutManager {
     }
 
     /**
-     * Sends a workout to a recipient. Note that these workouts are separate objects with exercises
-     * that are indexed by name and not by id.
+     * Sends a workout to a recipient. Note that these workouts are separate objects with exercises that are indexed by
+     * name and not by id.
      * <p>
-     * If a workout has already been sent by the active user with the same name, the old shared
-     * workout is overwritten and updated.
+     * If a workout has already been sent by the active user with the same name, the old shared workout is overwritten
+     * and updated.
      * <p>
      * A push notification is sent to the recipient upon successful creation of the sent workout.
      *
@@ -57,8 +58,7 @@ public class SendWorkoutManager {
      * @return id of the workout that was sent.
      * @throws Exception if either user does not exist or if there is any input error.
      */
-    public String sendWorkout(final String activeUser, final String recipientUsername,
-        final String workoutId)
+    public String sendWorkout(final String activeUser, final String recipientUsername, final String workoutId)
         throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".sendWorkout";
         this.metrics.commonSetup(classMethod);
@@ -74,8 +74,12 @@ public class SendWorkoutManager {
             }
 
             final Workout originalWorkout = this.workoutDAO.getWorkout(workoutId);
-            String sharedWorkoutId = null;
+            if (!originalWorkout.getCreator().equals(activeUser)) {
+                // prevents someone from trying to send a workout that is not theirs.
+                throw new UnauthorizedException("User does not have permissions to view this workout.");
+            }
 
+            String sharedWorkoutId = null;
             for (String workoutIdMeta : recipientUser.getReceivedWorkouts().keySet()) {
                 final SharedWorkoutMeta meta = recipientUser.getReceivedWorkouts()
                     .get(workoutIdMeta);

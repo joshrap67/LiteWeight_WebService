@@ -1,6 +1,7 @@
 package controllers;
 
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UnauthorizedException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
 import utils.ErrorMessage;
@@ -36,16 +37,14 @@ public class SwitchWorkoutController implements ApiRequestController {
             try {
                 final String activeUser = (String) jsonBody.get(RequestFields.ACTIVE_USER);
                 final String newWorkoutId = (String) jsonBody.get(Workout.WORKOUT_ID);
-                final Map<String, Object> oldWorkoutMap = (Map<String, Object>) jsonBody
-                    .get(RequestFields.WORKOUT);
+                final Map<String, Object> oldWorkoutMap = (Map<String, Object>) jsonBody.get(RequestFields.WORKOUT);
                 final Workout oldWorkout = new Workout(oldWorkoutMap);
 
                 Injector.getInjector(metrics).inject(this);
-                final UserWithWorkout result = this.switchWorkoutManager
-                    .switchWorkout(activeUser, newWorkoutId, oldWorkout);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
-            } catch (WorkoutNotFoundException | UserNotFoundException exception) {
+                final UserWithWorkout result = this.switchWorkoutManager.switchWorkout(activeUser, newWorkoutId,
+                    oldWorkout);
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
+            } catch (WorkoutNotFoundException | UnauthorizedException | UserNotFoundException exception) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
                 resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
             } catch (Exception e) {
