@@ -50,12 +50,12 @@ public class FileReader {
         return retVal;
     }
 
-    public static byte[] getDefaultProfilePicture() throws IOException {
-        BufferedImage originalImage = ImageIO.read(FileReader.class.getResource(DEFAULT_PROFILE_PICTURE_FILE));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(originalImage, "jpg", baos);
-        byte[] imageInByte = baos.toByteArray();
-        baos.close();
-        return imageInByte;
-    }
+//    public static byte[] getDefaultProfilePicture() throws IOException {
+//        BufferedImage originalImage = ImageIO.read(FileReader.class.getResource(DEFAULT_PROFILE_PICTURE_FILE));
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        ImageIO.write(originalImage, "jpg", baos);
+//        byte[] imageInByte = baos.toByteArray();
+//        baos.close();
+//        return imageInByte;
+//    }
 }

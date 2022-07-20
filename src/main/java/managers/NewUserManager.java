@@ -41,8 +41,8 @@ public class NewUserManager {
             // whenever a user is created, give them a unique UUID file path that will always get updated
             final UUID uuid = UUID.randomUUID();
             final String fileName = String.format("%s.%s", uuid, StorageService.JPG_TYPE);
-            // TODO this should really not happen, make a private bucket for this image and download it from there to get the jar smaller
-            storageService.uploadImage(FileReader.getDefaultProfilePicture(), fileName, this.metrics);
+            byte[] defaultImageBytes = storageService.downloadDefaultImage(this.metrics);
+            storageService.uploadImage(defaultImageBytes, fileName, this.metrics);
 
             final UserPreferences userPreferences = new UserPreferences();
             userPreferences.setMetricUnits(false);
