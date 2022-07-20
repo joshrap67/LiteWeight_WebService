@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
+import exceptions.UnauthorizedException;
 import utils.Metrics;
 import utils.UpdateItemTemplate;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import models.User;
 import models.Workout;
 import models.WorkoutMeta;
 import responses.UserWithWorkout;
+import utils.Validator;
 
 public class RestartWorkoutManager {
 
@@ -43,6 +45,7 @@ public class RestartWorkoutManager {
 
         try {
             final User user = this.userDAO.getUser(activeUser);
+            Validator.ensureWorkoutOwnership(activeUser, workout);
 
             final String workoutId = workout.getWorkoutId();
             final WorkoutMeta workoutMeta = user.getWorkoutMetas().get(workoutId);

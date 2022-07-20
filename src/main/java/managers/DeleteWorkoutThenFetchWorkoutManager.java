@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import models.User;
 import models.Workout;
 import responses.UserWithWorkout;
+import utils.Validator;
 
 public class DeleteWorkoutThenFetchWorkoutManager {
 
@@ -45,10 +46,7 @@ public class DeleteWorkoutThenFetchWorkoutManager {
         try {
             final User user = this.userDAO.getUser(activeUser);
             final Workout oldWorkout = this.workoutDAO.getWorkout(deletedWorkoutId);
-            if (!oldWorkout.getCreator().equals(user.getUsername())) {
-                // prevents someone from trying to delete a workout that is not theirs.
-                throw new UnauthorizedException("User does not have permissions to view this workout.");
-            }
+            Validator.ensureWorkoutOwnership(activeUser, oldWorkout);
 
             // remove the workout everywhere in the user object
             for (String exerciseId : user.getOwnedExercises().keySet()) {
@@ -59,10 +57,7 @@ public class DeleteWorkoutThenFetchWorkoutManager {
             Workout nextWorkout = null; // if null then that signals no workouts left
             if (nextWorkoutId != null) {
                 nextWorkout = this.workoutDAO.getWorkout(nextWorkoutId);
-                if (!nextWorkout.getCreator().equals(user.getUsername())) {
-                    // prevents someone from trying to switch to a workout that is not theirs.
-                    throw new UnauthorizedException("User does not have permissions to view this workout.");
-                }
+                Validator.ensureWorkoutOwnership(activeUser, nextWorkout);
             }
             user.setCurrentWorkout(nextWorkoutId);
 

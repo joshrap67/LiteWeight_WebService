@@ -53,12 +53,6 @@ public class GetUserWorkoutManager {
                 } else {
                     // user has a workout so try and fetch it from the DB
                     final Workout workout = this.workoutDAO.getWorkout(currentWorkoutId);
-
-                    if (!workout.getCreator().equals(activeUser)) {
-                        // prevents someone from trying to load a workout that is not theirs. A bit overkill but eh
-                        throw new UnauthorizedException("User does not have permissions to view this workout.");
-                    }
-
                     userWithWorkout = new UserWithWorkout(user, workout);
                 }
             } else {

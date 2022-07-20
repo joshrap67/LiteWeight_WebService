@@ -49,10 +49,7 @@ public class EditWorkoutManager {
         try {
             final User user = this.userDAO.getUser(activeUser);
             final Workout oldWorkout = this.workoutDAO.getWorkout(editedWorkout.getWorkoutId());
-            if (!oldWorkout.getCreator().equals(user.getUsername())) {
-                // prevents someone from trying to edit a workout that is not theirs.
-                throw new UnauthorizedException("User does not have permissions to view this workout.");
-            }
+            Validator.ensureWorkoutOwnership(activeUser, oldWorkout);
 
             final String workoutId = oldWorkout.getWorkoutId();
             final String errorMessage = Validator.validEditWorkoutInput(editedWorkout.getRoutine());

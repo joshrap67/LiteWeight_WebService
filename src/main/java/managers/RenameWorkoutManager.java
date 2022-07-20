@@ -57,10 +57,7 @@ public class RenameWorkoutManager {
 
             // no error, so go ahead and try and rename the workout
             final Workout workout = this.workoutDAO.getWorkout(workoutId);
-            if (!workout.getCreator().equals(user.getUsername())) {
-                // prevents someone from trying to rename a workout that is not theirs.
-                throw new UnauthorizedException("User does not have permissions to view this workout.");
-            }
+            Validator.ensureWorkoutOwnership(activeUser, workout);
 
             workout.setWorkoutName(newWorkoutName);
             // update all the exercises that are a part of this newly renamed workout
@@ -97,7 +94,7 @@ public class RenameWorkoutManager {
     private static void updateUserExercises(final User user, final String workoutId, final String newWorkoutName) {
         for (String exerciseId : user.getOwnedExercises().keySet()) {
             if (user.getOwnedExercises().get(exerciseId).getWorkouts().containsKey(workoutId)) {
-                // old workout name found, replace it newly named one
+                // old workout name found, replace it with newly named one
                 user.getOwnedExercises().get(exerciseId).getWorkouts().put(workoutId, newWorkoutName);
             }
         }

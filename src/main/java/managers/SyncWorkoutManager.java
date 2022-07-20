@@ -8,6 +8,7 @@ import exceptions.UnauthorizedException;
 import utils.Metrics;
 import javax.inject.Inject;
 import models.Workout;
+import utils.Validator;
 
 public class SyncWorkoutManager {
 
@@ -31,10 +32,7 @@ public class SyncWorkoutManager {
         this.metrics.commonSetup(classMethod);
 
         try {
-            if (!workout.getCreator().equals(activeUser)) {
-                // prevents someone from trying to sync a workout that is not theirs.
-                throw new UnauthorizedException("User does not have permissions to view this workout.");
-            }
+            Validator.ensureWorkoutOwnership(activeUser, workout);
 
             String workoutId = workout.getWorkoutId();
             confirmValidCurrentDayAndWeek(workout);

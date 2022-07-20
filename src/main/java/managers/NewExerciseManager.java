@@ -36,8 +36,9 @@ public class NewExerciseManager {
      * @return ExerciseUserResponse the newly created exercise
      * @throws Exception thrown if any input error
      */
-    public OwnedExerciseResponse newExercise(final String activeUser, final String exerciseName, double weight,
-        int sets, int reps, String details, String videUrl, final List<String> focuses) throws Exception {
+    public OwnedExerciseResponse newExercise(final String activeUser, final String exerciseName, final double weight,
+        final int sets, final int reps, final String details, final String videUrl, final List<String> focuses)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".newExercise";
         this.metrics.commonSetup(classMethod);
 

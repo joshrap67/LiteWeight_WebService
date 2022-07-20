@@ -25,6 +25,7 @@ import models.SharedWorkoutMeta;
 import models.SharedWorkout;
 import models.User;
 import models.Workout;
+import utils.Validator;
 
 public class SendWorkoutManager {
 
@@ -74,10 +75,7 @@ public class SendWorkoutManager {
             }
 
             final Workout originalWorkout = this.workoutDAO.getWorkout(workoutId);
-            if (!originalWorkout.getCreator().equals(activeUser)) {
-                // prevents someone from trying to send a workout that is not theirs.
-                throw new UnauthorizedException("User does not have permissions to view this workout.");
-            }
+            Validator.ensureWorkoutOwnership(activeUser, originalWorkout);
 
             String sharedWorkoutId = null;
             for (String workoutIdMeta : recipientUser.getReceivedWorkouts().keySet()) {

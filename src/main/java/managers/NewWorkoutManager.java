@@ -77,7 +77,7 @@ public class NewWorkoutManager {
             newWorkout.setCurrentWeek(0);
 
             final WorkoutMeta workoutMeta = new WorkoutMeta();
-            workoutMeta.setWorkoutName(workoutName.trim());
+            workoutMeta.setWorkoutName(workoutName);
             workoutMeta.setAverageExercisesCompleted(0.0);
             workoutMeta.setDateLast(creationTime);
             workoutMeta.setTimesCompleted(0);

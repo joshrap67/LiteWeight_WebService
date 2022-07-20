@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
+import exceptions.UnauthorizedException;
 import java.time.Instant;
 import java.util.UUID;
 import models.Routine;
@@ -53,6 +54,7 @@ public class CopyWorkoutManager {
         try {
             final User activeUserObject = this.userDAO.getUser(activeUser);
             final String oldWorkoutId = oldWorkout.getWorkoutId();
+            Validator.ensureWorkoutOwnership(activeUser, oldWorkout);
 
             final String errorMessage = Validator.validNewWorkoutInput(newWorkoutName, activeUserObject,
                 oldWorkout.getRoutine());

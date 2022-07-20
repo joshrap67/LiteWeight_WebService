@@ -2,6 +2,7 @@ package controllers;
 
 import exceptions.ManagerExecutionException;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UnauthorizedException;
 import exceptions.UserNotFoundException;
 import utils.ErrorMessage;
 import utils.JsonUtils;
@@ -45,9 +46,9 @@ public class CopyWorkoutController implements ApiRequestController {
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());
-            } catch (UserNotFoundException unfe) {
-                metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
-                resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());
+            } catch (UserNotFoundException | UnauthorizedException e) {
+                metrics.logWithBody(new ErrorMessage<>(classMethod, e));
+                resultStatus = ResultStatus.failureBadRequest(e.getMessage());
             } catch (Exception e) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, e));
                 resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);

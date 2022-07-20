@@ -41,7 +41,7 @@ public class GetUserWorkoutController implements ApiRequestController {
             }
         } catch (final MissingApiRequestKeyException e) {
             throw e;
-        } catch (UserNotFoundException | UnauthorizedException | WorkoutNotFoundException exception) {
+        } catch (UserNotFoundException | WorkoutNotFoundException exception) {
             metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
             resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
         } catch (final Exception e) {

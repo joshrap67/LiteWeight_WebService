@@ -13,6 +13,7 @@ import models.User;
 import models.Workout;
 import models.WorkoutMeta;
 import responses.UserWithWorkout;
+import utils.Validator;
 
 public class SwitchWorkoutManager {
 
@@ -48,10 +49,8 @@ public class SwitchWorkoutManager {
         try {
             final User user = this.userDAO.getUser(activeUser);
             final Workout newWorkout = this.workoutDAO.getWorkout(newWorkoutId);
-            if (!newWorkout.getCreator().equals(activeUser)) {
-                // prevents someone from trying to switch a workout that is not theirs.
-                throw new UnauthorizedException("User does not have permissions to view this workout.");
-            }
+            Validator.ensureWorkoutOwnership(activeUser, newWorkout);
+            Validator.ensureWorkoutOwnership(activeUser, oldWorkout);
 
             user.setCurrentWorkout(newWorkoutId);
             final String timeNow = Instant.now().toString();
