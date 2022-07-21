@@ -1,6 +1,5 @@
 package models;
 
-import exceptions.InvalidAttributeException;
 import interfaces.Model;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,8 +18,7 @@ public class RoutineDay implements Iterable<Integer>, Model {
     public RoutineDay(Map<String, Object> exercisesForDay) {
         this.exercises = new HashMap<>();
         for (String sortVal : exercisesForDay.keySet()) {
-            RoutineExercise routineExercise = new RoutineExercise(
-                (Map<String, Object>) exercisesForDay.get(sortVal));
+            RoutineExercise routineExercise = new RoutineExercise((Map<String, Object>) exercisesForDay.get(sortVal));
             this.exercises.put(Integer.parseInt(sortVal), routineExercise);
         }
     }
@@ -28,8 +26,7 @@ public class RoutineDay implements Iterable<Integer>, Model {
     public RoutineDay clone() {
         RoutineDay retVal = new RoutineDay();
         for (Integer sortVal : this.exercises.keySet()) {
-            RoutineExercise specificExerciseCloned = new RoutineExercise(
-                this.exercises.get(sortVal));
+            RoutineExercise specificExerciseCloned = new RoutineExercise(this.exercises.get(sortVal));
             retVal.getExercises().putIfAbsent(sortVal, specificExerciseCloned);
         }
         return retVal;
@@ -37,10 +34,6 @@ public class RoutineDay implements Iterable<Integer>, Model {
 
     public void put(int sortVal, RoutineExercise routineExercise) {
         this.exercises.put(sortVal, routineExercise);
-    }
-
-    public int getNumberOfExercises() {
-        return this.exercises.size();
     }
 
     public RoutineExercise getExercise(int sortVal) {

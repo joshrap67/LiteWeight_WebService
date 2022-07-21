@@ -33,15 +33,14 @@ public class AcceptFriendRequestManager {
     }
 
     /**
-     * Accepts a friend request and adds the accepted user to the friends list of the active user.
-     * Upon success, a data notification is sent to the accepted user.
+     * Accepts a friend request and adds the accepted user to the friends list of the active user. Upon success, a data
+     * notification is sent to the accepted user.
      *
      * @param activeUser       username of the user that is accepting the friend request.
      * @param usernameToAccept username of the user that the active user is accepting.
      * @throws Exception if there are any input errors or if either user does not exist.
      */
-    public void acceptRequest(final String activeUser, final String usernameToAccept)
-        throws Exception {
+    public void acceptRequest(final String activeUser, final String usernameToAccept) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".acceptRequest";
         this.metrics.commonSetup(classMethod);
 
@@ -62,18 +61,15 @@ public class AcceptFriendRequestManager {
 
             // remove request from active user and add the new friend
             Friend newFriend = new Friend(userToAccept, true);
-            UpdateItemTemplate activeUserData = new UpdateItemTemplate(
-                activeUser, UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate activeUserData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.FRIENDS + ".#username = :friendVal " +
                     "remove " + User.FRIEND_REQUESTS + ".#username")
                 .withNameMap(new NameMap().with("#username", usernameToAccept))
                 .withValueMap(new ValueMap().withMap(":friendVal", newFriend.asMap()));
 
             // update the active user to be confirmed in the newly accepted friends mapping
-            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(
-                usernameToAccept, UserDAO.USERS_TABLE_NAME)
-                .withUpdateExpression(
-                    "set " + User.FRIENDS + ".#username." + Friend.CONFIRMED + " = :confirmedVal")
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(usernameToAccept, UserDAO.USERS_TABLE_NAME)
+                .withUpdateExpression("set " + User.FRIENDS + ".#username." + Friend.CONFIRMED + " = :confirmedVal")
                 .withNameMap(new NameMap().with("#username", activeUser))
                 .withValueMap(new ValueMap().withBoolean(":confirmedVal", true));
 
@@ -85,9 +81,8 @@ public class AcceptFriendRequestManager {
             // if this succeeds, go ahead and send a notification to the accepted user (only need to send username)
             this.notificationService.sendMessage(userToAccept.getPushEndpointArn(),
                 new NotificationData(NotificationService.acceptedFriendRequestAction,
-                    Maps.newHashMap(
-                        ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
-                            .build())));
+                    Maps.newHashMap(ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
+                        .build())));
             this.metrics.commonClose(true);
         } catch (Exception e) {
             this.metrics.commonClose(false);

@@ -27,7 +27,6 @@ public class SharedWorkoutDAO {
 
     public static final String SHARED_WORKOUTS_TABLE_NAME = "sharedWorkouts";
     public static final String SHARED_WORKOUTS_TABLE_PRIMARY_KEY = SharedWorkout.SHARED_WORKOUT_ID;
-
     protected final Table sharedWorkoutsTable;
     private final Database database;
 
@@ -47,9 +46,8 @@ public class SharedWorkoutDAO {
         return this.sharedWorkoutsTable.putItem(workout);
     }
 
-    public Item getSharedWorkoutItem(String currentWorkoutId) {
-        return this.sharedWorkoutsTable
-            .getItem(new PrimaryKey(SHARED_WORKOUTS_TABLE_PRIMARY_KEY, currentWorkoutId));
+    private Item getSharedWorkoutItem(String currentWorkoutId) {
+        return this.sharedWorkoutsTable.getItem(new PrimaryKey(SHARED_WORKOUTS_TABLE_PRIMARY_KEY, currentWorkoutId));
     }
 
     public SharedWorkout getSharedWorkout(String workoutId)
@@ -61,8 +59,7 @@ public class SharedWorkoutDAO {
         return new SharedWorkout(workoutItem);
     }
 
-    public UpdateItemOutcome updateSharedWorkout(final String workoutId,
-        final UpdateItemSpec updateItemSpec) {
+    public UpdateItemOutcome updateSharedWorkout(final String workoutId, final UpdateItemSpec updateItemSpec) {
         updateItemSpec.withPrimaryKey(SHARED_WORKOUTS_TABLE_PRIMARY_KEY, workoutId);
         return this.sharedWorkoutsTable.updateItem(updateItemSpec);
     }
@@ -72,8 +69,7 @@ public class SharedWorkoutDAO {
         return this.database.executeWriteTransaction(actions);
     }
 
-    public TransactGetItemsResult executeGetTransaction(
-        final TransactGetItemsRequest transactGetItemsRequest) {
+    public TransactGetItemsResult executeGetTransaction(final TransactGetItemsRequest transactGetItemsRequest) {
         return this.database.executeGetTransaction(transactGetItemsRequest);
     }
 

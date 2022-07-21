@@ -25,27 +25,25 @@ public class NewWorkoutController implements ApiRequestController {
     public NewWorkoutManager newWorkoutManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_NAME, Workout.ROUTINE);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_NAME,
+            Workout.ROUTINE);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {
                 final String activeUser = (String) json.get(RequestFields.ACTIVE_USER);
                 final String workoutName = (String) json.get(Workout.WORKOUT_NAME);
-                final Map<String, Object> routineMap = (Map<String, Object>) json
-                    .get(Workout.ROUTINE);
+                final Map<String, Object> routineMap = (Map<String, Object>) json.get(Workout.ROUTINE);
                 final Routine routine = new Routine(routineMap);
 
                 Injector.getInjector(metrics).inject(this);
-                final UserWithWorkout userWithWorkout = this.newWorkoutManager
-                    .createNewWorkout(activeUser, workoutName, routine);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(userWithWorkout.asResponse()));
+                final UserWithWorkout userWithWorkout = this.newWorkoutManager.createNewWorkout(activeUser, workoutName,
+                    routine);
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(userWithWorkout.asResponse()));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

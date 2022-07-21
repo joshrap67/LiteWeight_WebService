@@ -27,17 +27,18 @@ public class NewExerciseManager {
     }
 
     /**
-     * Creates a new exercise with the given input assuming that the input is valid and that the
-     * user has not gone over the maximum number of custom exercises.
+     * Creates a new exercise with the given input assuming that the input is valid and that the user has not gone over
+     * the maximum number of owned exercises.
      *
      * @param activeUser   user that is creating this exercise.
      * @param exerciseName name of the new exercise.
-     * @param focuses      list of the focuses that this exercise is apart of.
+     * @param focuses      list of the focuses that this exercise is a part of.
      * @return ExerciseUserResponse the newly created exercise
      * @throws Exception thrown if any input error
      */
-    public OwnedExerciseResponse newExercise(final String activeUser, final String exerciseName,
-        final List<String> focuses) throws Exception {
+    public OwnedExerciseResponse newExercise(final String activeUser, final String exerciseName, final double weight,
+        final int sets, final int reps, final String details, final String videUrl, final List<String> focuses)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".newExercise";
         this.metrics.commonSetup(classMethod);
 
@@ -45,7 +46,8 @@ public class NewExerciseManager {
             final User user = this.userDAO.getUser(activeUser);
 
             List<String> focusList = new ArrayList<>(focuses);
-            final String errorMessage = Validator.validNewExercise(user, exerciseName, focusList);
+            final String errorMessage = Validator.validNewExercise(user, exerciseName, weight, sets, reps, details,
+                videUrl, focusList);
 
             if (!errorMessage.isEmpty()) {
                 this.metrics.commonClose(false);
@@ -53,8 +55,8 @@ public class NewExerciseManager {
             }
 
             // all input is valid so go ahead and make the new exercise
-            OwnedExercise ownedExercise = new OwnedExercise(exerciseName,
-                OwnedExercise.defaultVideoValue, focusList);
+            OwnedExercise ownedExercise = new OwnedExercise(exerciseName, weight, sets, reps, details, videUrl,
+                focusList);
             String exerciseId = UUID.randomUUID().toString();
 
             UpdateItemSpec updateItemSpec = new UpdateItemSpec()

@@ -31,8 +31,7 @@ public class GetSharedWorkoutManager {
      * @param workoutId  id of the workout the user is attempting to fetch.
      * @return the shared workout for the given workoutId
      */
-    public SharedWorkout getSharedWorkout(final String activeUser, final String workoutId)
-        throws Exception {
+    public SharedWorkout getSharedWorkout(final String activeUser, final String workoutId) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".getSharedWorkout";
         this.metrics.commonSetup(classMethod);
 

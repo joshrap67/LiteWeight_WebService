@@ -29,8 +29,7 @@ public class SetAllReceivedWorkoutsSeenManager {
      * @throws InvalidAttributeException if error with user item.
      * @throws UserNotFoundException     if active user is not found.
      */
-    public void setAllReceivedWorkoutsSeen(final String activeUser)
-        throws InvalidAttributeException, UserNotFoundException {
+    public void setAllReceivedWorkoutsSeen(final String activeUser) throws InvalidAttributeException, UserNotFoundException {
         final String classMethod = this.getClass().getSimpleName() + ".setAllReceivedWorkoutsSeen";
         this.metrics.commonSetup(classMethod);
 
@@ -43,8 +42,7 @@ public class SetAllReceivedWorkoutsSeenManager {
 
             UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
                 .withUpdateExpression("set " + User.RECEIVED_WORKOUTS + "=:receivedWorkoutsVal")
-                .withValueMap(new ValueMap()
-                    .withMap(":receivedWorkoutsVal", user.getReceivedWorkoutMetaMap()));
+                .withValueMap(new ValueMap().withMap(":receivedWorkoutsVal", user.getReceivedWorkoutMetaMap()));
             this.userDAO.updateUser(activeUser, updateActiveUserData);
 
             this.metrics.commonClose(true);

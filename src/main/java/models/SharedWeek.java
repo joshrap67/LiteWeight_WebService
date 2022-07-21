@@ -24,10 +24,6 @@ public class SharedWeek implements Iterable<Integer>, Model {
         }
     }
 
-    public int getNumberOfDays() {
-        return this.days.size();
-    }
-
     public SharedDay getDay(int day) {
         return this.days.get(day);
     }

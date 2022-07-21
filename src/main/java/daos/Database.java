@@ -29,8 +29,7 @@ public class Database {
         return this.client.transactWriteItems(transactWriteItemsRequest);
     }
 
-    public TransactGetItemsResult executeGetTransaction(
-        final TransactGetItemsRequest transactGetItemsRequest) {
+    public TransactGetItemsResult executeGetTransaction(final TransactGetItemsRequest transactGetItemsRequest) {
         return this.client.transactGetItems(transactGetItemsRequest);
     }
 

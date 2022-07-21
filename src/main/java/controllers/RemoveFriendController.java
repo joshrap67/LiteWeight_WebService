@@ -21,8 +21,8 @@ public class RemoveFriendController implements ApiRequestController {
     public RemoveFriendManager removeFriendManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;

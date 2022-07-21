@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
+import exceptions.UnauthorizedException;
 import utils.Metrics;
 import utils.UpdateItemTemplate;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 import models.User;
 import models.Workout;
 import responses.UserWithWorkout;
+import utils.Validator;
 
 public class DeleteWorkoutThenFetchWorkoutManager {
 
@@ -28,23 +30,23 @@ public class DeleteWorkoutThenFetchWorkoutManager {
     }
 
     /**
-     * Deletes a workout from the workout map and then returns the next workout according to the id
-     * that was passed in.
+     * Deletes a workout from the workout map and then returns the next workout according to the id that was passed in.
      *
      * @param activeUser       user that is popping this workout.
      * @param deletedWorkoutId workout id of the workout that is to be deleted.
-     * @return the user object updated with the next workout as well as all other updated fields.
-     * Note the workout will be null if there are no more workouts after the pop.
+     * @return the user object updated with the next workout as well as all other updated fields. Note the workout will
+     * be null if there are no more workouts after the pop.
      * @throws Exception if the workout/user is not found.
      */
-    public UserWithWorkout deleteWorkoutThenFetch(final String activeUser,
-        final String deletedWorkoutId, final String nextWorkoutId)
-        throws Exception {
+    public UserWithWorkout deleteWorkoutThenFetch(final String activeUser, final String deletedWorkoutId,
+        final String nextWorkoutId) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".deleteWorkoutThenFetch";
         this.metrics.commonSetup(classMethod);
 
         try {
             final User user = this.userDAO.getUser(activeUser);
+            final Workout oldWorkout = this.workoutDAO.getWorkout(deletedWorkoutId);
+            Validator.ensureWorkoutOwnership(activeUser, oldWorkout);
 
             // remove the workout everywhere in the user object
             for (String exerciseId : user.getOwnedExercises().keySet()) {
@@ -55,11 +57,11 @@ public class DeleteWorkoutThenFetchWorkoutManager {
             Workout nextWorkout = null; // if null then that signals no workouts left
             if (nextWorkoutId != null) {
                 nextWorkout = this.workoutDAO.getWorkout(nextWorkoutId);
+                Validator.ensureWorkoutOwnership(activeUser, nextWorkout);
             }
             user.setCurrentWorkout(nextWorkoutId);
 
-            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
                     User.WORKOUTS + "= :userWorkoutsMap, " +

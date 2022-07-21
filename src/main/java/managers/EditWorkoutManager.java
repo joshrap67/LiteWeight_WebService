@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
+import exceptions.UnauthorizedException;
 import utils.Metrics;
 import utils.UpdateItemTemplate;
 import utils.Validator;
@@ -32,24 +33,23 @@ public class EditWorkoutManager {
     }
 
     /**
-     * Saves edited changes to an existing workout. The edited workout is saved in the database and
-     * the user's owned exercises are updated to match whether they are apart of this workout now or
-     * not. The most frequent focus is also updated in the workout if it now is different as a
-     * result of the edits.
+     * Saves edited changes to an existing workout. The edited workout is saved in the database and the user's owned
+     * exercises are updated to match whether they are apart of this workout now or not. The most frequent focus is also
+     * updated in the workout if it now is different as a result of the edits.
      *
      * @param activeUser    the user that is editing this workout.
      * @param editedWorkout the modified workout as sent by the client.
      * @return UserWithWorkout that has the newly edited workout and exercise mapping.
      * @throws Exception thrown if there is any error.
      */
-    public UserWithWorkout editWorkout(final String activeUser, final Workout editedWorkout)
-        throws Exception {
+    public UserWithWorkout editWorkout(final String activeUser, final Workout editedWorkout) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".editWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
             final User user = this.userDAO.getUser(activeUser);
             final Workout oldWorkout = this.workoutDAO.getWorkout(editedWorkout.getWorkoutId());
+            Validator.ensureWorkoutOwnership(activeUser, oldWorkout);
 
             final String workoutId = oldWorkout.getWorkoutId();
             final String errorMessage = Validator.validEditWorkoutInput(editedWorkout.getRoutine());
@@ -59,23 +59,19 @@ public class EditWorkoutManager {
                 throw new ManagerExecutionException(errorMessage);
             }
 
-            // update all the exercises that are now apart of this workout
+            // update all the exercises that are now a part of this workout
             WorkoutUtils.updateOwnedExercisesOnEdit(user, editedWorkout.getRoutine(),
-                oldWorkout.getRoutine(), workoutId,
-                oldWorkout.getWorkoutName());
+                oldWorkout.getRoutine(), workoutId, oldWorkout.getWorkoutName());
             // update most frequent focus since exercises have changed
-            editedWorkout.setMostFrequentFocus(
-                WorkoutUtils.findMostFrequentFocus(user, editedWorkout.getRoutine()));
+            editedWorkout.setMostFrequentFocus(WorkoutUtils.findMostFrequentFocus(user, editedWorkout.getRoutine()));
 
             // Need to determine if the current week/day is valid (frontend's responsibility is updating them)
             confirmValidCurrentDayAndWeek(editedWorkout);
-            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.EXERCISES + "= :exerciseMap")
                 .withValueMap(new ValueMap().withMap(":exerciseMap", user.getOwnedExercisesMap()));
 
-            UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId,
-                WorkoutDAO.WORKOUT_TABLE_NAME)
+            UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId, WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " +
                     Workout.MOST_FREQUENT_FOCUS + " = :mostFrequentFocusVal, " +
                     Workout.CURRENT_WEEK + " =:currentWeekVal, " +

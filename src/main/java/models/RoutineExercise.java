@@ -52,7 +52,6 @@ public class RoutineExercise implements Model {
         this.details = toBeCopied.details;
     }
 
-
     @Override
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();

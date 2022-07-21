@@ -27,19 +27,18 @@ public class UpdateExerciseManager {
     }
 
     /**
-     * Updates an owned exercise of the user if the input is valid. Note that at this time it just
-     * overwrites the previous exercise values.
+     * Updates an owned exercise of the user if the input is valid. Note that at this time it just overwrites the
+     * previous exercise values.
      *
-     * @param activeUser   username of the user that is updating the exercise.
-     * @param exerciseId   id of the exercise that is being updated.
+     * @param activeUser      username of the user that is updating the exercise.
+     * @param exerciseId      id of the exercise that is being updated.
      * @param updatedExercise the exercise that is to be updated.
      * @return User the user object with this exercise now updated.
      * @throws UserNotFoundException     if the active user is not found.
      * @throws InvalidAttributeException if the user item is invalid.
      * @throws ManagerExecutionException if there is any input errors.
      */
-    public User updateExercise(final String activeUser, final String exerciseId,
-        final OwnedExercise updatedExercise)
+    public User updateExercise(final String activeUser, final String exerciseId, final OwnedExercise updatedExercise)
         throws UserNotFoundException, InvalidAttributeException, ManagerExecutionException {
         final String classMethod = this.getClass().getSimpleName() + ".updateExercise";
         this.metrics.commonSetup(classMethod);
@@ -51,10 +50,8 @@ public class UpdateExerciseManager {
             for (String _exerciseId : user.getOwnedExercises().keySet()) {
                 exerciseNames.add(user.getOwnedExercises().get(_exerciseId).getExerciseName());
             }
-            final String oldExerciseName = user.getOwnedExercises().get(exerciseId)
-                .getExerciseName();
-            final String exerciseError = Validator
-                .validOwnedExercise(updatedExercise, exerciseNames, oldExerciseName);
+            final String oldExerciseName = user.getOwnedExercises().get(exerciseId).getExerciseName();
+            final String exerciseError = Validator.validOwnedExercise(updatedExercise, exerciseNames, oldExerciseName);
             if (!exerciseError.isEmpty()) {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(exerciseError);

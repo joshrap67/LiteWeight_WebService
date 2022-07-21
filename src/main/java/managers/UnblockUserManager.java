@@ -40,8 +40,7 @@ public class UnblockUserManager {
 
             if (!activeUserObject.getBlocked().containsKey(userToUnblock)) {
                 this.metrics.commonClose(false);
-                throw new ManagerExecutionException(
-                    String.format("Unable to unblock %s", userToUnblock));
+                throw new ManagerExecutionException(String.format("Unable to unblock %s", userToUnblock));
             }
 
             // unblock the user

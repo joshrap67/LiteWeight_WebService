@@ -24,8 +24,8 @@ public class BlockUserController implements ApiRequestController {
     public BlockUserManager blockUserManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
@@ -38,9 +38,7 @@ public class BlockUserController implements ApiRequestController {
 
                 Injector.getInjector(metrics).inject(this);
                 final String result = this.blockUserManager.blockUser(activeUser, userToBlock);
-                resultStatus = ResultStatus.successful(JsonUtils
-                    .serializeMap(ImmutableMap.of(User.ICON, result)));
-
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(ImmutableMap.of(User.ICON, result)));
             } catch (ManagerExecutionException meu) {
                 metrics.log("Input error: " + meu.getMessage());
                 resultStatus = ResultStatus.failureBadRequest(meu.getMessage());

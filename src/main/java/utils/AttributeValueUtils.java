@@ -13,13 +13,12 @@ public class AttributeValueUtils {
         AttributeValue attributeValue;
 
         if (value instanceof Map) {
-            attributeValue = new AttributeValue()
-                .withM(AttributeValueUtils.convertMapToAttributeValueMap((Map) value));
+            attributeValue = new AttributeValue().withM(AttributeValueUtils.convertMapToAttributeValueMap((Map) value));
         } else if (value instanceof String) {
             attributeValue = new AttributeValue().withS((String) value);
         } else if (value instanceof Iterable) {
-            attributeValue = new AttributeValue()
-                .withL(AttributeValueUtils.convertIterableToAttributeValueList((Iterable) value));
+            attributeValue = new AttributeValue().withL(
+                AttributeValueUtils.convertIterableToAttributeValueList((Iterable) value));
         } else if (value instanceof Number) {
             attributeValue = new AttributeValue().withN(value.toString());
         } else if (value instanceof Boolean) {

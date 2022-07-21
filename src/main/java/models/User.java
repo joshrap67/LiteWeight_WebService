@@ -72,8 +72,7 @@ public class User implements Model {
         this.setPremiumToken((String) json.get(PREMIUM_TOKEN));
         this.setCurrentWorkout((String) json.get(CURRENT_WORKOUT));
         this.setWorkoutsSent(Parser.convertObjectToInteger(json.get(WORKOUTS_SENT)));
-        this.setUserPreferences(new UserPreferences(
-            (Map<String, Object>) json.get(USER_PREFERENCES)));
+        this.setUserPreferences(new UserPreferences((Map<String, Object>) json.get(USER_PREFERENCES)));
         this.setWorkoutMetas((Map<String, Object>) json.get(WORKOUTS));
         this.setOwnedExercises((Map<String, Object>) json.get(EXERCISES));
         this.setFriends((Map<String, Object>) json.get(FRIENDS));
@@ -89,9 +88,8 @@ public class User implements Model {
         } else {
             this.ownedExercises = new HashMap<>();
             for (String exerciseId : json.keySet()) {
-                this.ownedExercises
-                    .putIfAbsent(exerciseId,
-                        new OwnedExercise((Map<String, Object>) json.get(exerciseId)));
+                this.ownedExercises.putIfAbsent(exerciseId,
+                    new OwnedExercise((Map<String, Object>) json.get(exerciseId)));
             }
         }
     }
@@ -113,8 +111,7 @@ public class User implements Model {
         } else {
             this.friends = new HashMap<>();
             for (String username : json.keySet()) {
-                this.friends
-                    .putIfAbsent(username, new Friend((Map<String, Object>) json.get(username)));
+                this.friends.putIfAbsent(username, new Friend((Map<String, Object>) json.get(username)));
             }
         }
     }
@@ -125,8 +122,7 @@ public class User implements Model {
         } else {
             this.friendRequests = new HashMap<>();
             for (String username : json.keySet()) {
-                this.friendRequests.putIfAbsent(username, new FriendRequest(
-                    (Map<String, Object>) json.get(username)));
+                this.friendRequests.putIfAbsent(username, new FriendRequest((Map<String, Object>) json.get(username)));
             }
         }
     }
@@ -141,8 +137,8 @@ public class User implements Model {
         } else {
             this.receivedWorkouts = new HashMap<>();
             for (String workoutId : json.keySet()) {
-                this.receivedWorkouts.putIfAbsent(workoutId, new SharedWorkoutMeta(
-                    (Map<String, Object>) json.get(workoutId), workoutId));
+                this.receivedWorkouts.putIfAbsent(workoutId,
+                    new SharedWorkoutMeta((Map<String, Object>) json.get(workoutId), workoutId));
             }
         }
     }
@@ -153,8 +149,7 @@ public class User implements Model {
         } else {
             this.workoutMetas = new HashMap<>();
             for (String workoutId : json.keySet()) {
-                this.workoutMetas.putIfAbsent(workoutId, new WorkoutMeta(
-                    (Map<String, Object>) json.get(workoutId)));
+                this.workoutMetas.putIfAbsent(workoutId, new WorkoutMeta((Map<String, Object>) json.get(workoutId)));
             }
         }
     }
@@ -203,8 +198,8 @@ public class User implements Model {
 
     private Map<String, Object> getReceivedWorkoutsResponse() {
         // give the user their first batch of received workouts. Any other ones will have to be added via API call
-        Map<String, SharedWorkoutMeta> firstBatch = GetReceivedWorkoutsManager
-            .getBatchOfWorkouts(this.getReceivedWorkouts(), 0);
+        Map<String, SharedWorkoutMeta> firstBatch = GetReceivedWorkoutsManager.getBatchOfWorkouts(
+            this.getReceivedWorkouts(), 0);
         Map<String, Object> retMap = new HashMap<>();
         for (String workoutId : firstBatch.keySet()) {
             retMap.putIfAbsent(workoutId, receivedWorkouts.get(workoutId).asResponse());
@@ -240,8 +235,7 @@ public class User implements Model {
 
         return this.receivedWorkouts.entrySet().stream().collect(
             collectingAndThen(
-                toMap(Entry::getKey,
-                    (Map.Entry<String, SharedWorkoutMeta> e) -> e.getValue().asMap()),
+                toMap(Entry::getKey, (Map.Entry<String, SharedWorkoutMeta> e) -> e.getValue().asMap()),
                 HashMap::new));
     }
 

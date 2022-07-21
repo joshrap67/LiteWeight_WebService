@@ -21,8 +21,7 @@ public class GetUserDataController implements ApiRequestController {
     public GetUserDataManager getUserDataManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(final Map<String, Object> jsonMap,
-        final Metrics metrics)
+    public ResultStatus<String> processApiRequest(final Map<String, Object> jsonMap, final Metrics metrics)
         throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
@@ -33,16 +32,13 @@ public class GetUserDataController implements ApiRequestController {
             if (jsonMap.containsKey(User.USERNAME)) {
                 final String username = (String) jsonMap.get(User.USERNAME);
                 final User result = this.getUserDataManager.getUserData(username);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
             } else if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
                 final User result = this.getUserDataManager.getActiveUserData(activeUser);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
             } else {
-                throw new MissingApiRequestKeyException(
-                    ImmutableList.of(RequestFields.ACTIVE_USER));
+                throw new MissingApiRequestKeyException(ImmutableList.of(RequestFields.ACTIVE_USER));
             }
         } catch (final MissingApiRequestKeyException e) {
             throw e;

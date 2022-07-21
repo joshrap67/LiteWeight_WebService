@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import daos.UserDAO;
 import daos.WorkoutDAO;
+import exceptions.UnauthorizedException;
 import utils.Metrics;
 import java.time.Instant;
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import models.User;
 import models.Workout;
 import models.WorkoutMeta;
 import responses.UserWithWorkout;
+import utils.Validator;
 
 public class SwitchWorkoutManager {
 
@@ -30,24 +32,25 @@ public class SwitchWorkoutManager {
     }
 
     /**
-     * Switches to the workout that the user passes in. The user's current workout (oldWorkout) is
-     * synced before switching to the new workout.
+     * Switches to the workout that the user passes in. The user's current workout (oldWorkout) is synced before
+     * switching to the new workout.
      *
      * @param activeUser   user that is attempting to switch workouts.
      * @param newWorkoutId id of the workout to be switched to.
      * @param oldWorkout   the old workout the user is switching from.
-     * @return UserWithWorkout has the newly switched workout and the user object updated with the
-     * new current workout.
+     * @return UserWithWorkout has the newly switched workout and the user object updated with the new current workout.
      * @throws Exception if user/workout does not exist.
      */
-    public UserWithWorkout switchWorkout(final String activeUser, final String newWorkoutId,
-        final Workout oldWorkout) throws Exception {
+    public UserWithWorkout switchWorkout(final String activeUser, final String newWorkoutId, final Workout oldWorkout)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".switchWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
             final User user = this.userDAO.getUser(activeUser);
             final Workout newWorkout = this.workoutDAO.getWorkout(newWorkoutId);
+            Validator.ensureWorkoutOwnership(activeUser, newWorkout);
+            Validator.ensureWorkoutOwnership(activeUser, oldWorkout);
 
             user.setCurrentWorkout(newWorkoutId);
             final String timeNow = Instant.now().toString();
@@ -65,7 +68,7 @@ public class SwitchWorkoutManager {
                 .withNameMap(new NameMap().with("#newWorkoutId", newWorkoutId));
 
             // persist the current week/day/routine of the old workout
-            this.syncWorkoutManager.syncWorkout(oldWorkout);
+            this.syncWorkoutManager.syncWorkout(activeUser, oldWorkout);
             this.userDAO.updateUser(activeUser, updateItemSpec);
 
             this.metrics.commonClose(true);

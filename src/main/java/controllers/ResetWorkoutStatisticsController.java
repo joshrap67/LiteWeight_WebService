@@ -23,13 +23,12 @@ public class ResetWorkoutStatisticsController implements ApiRequestController {
     public ResetWorkoutStatisticsManager resetWorkoutStatisticsManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_ID);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, Workout.WORKOUT_ID);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {
@@ -37,10 +36,8 @@ public class ResetWorkoutStatisticsController implements ApiRequestController {
                 final String workoutId = (String) json.get(Workout.WORKOUT_ID);
 
                 Injector.getInjector(metrics).inject(this);
-                final WorkoutMeta result = this.resetWorkoutStatisticsManager
-                    .resetStatistics(activeUser, workoutId);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(result.asResponse()));
+                final WorkoutMeta result = this.resetWorkoutStatisticsManager.resetStatistics(activeUser, workoutId);
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(result.asResponse()));
             } catch (UserNotFoundException unfe) {
                 metrics.logWithBody(new ErrorMessage<>(classMethod, unfe));
                 resultStatus = ResultStatus.failureBadRequest(unfe.getMessage());

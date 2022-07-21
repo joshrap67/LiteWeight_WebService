@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.common.collect.ImmutableList;
 import exceptions.MissingApiRequestKeyException;
+import exceptions.UnauthorizedException;
 import exceptions.UserNotFoundException;
 import exceptions.WorkoutNotFoundException;
 import utils.ErrorMessage;
@@ -23,8 +24,8 @@ public class GetUserWorkoutController implements ApiRequestController {
     public GetUserWorkoutManager getUserWorkoutManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> jsonMap,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonMap, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
@@ -33,13 +34,10 @@ public class GetUserWorkoutController implements ApiRequestController {
 
             if (jsonMap.containsKey(RequestFields.ACTIVE_USER)) {
                 final String activeUser = (String) jsonMap.get(RequestFields.ACTIVE_USER);
-                final UserWithWorkout userWithWorkout = this.getUserWorkoutManager
-                    .getUserWithWorkout(activeUser);
-                resultStatus = ResultStatus
-                    .successful(JsonUtils.serializeMap(userWithWorkout.asResponse()));
+                final UserWithWorkout userWithWorkout = this.getUserWorkoutManager.getUserWithWorkout(activeUser);
+                resultStatus = ResultStatus.successful(JsonUtils.serializeMap(userWithWorkout.asResponse()));
             } else {
-                throw new MissingApiRequestKeyException(
-                    ImmutableList.of(RequestFields.ACTIVE_USER));
+                throw new MissingApiRequestKeyException(ImmutableList.of(RequestFields.ACTIVE_USER));
             }
         } catch (final MissingApiRequestKeyException e) {
             throw e;
@@ -47,7 +45,7 @@ public class GetUserWorkoutController implements ApiRequestController {
             metrics.logWithBody(new ErrorMessage<>(classMethod, exception));
             resultStatus = ResultStatus.failureBadRequest(exception.getMessage());
         } catch (final Exception e) {
-            metrics.logWithBody(new ErrorMessage<Map>(classMethod, e));
+            metrics.logWithBody(new ErrorMessage<>(classMethod, e));
             resultStatus = ResultStatus.failureBadRequest("Exception in " + classMethod);
         }
 

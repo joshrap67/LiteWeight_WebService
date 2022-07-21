@@ -4,9 +4,11 @@ import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import daos.WorkoutDAO;
+import exceptions.UnauthorizedException;
 import utils.Metrics;
 import javax.inject.Inject;
 import models.Workout;
+import utils.Validator;
 
 public class SyncWorkoutManager {
 
@@ -20,16 +22,18 @@ public class SyncWorkoutManager {
     }
 
     /**
-     * Syncs a workout in the workout table by updating the current week/day and routine from the
-     * values found in the passed in workout.
+     * Syncs a workout in the workout table by updating the current week/day and routine from the values found in the
+     * workout.
      *
      * @param workout workout that is to be synced.
      */
-    public void syncWorkout(final Workout workout) {
+    public void syncWorkout(final String activeUser, final Workout workout) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".syncWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
+            Validator.ensureWorkoutOwnership(activeUser, workout);
+
             String workoutId = workout.getWorkoutId();
             confirmValidCurrentDayAndWeek(workout);
 
@@ -62,8 +66,7 @@ public class SyncWorkoutManager {
             workout.setCurrentWeek(0);
         }
 
-        if (currentDay >= 0 && currentDay >= workout.getRoutine().getWeek(currentWeek)
-            .getNumberOfDays()) {
+        if (currentDay >= 0 && currentDay >= workout.getRoutine().getWeek(currentWeek).getNumberOfDays()) {
             // frontend incorrectly set the current day, so just set it to 0
             workout.setCurrentDay(0);
         }

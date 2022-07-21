@@ -35,8 +35,7 @@ public class CancelFriendRequestManager {
      * @param activeUser       user that is canceling the request.
      * @param usernameToCancel user that is being canceled by active user.
      */
-    public void cancelRequest(final String activeUser, final String usernameToCancel)
-        throws Exception {
+    public void cancelRequest(final String activeUser, final String usernameToCancel) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".cancelRequest";
         this.metrics.commonSetup(classMethod);
 
@@ -44,13 +43,11 @@ public class CancelFriendRequestManager {
             final User userToCancel = this.userDAO.getUser(usernameToCancel);
 
             // for canceled user, remove the friend request
-            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(
-                usernameToCancel, UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(usernameToCancel, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIEND_REQUESTS + ".#username")
                 .withNameMap(new NameMap().with("#username", activeUser));
             // for active user, remove the (unconfirmed) user from their friends mapping
-            UpdateItemTemplate updateActiveUserData = new UpdateItemTemplate(
-                activeUser, UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateActiveUserData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", usernameToCancel));
 
@@ -62,9 +59,8 @@ public class CancelFriendRequestManager {
             // if this succeeds, go ahead and send a notification to the canceled user (only need to send username)
             this.notificationService.sendMessage(userToCancel.getPushEndpointArn(),
                 new NotificationData(NotificationService.canceledFriendRequestAction,
-                    Maps.newHashMap(
-                        ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
-                            .build())));
+                    Maps.newHashMap(ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
+                        .build())));
 
             this.metrics.commonClose(true);
         } catch (Exception e) {

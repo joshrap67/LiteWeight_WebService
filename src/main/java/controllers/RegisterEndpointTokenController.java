@@ -22,13 +22,12 @@ public class RegisterEndpointTokenController implements ApiRequestController {
     public RegisterEndpointTokenManager registerEndpointTokenManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> json,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> json, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, User.PUSH_ENDPOINT_ARN);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, User.PUSH_ENDPOINT_ARN);
 
         if (json.keySet().containsAll(requiredKeys)) {
             try {

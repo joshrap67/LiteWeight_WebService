@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
+import exceptions.UnauthorizedException;
 import java.time.Instant;
 import java.util.UUID;
 import models.Routine;
@@ -36,26 +37,27 @@ public class CopyWorkoutManager {
     }
 
     /**
-     * Copies an old workout as a new workout - assuming all input is valid. Also syncs the old
-     * workout before performing the copy.
+     * Copies an old workout as a new workout - assuming all input is valid. Also syncs the old workout before
+     * performing the copy.
      *
      * @param activeUser     username doing the copying.
      * @param newWorkoutName workout name for the copy of the old workout.
      * @param oldWorkout     workout that is being copied.
-     * @return user with workout object that contains all the changed fields, as well as the new
-     * copied workout set as current.
+     * @return user with workout object that contains all the changed fields, as well as the new copied workout set as
+     * current.
      */
-    public UserWithWorkout copyWorkout(final String activeUser, final String newWorkoutName,
-        final Workout oldWorkout) throws Exception {
+    public UserWithWorkout copyWorkout(final String activeUser, final String newWorkoutName, final Workout oldWorkout)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".copyWorkout";
         this.metrics.commonSetup(classMethod);
 
         try {
             final User activeUserObject = this.userDAO.getUser(activeUser);
             final String oldWorkoutId = oldWorkout.getWorkoutId();
+            Validator.ensureWorkoutOwnership(activeUser, oldWorkout);
 
-            final String errorMessage = Validator
-                .validNewWorkoutInput(newWorkoutName, activeUserObject, oldWorkout.getRoutine());
+            final String errorMessage = Validator.validNewWorkoutInput(newWorkoutName, activeUserObject,
+                oldWorkout.getRoutine());
 
             if (!errorMessage.isEmpty()) {
                 this.metrics.commonClose(false);
@@ -94,13 +96,11 @@ public class CopyWorkoutManager {
             activeUserObject.putNewWorkoutMeta(workoutId, workoutMeta);
             activeUserObject.setCurrentWorkout(workoutId);
 
-            // update all the exercises that are now apart of this newly copied workout
-            WorkoutUtils.updateOwnedExercises(activeUserObject, oldWorkout.getRoutine(), workoutId,
-                newWorkoutName);
+            // update all the exercises that are now a part of this newly copied workout
+            WorkoutUtils.updateOwnedExercises(activeUserObject, oldWorkout.getRoutine(), workoutId, newWorkoutName);
 
             // update user object with this newly copied workout
-            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
                     User.WORKOUTS + ".#newWorkoutId= :newWorkoutMeta, " +
@@ -128,8 +128,8 @@ public class CopyWorkoutManager {
             actions.add(new TransactWriteItem().withUpdate(updateUserItemData.asUpdate()));
             actions.add(new TransactWriteItem().withUpdate(updateOldWorkoutItemData.asUpdate()));
             actions.add(new TransactWriteItem()
-                .withPut(new Put().withTableName(WorkoutDAO.WORKOUT_TABLE_NAME).withItem(
-                    AttributeValueUtils.convertMapToAttributeValueMap(newWorkout.asMap()))));
+                .withPut(new Put().withTableName(WorkoutDAO.WORKOUT_TABLE_NAME)
+                    .withItem(AttributeValueUtils.convertMapToAttributeValueMap(newWorkout.asMap()))));
             this.userDAO.executeWriteTransaction(actions);
 
             this.metrics.commonClose(true);

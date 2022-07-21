@@ -21,13 +21,12 @@ public class DeleteExerciseController implements ApiRequestController {
     public DeleteExerciseManager deleteExerciseManager;
 
     @Override
-    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody,
-        Metrics metrics) throws MissingApiRequestKeyException {
+    public ResultStatus<String> processApiRequest(Map<String, Object> jsonBody, Metrics metrics)
+        throws MissingApiRequestKeyException {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         ResultStatus<String> resultStatus;
-        final List<String> requiredKeys = Arrays
-            .asList(RequestFields.ACTIVE_USER, RequestFields.EXERCISE_ID);
+        final List<String> requiredKeys = Arrays.asList(RequestFields.ACTIVE_USER, RequestFields.EXERCISE_ID);
 
         if (jsonBody.keySet().containsAll(requiredKeys)) {
             try {

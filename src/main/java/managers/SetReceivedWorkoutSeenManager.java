@@ -38,17 +38,14 @@ public class SetReceivedWorkoutSeenManager {
             final User user = this.userDAO.getUser(activeUser);
             SharedWorkoutMeta workoutMeta = user.getReceivedWorkouts().get(workoutId);
             if (workoutMeta.isSeen()) {
-                // if it is already seen don't bother with any update
                 this.metrics.commonClose(true);
                 return;
             }
             workoutMeta.setSeen(true);
 
             UpdateItemSpec updateActiveUserData = new UpdateItemSpec()
-                .withUpdateExpression(
-                    "set " + User.RECEIVED_WORKOUTS + ".#workoutId=:receivedWorkoutVal")
-                .withValueMap(new ValueMap()
-                    .withMap(":receivedWorkoutVal", workoutMeta.asMap()))
+                .withUpdateExpression("set " + User.RECEIVED_WORKOUTS + ".#workoutId=:receivedWorkoutVal")
+                .withValueMap(new ValueMap().withMap(":receivedWorkoutVal", workoutMeta.asMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
             this.userDAO.updateUser(activeUser, updateActiveUserData);
 

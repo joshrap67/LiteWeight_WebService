@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
+import exceptions.UnauthorizedException;
 import utils.Metrics;
 import utils.UpdateItemTemplate;
 import utils.Validator;
@@ -31,8 +32,8 @@ public class RenameWorkoutManager {
     }
 
     /**
-     * Renames a given workout and loops through all owned exercises to update their workout mapping
-     * to have this new name,
+     * Renames a given workout and loops through all owned exercises to update their workout mapping to have this new
+     * name,
      *
      * @param activeUser     user that is renaming the workout.
      * @param workoutId      id of the workout that is to be renamed.
@@ -40,8 +41,8 @@ public class RenameWorkoutManager {
      * @return User the updated user with the updated workout meta and exercise mapping.
      * @throws Exception if there is input error.
      */
-    public User renameWorkout(final String activeUser, final String workoutId,
-        final String newWorkoutName) throws Exception {
+    public User renameWorkout(final String activeUser, final String workoutId, final String newWorkoutName)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".renameWorkout";
         this.metrics.commonSetup(classMethod);
 
@@ -56,14 +57,15 @@ public class RenameWorkoutManager {
 
             // no error, so go ahead and try and rename the workout
             final Workout workout = this.workoutDAO.getWorkout(workoutId);
+            Validator.ensureWorkoutOwnership(activeUser, workout);
+
             workout.setWorkoutName(newWorkoutName);
-            // update all the exercises that are apart of this newly renamed workout
+            // update all the exercises that are a part of this newly renamed workout
             updateUserExercises(user, workoutId, newWorkoutName);
             WorkoutMeta workoutMeta = user.getWorkoutMetas().get(workoutId);
             workoutMeta.setWorkoutName(newWorkoutName);
 
-            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.WORKOUTS + ".#workoutId = :workoutMap, " +
                     User.EXERCISES + "= :exercisesMap")
@@ -72,8 +74,7 @@ public class RenameWorkoutManager {
                     .withMap(":exercisesMap", user.getOwnedExercisesMap()))
                 .withNameMap(new NameMap().with("#workoutId", workoutId));
 
-            UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId,
-                WorkoutDAO.WORKOUT_TABLE_NAME)
+            UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId, WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " + Workout.WORKOUT_NAME + "= :workoutNameVal")
                 .withValueMap(new ValueMap().withString(":workoutNameVal", newWorkoutName));
 
@@ -90,14 +91,11 @@ public class RenameWorkoutManager {
         }
     }
 
-    private static void updateUserExercises(final User user, final String workoutId,
-        final String newWorkoutName) {
-        // loops through all user exercises and updates the old workout name with the newly renamed one
+    private static void updateUserExercises(final User user, final String workoutId, final String newWorkoutName) {
         for (String exerciseId : user.getOwnedExercises().keySet()) {
             if (user.getOwnedExercises().get(exerciseId).getWorkouts().containsKey(workoutId)) {
-                // old workout name found, replace it
-                user.getOwnedExercises().get(exerciseId).getWorkouts()
-                    .put(workoutId, newWorkoutName);
+                // old workout name found, replace it with newly named one
+                user.getOwnedExercises().get(exerciseId).getWorkouts().put(workoutId, newWorkoutName);
             }
         }
     }

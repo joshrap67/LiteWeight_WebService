@@ -24,9 +24,8 @@ public class UpdateUserPreferencesManager {
     }
 
     /**
-     * Updates the preferences of the given user. Note that at this time it just overwrites the
-     * values and there are no validation checks (since right now all values are either true or
-     * false).
+     * Updates the preferences of the given user. Note that at this time it just overwrites the values and there are no
+     * validation checks (since right now all values are either true or false).
      *
      * @param activeUser username of the user that is updating their preferences.
      * @param userPrefs  the preferences to be updated.
@@ -37,8 +36,8 @@ public class UpdateUserPreferencesManager {
 
         try {
             // right now just overwrite values in DB with these new ones
-            UpdateItemSpec updateItemSpec = new UpdateItemSpec().withUpdateExpression(
-                "set " + User.USER_PREFERENCES + " =:userPrefsVal")
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+                .withUpdateExpression("set " + User.USER_PREFERENCES + " =:userPrefsVal")
                 .withValueMap(new ValueMap().withMap(":userPrefsVal", userPrefs.asMap()));
             this.userDAO.updateUser(activeUser, updateItemSpec);
 

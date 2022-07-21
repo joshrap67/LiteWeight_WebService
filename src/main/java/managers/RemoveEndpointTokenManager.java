@@ -26,8 +26,8 @@ public class RemoveEndpointTokenManager {
     }
 
     /**
-     * Sets the user's push token to null in the database and unregisters it from SNS. At this time
-     * only one device can be registered per user.
+     * Sets the user's push token to null in the database and unregisters it from SNS. At this time only one device can
+     * be registered per user.
      *
      * @param activeUser username of the user that is unregistering this device.
      * @throws InvalidAttributeException if the user is not properly formatted in the database.
@@ -48,8 +48,8 @@ public class RemoveEndpointTokenManager {
                 this.userDAO.updateUser(activeUser, updateItemSpec);
 
                 // ARN is no longer in DB. Now try and delete the ARN from SNS
-                final DeleteEndpointRequest deleteEndpointRequest = new DeleteEndpointRequest()
-                    .withEndpointArn(user.getPushEndpointArn());
+                final DeleteEndpointRequest deleteEndpointRequest = new DeleteEndpointRequest().withEndpointArn(
+                    user.getPushEndpointArn());
                 this.notificationService.unregisterPlatformEndpoint(deleteEndpointRequest);
             }
             this.metrics.commonClose(true);

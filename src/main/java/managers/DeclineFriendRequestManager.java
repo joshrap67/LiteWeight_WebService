@@ -36,8 +36,7 @@ public class DeclineFriendRequestManager {
      * @param activeUser   user that is declining the request.
      * @param declinedUser user whose request has been declined.
      */
-    public void declineRequest(final String activeUser, final String declinedUser)
-        throws Exception {
+    public void declineRequest(final String activeUser, final String declinedUser) throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".declineRequest";
         this.metrics.commonSetup(classMethod);
 
@@ -53,14 +52,12 @@ public class DeclineFriendRequestManager {
             }
 
             // remove friend from active user
-            UpdateItemTemplate activeUserData = new UpdateItemTemplate(
-                activeUser, UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate activeUserData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIEND_REQUESTS + ".#username")
                 .withNameMap(new NameMap().with("#username", declinedUser));
 
             // remove the (unconfirmed) active user from friend's mapping
-            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(
-                declinedUser, UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateFriendData = new UpdateItemTemplate(declinedUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("remove " + User.FRIENDS + ".#username")
                 .withNameMap(new NameMap().with("#username", activeUser));
 
@@ -72,9 +69,8 @@ public class DeclineFriendRequestManager {
             // if this succeeds, go ahead and send a notification to the declined user (only need to send username)
             this.notificationService.sendMessage(declinedUserObject.getPushEndpointArn(),
                 new NotificationData(NotificationService.declinedFriendRequestAction,
-                    Maps.newHashMap(
-                        ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
-                            .build())));
+                    Maps.newHashMap(ImmutableMap.<String, String>builder().put(User.USERNAME, activeUser)
+                        .build())));
 
             this.metrics.commonClose(true);
         } catch (Exception e) {

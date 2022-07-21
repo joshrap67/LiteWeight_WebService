@@ -1,5 +1,6 @@
 package managers;
 
+import java.io.IOException;
 import services.StorageService;
 import daos.UserDAO;
 import exceptions.InvalidAttributeException;
@@ -32,7 +33,7 @@ public class UpdateIconManager {
      * @throws UserNotFoundException     if the active user is not found.
      */
     public boolean updateIcon(final String activeUser, final byte[] imageData)
-        throws InvalidAttributeException, UserNotFoundException {
+        throws InvalidAttributeException, UserNotFoundException, IOException {
         final String classMethod = this.getClass().getSimpleName() + ".updateIcon";
         this.metrics.commonSetup(classMethod);
 
@@ -40,10 +41,10 @@ public class UpdateIconManager {
             final User user = this.userDAO.getUser(activeUser);
             // same filename is always used. Content is just overwritten
             String fileName = user.getIcon();
-            boolean success = this.storageService.uploadImage(imageData, fileName, this.metrics);
+            this.storageService.uploadImage(imageData, fileName, this.metrics);
 
-            this.metrics.commonClose(success);
-            return success;
+            this.metrics.commonClose(true);
+            return true;
         } catch (Exception e) {
             this.metrics.commonClose(false);
             throw e;

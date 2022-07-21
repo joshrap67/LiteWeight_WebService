@@ -19,8 +19,7 @@ public class BlockUserManager {
     private final CancelFriendRequestManager cancelFriendRequestManager;
 
     @Inject
-    public BlockUserManager(final UserDAO userDAO, final Metrics metrics,
-        final RemoveFriendManager removeFriendManager,
+    public BlockUserManager(final UserDAO userDAO, final Metrics metrics, final RemoveFriendManager removeFriendManager,
         final DeclineFriendRequestManager declineFriendRequestManager,
         final CancelFriendRequestManager cancelFriendRequestManager) {
         this.userDAO = userDAO;
@@ -31,11 +30,10 @@ public class BlockUserManager {
     }
 
     /**
-     * Attempts to block a given user if the active user has not reached the max amount of blocked
-     * users. Appropriate actions are taken if the active user has a pending friend request for the
-     * pending blocked user, or has sent a friend request to the blocked user, or is friends with
-     * the blocked user. Appropriate data notifications are sent if any of the above mentioned
-     * conditions exist.
+     * Attempts to block a given user if the active user has not reached the max amount of blocked users. Appropriate
+     * actions are taken if the active user has a pending friend request for the pending blocked user, or has sent a
+     * friend request to the blocked user, or is friends with the blocked user. Appropriate data notifications are sent
+     * if any of these conditions exist.
      *
      * @param activeUser  username of the user who is blocking the user to block.
      * @param userToBlock username of the user who is about to be blocked by the active user.
@@ -52,8 +50,7 @@ public class BlockUserManager {
 
             if (activeUserObject.getBlocked().size() >= Globals.MAX_BLOCKED) {
                 this.metrics.commonClose(false);
-                throw new ManagerExecutionException(
-                    String.format("User %s has exceeded blocked limit.", activeUser));
+                throw new ManagerExecutionException(String.format("User %s has exceeded blocked limit.", activeUser));
             }
 
             if (activeUserObject.getFriendRequests().containsKey(userToBlock)) {
@@ -72,10 +69,8 @@ public class BlockUserManager {
 
             // go ahead and block the user
             UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-                .withUpdateExpression(
-                    "set " + User.BLOCKED + ".#username =:blockedUserIcon")
-                .withValueMap(new ValueMap()
-                    .withString(":blockedUserIcon", userToBlockObject.getIcon()))
+                .withUpdateExpression("set " + User.BLOCKED + ".#username =:blockedUserIcon")
+                .withValueMap(new ValueMap().withString(":blockedUserIcon", userToBlockObject.getIcon()))
                 .withNameMap(new NameMap().with("#username", userToBlock));
             this.userDAO.updateUser(activeUser, updateItemSpec);
 

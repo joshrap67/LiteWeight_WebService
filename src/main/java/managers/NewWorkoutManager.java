@@ -38,9 +38,9 @@ public class NewWorkoutManager {
     }
 
     /**
-     * Creates a new workout if all input is valid and if the user has not already reached the max
-     * number of workouts allowed. Updates all exercises that are apart of the newly created workout
-     * to have this workout listed in their workout maps.
+     * Creates a new workout if all input is valid and if the user has not already reached the max number of workouts
+     * allowed. Updates all exercises that are apart of the newly created workout to have this workout listed in their
+     * workout maps.
      *
      * @param activeUser  user that is creating this new workout.
      * @param workoutName name of the workout that is to be created.
@@ -48,8 +48,8 @@ public class NewWorkoutManager {
      * @return UserWithWorkout the newly created workout and updated user object.
      * @throws Exception thrown if there exists input validation.
      */
-    public UserWithWorkout createNewWorkout(final String activeUser, final String workoutName,
-        final Routine routine) throws Exception {
+    public UserWithWorkout createNewWorkout(final String activeUser, final String workoutName, final Routine routine)
+        throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".createNewWorkout";
         this.metrics.commonSetup(classMethod);
 
@@ -57,26 +57,27 @@ public class NewWorkoutManager {
             final User user = this.userDAO.getUser(activeUser);
 
             final String workoutId = UUID.randomUUID().toString();
-            final String creationTime = Instant.now().toString();
             final String errorMessage = Validator.validNewWorkoutInput(workoutName, user, routine);
 
             if (!errorMessage.isEmpty()) {
                 this.metrics.commonClose(false);
                 throw new ManagerExecutionException(errorMessage);
             }
+            final String creationTime = Instant.now().toString();
+
             // no error, so go ahead and try and insert this new workout along with updating active user
             final Workout newWorkout = new Workout();
             newWorkout.setCreationDate(creationTime);
             newWorkout.setCreator(activeUser);
             newWorkout.setMostFrequentFocus(WorkoutUtils.findMostFrequentFocus(user, routine));
             newWorkout.setWorkoutId(workoutId);
-            newWorkout.setWorkoutName(workoutName.trim());
+            newWorkout.setWorkoutName(workoutName);
             newWorkout.setRoutine(routine);
             newWorkout.setCurrentDay(0);
             newWorkout.setCurrentWeek(0);
 
             final WorkoutMeta workoutMeta = new WorkoutMeta();
-            workoutMeta.setWorkoutName(workoutName.trim());
+            workoutMeta.setWorkoutName(workoutName);
             workoutMeta.setAverageExercisesCompleted(0.0);
             workoutMeta.setDateLast(creationTime);
             workoutMeta.setTimesCompleted(0);
@@ -84,11 +85,10 @@ public class NewWorkoutManager {
             // need to set it here so frontend gets updated user item back
             user.putNewWorkoutMeta(workoutId, workoutMeta);
             user.setCurrentWorkout(workoutId);
-            // update all the exercises that are now apart of this workout
+            // update all the exercises that are now a part of this workout
             WorkoutUtils.updateOwnedExercises(user, routine, workoutId, workoutName);
 
-            UpdateItemTemplate updateItemData = new UpdateItemTemplate(activeUser,
-                UserDAO.USERS_TABLE_NAME)
+            UpdateItemTemplate updateItemData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " +
                     User.CURRENT_WORKOUT + " = :currentWorkoutVal, " +
                     User.WORKOUTS + ".#workoutId= :workoutUserMap, " +

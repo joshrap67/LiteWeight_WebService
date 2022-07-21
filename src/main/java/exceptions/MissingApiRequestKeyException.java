@@ -10,7 +10,6 @@ public class MissingApiRequestKeyException extends Exception {
 
     @Override
     public String getMessage() {
-        return "Missing request key. The following keys are required for this action: "
-            + this.requiredKeys.toString();
+        return "Missing request key. The following keys are required for this action: " + this.requiredKeys.toString();
     }
 }

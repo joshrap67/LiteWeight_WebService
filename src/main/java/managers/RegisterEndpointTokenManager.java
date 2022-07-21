@@ -38,12 +38,11 @@ public class RegisterEndpointTokenManager {
     }
 
     /**
-     * This function takes in a device token registered in google cloud messaging and maps a SNS
-     * endpoint for this token, and then registers the ARN of the SNS endpoint on the user item.
+     * This function takes in a device token registered in google cloud messaging and maps a SNS endpoint for this
+     * token, and then registers the ARN of the SNS endpoint on the user item.
      *
      * @param activeUser  The user making the api request whos push endpoint is being registered.
-     * @param deviceToken This is the GCM token for the user's device that is used to register the
-     *                    endpoint.
+     * @param deviceToken This is the GCM token for the user's device that is used to register the endpoint.
      */
     public void registerDevice(final String activeUser, final String deviceToken)
         throws ManagerExecutionException, InvalidAttributeException, UserNotFoundException {
@@ -56,8 +55,7 @@ public class RegisterEndpointTokenManager {
         } catch (final InvalidParameterException ipe) {
             // The error handling here is obtained from aws doc: https://docs.aws.amazon.com/sns/latest/dg/mobile-platform-endpoint.html#mobile-platform-endpoint-sdk-examples
             final String message = ipe.getErrorMessage();
-            final Pattern p = Pattern
-                .compile(".*Endpoint (arn:aws:sns[^ ]+) already exists with the same [Tt]oken.*");
+            final Pattern p = Pattern.compile(".*Endpoint (arn:aws:sns[^ ]+) already exists with the same [Tt]oken.*");
             final Matcher m = p.matcher(message);
             if (!m.matches()) {
                 this.metrics.commonClose(false);
@@ -67,8 +65,7 @@ public class RegisterEndpointTokenManager {
             // Get the current user associated with the arn and unsubscribe them then subscribe the new user
             final String endpointArn = m.group(1);
 
-            final Map<String, String> endpointAttributes = this.notificationService
-                .getEndpointAttributes(endpointArn);
+            final Map<String, String> endpointAttributes = this.notificationService.getEndpointAttributes(endpointArn);
 
             final String oldUsername = endpointAttributes.get(USER_DATA_KEY);
 
@@ -88,13 +85,12 @@ public class RegisterEndpointTokenManager {
     private void attemptToRegisterUserEndpoint(final String activeUser,
         final String deviceToken) throws InvalidParameterException {
         // first thing to do is register the device token with SNS
-        final CreatePlatformEndpointRequest createPlatformEndpointRequest =
-            new CreatePlatformEndpointRequest()
-                .withPlatformApplicationArn(Config.PUSH_SNS_PLATFORM_ARN)
-                .withToken(deviceToken)
-                .withCustomUserData(activeUser);
-        final CreatePlatformEndpointResult createPlatformEndpointResult = this.notificationService
-            .registerPlatformEndpoint(createPlatformEndpointRequest);
+        final CreatePlatformEndpointRequest createPlatformEndpointRequest = new CreatePlatformEndpointRequest()
+            .withPlatformApplicationArn(Config.PUSH_SNS_PLATFORM_ARN)
+            .withToken(deviceToken)
+            .withCustomUserData(activeUser);
+        final CreatePlatformEndpointResult createPlatformEndpointResult = this.notificationService.registerPlatformEndpoint(
+            createPlatformEndpointRequest);
 
         // this creation will give a new ARN for the sns endpoint associated with the device token
         final String userEndpointArn = createPlatformEndpointResult.getEndpointArn();

@@ -56,31 +56,28 @@ public class SharedWorkout implements Model {
         Map<String, String> exerciseNameToId = new HashMap<>();
         for (Integer week : workout.getRoutine()) {
             for (Integer day : workout.getRoutine().getWeek(week)) {
-                for (RoutineExercise exercise : workout.getRoutine()
-                    .getExerciseListForDay(week, day)) {
-                    String exerciseName = user.getOwnedExercises().get(exercise.getExerciseId())
-                        .getExerciseName();
+                for (RoutineExercise exercise : workout.getRoutine().getExerciseListForDay(week, day)) {
+                    String exerciseName = user.getOwnedExercises().get(exercise.getExerciseId()).getExerciseName();
                     exerciseNames.add(exerciseName);
                     exerciseNameToId.putIfAbsent(exerciseName, exercise.getExerciseId());
                 }
             }
         }
         for (String exerciseName : exerciseNames) {
-            this.exercises.putIfAbsent(exerciseName, new SharedWorkoutExercise(
-                user.getOwnedExercises().get(exerciseNameToId.get(exerciseName))));
+            this.exercises.putIfAbsent(exerciseName,
+                new SharedWorkoutExercise(user.getOwnedExercises().get(exerciseNameToId.get(exerciseName))));
         }
     }
 
     public Map<String, AttributeValue> asItemAttributes() {
         final Map<String, AttributeValue> workoutToSendItemValues = new HashMap<>();
         workoutToSendItemValues.putIfAbsent(WORKOUT_NAME, new AttributeValue(this.workoutName));
-        workoutToSendItemValues
-            .putIfAbsent(SHARED_WORKOUT_ID, new AttributeValue(this.sharedWorkoutId));
+        workoutToSendItemValues.putIfAbsent(SHARED_WORKOUT_ID, new AttributeValue(this.sharedWorkoutId));
         workoutToSendItemValues.putIfAbsent(CREATOR, new AttributeValue(this.creator));
-        workoutToSendItemValues.putIfAbsent(ROUTINE, new AttributeValue()
-            .withM(AttributeValueUtils.convertMapToAttributeValueMap(this.routine.asMap())));
-        workoutToSendItemValues.putIfAbsent(EXERCISES, new AttributeValue()
-            .withM(AttributeValueUtils.convertMapToAttributeValueMap(getExercisesMap())));
+        workoutToSendItemValues.putIfAbsent(ROUTINE,
+            new AttributeValue().withM(AttributeValueUtils.convertMapToAttributeValueMap(this.routine.asMap())));
+        workoutToSendItemValues.putIfAbsent(EXERCISES,
+            new AttributeValue().withM(AttributeValueUtils.convertMapToAttributeValueMap(getExercisesMap())));
         return workoutToSendItemValues;
     }
 
@@ -90,8 +87,8 @@ public class SharedWorkout implements Model {
         } else {
             this.exercises = new HashMap<>();
             for (String exerciseName : json.keySet()) {
-                this.exercises.putIfAbsent(exerciseName, new SharedWorkoutExercise(
-                    (Map<String, Object>) json.get(exerciseName)));
+                this.exercises.putIfAbsent(exerciseName,
+                    new SharedWorkoutExercise((Map<String, Object>) json.get(exerciseName)));
             }
         }
     }
@@ -113,8 +110,9 @@ public class SharedWorkout implements Model {
         }
 
         return this.exercises.entrySet().stream().collect(
-            collectingAndThen(toMap(Entry::getKey,
-                (Map.Entry<String, SharedWorkoutExercise> e) -> e.getValue().asMap()), HashMap::new));
+            collectingAndThen(
+                toMap(Entry::getKey, (Map.Entry<String, SharedWorkoutExercise> e) -> e.getValue().asMap()),
+                HashMap::new));
     }
 
     @Override

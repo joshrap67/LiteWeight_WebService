@@ -23,26 +23,22 @@ public class GetReceivedWorkoutsManager {
     }
 
     /**
-     * Gets a batch of received workout metas to the active user based on the current batch number
-     * after all workouts are sorted by date sent. E.g. if there are 10 received workouts with a
-     * batch size of 2 and the user passes in batch number 3, this method will return a map of
-     * workout metas indexed 6 and 7.
+     * Gets a batch of received workout metas to the active user based on the current batch number after all workouts
+     * are sorted by date sent. E.g. if there are 10 received workouts with a batch size of 2 and the user passes in
+     * batch number 3, this method will return a map of workout metas indexed 6 and 7.
      *
-     * @param activeUser  username of the user that made the api request, trying to get data about
-     *                    themselves.
+     * @param activeUser  username of the user that made the api request, trying to get data about themselves.
      * @param batchNumber batch number that the user is currently on.
      * @return Map of the received workout metas that fall into this batch
      */
-    public Map<String, SharedWorkoutMeta> getReceivedWorkouts(final String activeUser,
-        final int batchNumber)
+    public Map<String, SharedWorkoutMeta> getReceivedWorkouts(final String activeUser, final int batchNumber)
         throws Exception {
         final String classMethod = this.getClass().getSimpleName() + ".getReceivedWorkouts";
         this.metrics.commonSetup(classMethod);
 
         try {
             final User activeUserObject = this.userDAO.getUser(activeUser);
-            final Map<String, SharedWorkoutMeta> receivedWorkouts = activeUserObject
-                .getReceivedWorkouts();
+            final Map<String, SharedWorkoutMeta> receivedWorkouts = activeUserObject.getReceivedWorkouts();
 
             this.metrics.commonClose(true);
             return getBatchOfWorkouts(receivedWorkouts, batchNumber);
@@ -60,7 +56,7 @@ public class GetReceivedWorkoutsManager {
         ArrayList<String> workoutIds = new ArrayList<>(receivedWorkouts.keySet());
         Map<String, SharedWorkoutMeta> workoutsBatch = new LinkedHashMap<>();
 
-        // get all of the received workouts from the first workout to the oldest workout in the batch
+        // get all the received workouts from the first workout to the oldest workout in the batch
         if (workoutIds.size() > newestReceivedWorkoutIndex) {
             if (workoutIds.size() <= oldestReceivedWorkoutIndex) {
                 // if on the last batch and remainder doesn't fit into the entire batch, last index is the size
