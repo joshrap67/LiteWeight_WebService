@@ -206,9 +206,10 @@ public class AcceptReceivedWorkoutManager {
             ownedExercises.add(user.getOwnedExercises().get(exerciseId).getExerciseName());
         }
         Set<String> newExercises = Sets.difference(sharedWorkoutExercises, ownedExercises);
-        for (String exercise : newExercises) {
+        for (String exerciseName : newExercises) {
             // for each of the exercises that the user doesn't own, make a new entry for them in the owned mapping
-            OwnedExercise ownedExercise = new OwnedExercise(sharedWorkout.getExercises().get(exercise), exercise);
+            OwnedExercise ownedExercise = new OwnedExercise(sharedWorkout.getExercises().get(exerciseName),
+                exerciseName);
             String exerciseId = UUID.randomUUID().toString();
             user.getOwnedExercises().putIfAbsent(exerciseId, ownedExercise);
         }

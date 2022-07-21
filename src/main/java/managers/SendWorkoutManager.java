@@ -26,6 +26,7 @@ import models.SharedWorkout;
 import models.User;
 import models.Workout;
 import utils.Validator;
+import utils.WorkoutUtils;
 
 public class SendWorkoutManager {
 
@@ -80,8 +81,7 @@ public class SendWorkoutManager {
             String sharedWorkoutId = null;
             for (String workoutIdMeta : recipientUser.getReceivedWorkouts().keySet()) {
                 final SharedWorkoutMeta meta = recipientUser.getReceivedWorkouts().get(workoutIdMeta);
-                if (meta.getWorkoutName().equals(originalWorkout.getWorkoutName())
-                    && meta.getSender().equals(activeUser)) {
+                if (meta.getWorkoutName().equals(originalWorkout.getWorkoutName()) && meta.getSender().equals(activeUser)) {
                     // sender has already sent a workout with this name
                     sharedWorkoutId = meta.getWorkoutId();
                     break;
@@ -92,12 +92,14 @@ public class SendWorkoutManager {
                 sharedWorkoutId = UUID.randomUUID().toString();
             }
 
+            String mostFrequentFocus = WorkoutUtils.findMostFrequentFocus(activeUserObject, originalWorkout.getRoutine());
+
             final SharedWorkoutMeta sharedWorkoutMeta = new SharedWorkoutMeta();
             sharedWorkoutMeta.setDateSent(Instant.now().toString());
             sharedWorkoutMeta.setWorkoutId(sharedWorkoutId);
             sharedWorkoutMeta.setSeen(false);
             sharedWorkoutMeta.setSender(activeUser);
-            sharedWorkoutMeta.setMostFrequentFocus(originalWorkout.getMostFrequentFocus());
+            sharedWorkoutMeta.setMostFrequentFocus(mostFrequentFocus);
             sharedWorkoutMeta.setWorkoutName(originalWorkout.getWorkoutName());
             sharedWorkoutMeta.setTotalDays(originalWorkout.getRoutine().getTotalNumberOfDays());
             sharedWorkoutMeta.setIcon(activeUserObject.getIcon());
