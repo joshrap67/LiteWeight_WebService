@@ -18,7 +18,7 @@ public class RoutineExercise implements Model {
 
     private boolean completed;
     private String exerciseId;
-    private double weight;
+    private Double weight;
     private Integer sets;
     private Integer reps;
     private String details;
@@ -34,6 +34,7 @@ public class RoutineExercise implements Model {
 
     public RoutineExercise(final SharedExercise sharedExercise, final String exerciseId) {
         // this constructor is used when converting from an exercise from a sent workout back to a normal workout exercise
+        // todo "named" ctor
         this.completed = false;
         this.exerciseId = exerciseId;
         this.weight = sharedExercise.getWeight();

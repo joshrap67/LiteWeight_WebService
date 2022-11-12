@@ -25,15 +25,14 @@ public class Workout implements Model {
     private String workoutId;
     private String workoutName;
     private String creationDate;
-    private String mostFrequentFocus;
+    private String mostFrequentFocus; // todo delete now
     private String creator;
     private Routine routine;
     private Integer currentDay;
     private Integer currentWeek;
+// todo last modified? would differ from one on meta. one on meta is last selected. this would be last modified from sync, edit
 
-
-    public Workout(final Item userItem)
-        throws InvalidAttributeException {
+    public Workout(final Item userItem) throws InvalidAttributeException {
         this(userItem.asMap());
     }
 

@@ -5,7 +5,8 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
-import exceptions.UnauthorizedException;
+import models.RoutineDay;
+import models.RoutineWeek;
 import utils.Metrics;
 import utils.UpdateItemTemplate;
 import java.util.ArrayList;
@@ -91,9 +92,9 @@ public class RestartWorkoutManager {
 
     private void restartWorkout(final Workout workout, final WorkoutMeta workoutMeta, final User user) {
         // reset each exercise to not completed and update average accordingly
-        for (Integer week : workout.getRoutine()) {
-            for (Integer day : workout.getRoutine().getWeek(week)) {
-                for (RoutineExercise routineExercise : workout.getRoutine().getExerciseListForDay(week, day)) {
+        for (RoutineWeek week : workout.getRoutine()) {
+            for (RoutineDay day : week) {
+                for (RoutineExercise routineExercise : day) {
                     if (routineExercise.isCompleted()) {
                         // update new average since this exercise was indeed completed
                         workoutMeta.setAverageExercisesCompleted(
@@ -102,7 +103,7 @@ public class RestartWorkoutManager {
                         routineExercise.setCompleted(false);
 
                         if (user.getUserPreferences().isUpdateDefaultWeightOnRestart()) {
-                            // automatically update default weight with this weight if its higher than previous
+                            // automatically update default weight with this weight if it's higher than previous
                             String exerciseId = routineExercise.getExerciseId();
                             OwnedExercise ownedExercise = user.getOwnedExercises().get(exerciseId);
                             if (routineExercise.getWeight() > ownedExercise.getDefaultWeight()) {

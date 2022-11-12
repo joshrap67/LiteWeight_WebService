@@ -7,11 +7,12 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
-import exceptions.UnauthorizedException;
 import java.time.Instant;
 import java.util.UUID;
 import models.Routine;
+import models.RoutineDay;
 import models.RoutineExercise;
+import models.RoutineWeek;
 import utils.AttributeValueUtils;
 import utils.Metrics;
 import utils.UpdateItemTemplate;
@@ -70,9 +71,9 @@ public class CopyWorkoutManager {
             final Workout newWorkout = new Workout();
             // remove any progress of the workout that is being copied
             Routine newRoutine = new Routine(oldWorkout.getRoutine());
-            for (Integer week : newRoutine) {
-                for (Integer day : newRoutine.getWeek(week)) {
-                    for (RoutineExercise exercise : newRoutine.getExerciseListForDay(week, day)) {
+            for (RoutineWeek week : newRoutine) {
+                for (RoutineDay day : week) {
+                    for (RoutineExercise exercise : day) {
                         exercise.setCompleted(false);
                     }
                 }
