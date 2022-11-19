@@ -80,7 +80,6 @@ public class CopyWorkoutManager {
             }
             newWorkout.setCreationDate(creationTime);
             newWorkout.setCreator(activeUser);
-            newWorkout.setMostFrequentFocus(oldWorkout.getMostFrequentFocus());
             newWorkout.setWorkoutId(workoutId);
             newWorkout.setWorkoutName(newWorkoutName.trim());
             newWorkout.setRoutine(newRoutine);

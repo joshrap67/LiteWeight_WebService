@@ -44,7 +44,7 @@ public class DeleteExerciseManager {
 
             final OwnedExercise ownedExercise = user.getOwnedExercises().get(exerciseId);
             List<String> workoutsToUpdate = new ArrayList<>(ownedExercise.getWorkouts().keySet());
-            updateWorkouts(exerciseId, workoutsToUpdate, user);
+            updateWorkouts(exerciseId, workoutsToUpdate);
             user.getOwnedExercises().remove(exerciseId);
 
             UpdateItemSpec updateItemSpec = new UpdateItemSpec()
@@ -58,22 +58,15 @@ public class DeleteExerciseManager {
         }
     }
 
-    private void updateWorkouts(final String exerciseId, final List<String> workoutIds,
-        final User user) throws Exception {
+    private void updateWorkouts(final String exerciseId, final List<String> workoutIds) throws Exception {
         // because the number of workouts could go above 25 (max for transaction) just have to do a bunch of blind updates
         for (String workoutId : workoutIds) {
             final Workout workout = this.workoutDAO.getWorkout(workoutId);
-
             Routine.deleteExerciseFromRoutine(exerciseId, workout.getRoutine());
-            final String newMostFrequentFocus = WorkoutUtils.findMostFrequentFocus(user, workout.getRoutine());
-            workout.setMostFrequentFocus(newMostFrequentFocus);
 
             final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-                .withUpdateExpression("set #routine =:routineMap, " +
-                    Workout.MOST_FREQUENT_FOCUS + "=:mostFrequentFocusVal")
-                .withValueMap(new ValueMap()
-                    .withMap(":routineMap", workout.getRoutine().asMap())
-                    .withString(":mostFrequentFocusVal", newMostFrequentFocus))
+                .withUpdateExpression("set #routine =:routineMap")
+                .withValueMap(new ValueMap().withMap(":routineMap", workout.getRoutine().asMap()))
                 .withNameMap(new NameMap().with("#routine", Workout.ROUTINE));
             this.workoutDAO.updateWorkout(workoutId, updateItemSpec);
         }

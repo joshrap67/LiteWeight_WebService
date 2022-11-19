@@ -61,8 +61,6 @@ public class EditWorkoutManager {
             // update all the exercises that are now a part of this workout
             WorkoutUtils.updateOwnedExercisesOnEdit(user, editedWorkout.getRoutine(),
                 oldWorkout.getRoutine(), workoutId, oldWorkout.getWorkoutName());
-            // update most frequent focus since exercises have changed
-            editedWorkout.setMostFrequentFocus(WorkoutUtils.findMostFrequentFocus(user, editedWorkout.getRoutine()));
 
             // Need to determine if the current week/day is valid (responsibility of frontend)
             confirmValidCurrentDayAndWeek(editedWorkout);
@@ -72,12 +70,10 @@ public class EditWorkoutManager {
 
             UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId, WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " +
-                    Workout.MOST_FREQUENT_FOCUS + " = :mostFrequentFocusVal, " +
                     Workout.CURRENT_WEEK + " =:currentWeekVal, " +
                     Workout.CURRENT_DAY + " =:currentDayVal, " +
                     "#routine = :routineMap")
                 .withValueMap(new ValueMap()
-                    .withString(":mostFrequentFocusVal", editedWorkout.getMostFrequentFocus())
                     .withNumber(":currentWeekVal", editedWorkout.getCurrentWeek())
                     .withNumber(":currentDayVal", editedWorkout.getCurrentDay())
                     .withMap(":routineMap", editedWorkout.getRoutine().asMap()))

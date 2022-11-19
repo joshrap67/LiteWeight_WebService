@@ -16,7 +16,6 @@ public class Workout implements Model {
     public static final String WORKOUT_ID = "workoutId";
     public static final String WORKOUT_NAME = "workoutName";
     public static final String CREATION_DATE = "creationDate";
-    public static final String MOST_FREQUENT_FOCUS = "mostFrequentFocus";
     public static final String CREATOR = "creator";
     public static final String ROUTINE = "routine";
     public static final String CURRENT_DAY = "currentDay";

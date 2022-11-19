@@ -101,7 +101,6 @@ public class AcceptReceivedWorkoutManager {
             final Routine routine = new Routine(workoutToAccept.getRoutine(), exerciseNameToId);
             newWorkout.setCreationDate(creationTime);
             newWorkout.setCreator(activeUser);
-            newWorkout.setMostFrequentFocus(sharedWorkoutMeta.getMostFrequentFocus());
             newWorkout.setWorkoutId(workoutId);
             newWorkout.setWorkoutName(workoutToAccept.getWorkoutName());
             newWorkout.setRoutine(routine);

@@ -30,8 +30,7 @@ public class Validator {
         if (activeUser.getWorkoutMetas().size() >= Globals.MAX_FREE_WORKOUTS && activeUser.getPremiumToken() == null) {
             error.append("Max amount of free workouts reached.\n");
         }
-        if (activeUser.getPremiumToken() != null
-            && activeUser.getWorkoutMetas().size() >= Globals.MAX_WORKOUTS) {
+        if (activeUser.getPremiumToken() != null && activeUser.getWorkoutMetas().size() >= Globals.MAX_WORKOUTS) {
             error.append("Maximum workouts exceeded.\n");
         }
 
