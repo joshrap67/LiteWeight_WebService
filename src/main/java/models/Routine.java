@@ -24,7 +24,7 @@ public class Routine implements Model, Iterable<RoutineWeek> {
         // copy constructor
         this.weeks = new ArrayList<>();
         for (RoutineWeek week : toBeCloned) {
-            RoutineWeek routineWeek = new RoutineWeek(); // todo add clone method
+            RoutineWeek routineWeek = new RoutineWeek();
             for (RoutineDay day : week) {
                 routineWeek.appendDay(day.clone());
             }

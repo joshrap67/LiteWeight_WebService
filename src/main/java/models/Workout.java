@@ -25,12 +25,10 @@ public class Workout implements Model {
     private String workoutId;
     private String workoutName;
     private String creationDate;
-    private String mostFrequentFocus; // todo delete now
     private String creator;
     private Routine routine;
     private Integer currentDay;
     private Integer currentWeek;
-// todo last modified? would differ from one on meta. one on meta is last selected. this would be last modified from sync, edit
 
     public Workout(final Item userItem) throws InvalidAttributeException {
         this(userItem.asMap());
@@ -40,7 +38,6 @@ public class Workout implements Model {
         this.workoutId = (String) json.get(WORKOUT_ID);
         this.workoutName = (String) json.get(WORKOUT_NAME);
         this.creationDate = (String) json.get(CREATION_DATE);
-        this.mostFrequentFocus = (String) json.get(MOST_FREQUENT_FOCUS);
         this.creator = (String) json.get(CREATOR);
         this.routine = new Routine((Map<String, Object>) json.get(ROUTINE));
         this.currentDay = Parser.convertObjectToInteger(json.get(CURRENT_DAY));
@@ -53,7 +50,6 @@ public class Workout implements Model {
         retVal.putIfAbsent(WORKOUT_NAME, this.workoutName);
         retVal.putIfAbsent(WORKOUT_ID, this.workoutId);
         retVal.putIfAbsent(CREATION_DATE, this.creationDate);
-        retVal.putIfAbsent(MOST_FREQUENT_FOCUS, this.mostFrequentFocus);
         retVal.putIfAbsent(CREATOR, this.creator);
         retVal.putIfAbsent(ROUTINE, this.routine.asMap());
         retVal.putIfAbsent(CURRENT_WEEK, this.currentWeek);
