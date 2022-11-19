@@ -189,8 +189,8 @@ public class Validator {
             for (RoutineDay day : week) {
                 dayIndex++;
                 if (day.getTag() != null && day.getTag().length() > MAX_DAY_TAG_LENGTH) {
-                    error.append("Day tag for W:D - ")
-                        .append(weekIndex).append(" ").append(dayIndex)
+                    error.append("Day tag for Week ")
+                        .append(weekIndex).append(" Day ").append(dayIndex)
                         .append(" exceeds maximum length.\n");
                 }
             }
