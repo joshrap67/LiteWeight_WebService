@@ -52,6 +52,7 @@ public class Routine implements Model, Iterable<RoutineWeek> {
             final RoutineWeek routineWeek = new RoutineWeek();
             for (SharedDay day : week) {
                 final RoutineDay routineDay = new RoutineDay();
+                routineDay.setTag(day.getTag());
                 for (SharedExercise sharedExercise : day) {
                     RoutineExercise routineExercise = new RoutineExercise(sharedExercise,
                         exerciseNameToId.get(sharedExercise.getExerciseName()));
@@ -61,14 +62,6 @@ public class Routine implements Model, Iterable<RoutineWeek> {
             }
             this.appendWeek(routineWeek);
         }
-    }
-
-    public List<RoutineExercise> getExerciseListForDay(int week, int day) {
-        List<RoutineExercise> exerciseList = new ArrayList<>();
-        for (RoutineExercise exercise : this.getWeek(week).getDay(day)) {
-            exerciseList.add(exercise);
-        }
-        return exerciseList;
     }
 
     public RoutineWeek getWeek(int week) {
