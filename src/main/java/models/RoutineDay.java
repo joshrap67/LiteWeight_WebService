@@ -1,83 +1,73 @@
 package models;
 
 import interfaces.Model;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import lombok.Data;
 
 @Data
-public class RoutineDay implements Iterable<Integer>, Model {
+public class RoutineDay implements Iterable<RoutineExercise>, Model {
 
-    private Map<Integer, RoutineExercise> exercises;
+    public static final String EXERCISES = "exercises";
+    public static final String TAG = "tag";
+
+    private List<RoutineExercise> exercises;
+    private String tag;
 
     public RoutineDay() {
-        this.exercises = new HashMap<>();
+        this.exercises = new ArrayList<>();
     }
 
-    public RoutineDay(Map<String, Object> exercisesForDay) {
-        this.exercises = new HashMap<>();
-        for (String sortVal : exercisesForDay.keySet()) {
-            RoutineExercise routineExercise = new RoutineExercise((Map<String, Object>) exercisesForDay.get(sortVal));
-            this.exercises.put(Integer.parseInt(sortVal), routineExercise);
+    public RoutineDay(Map<String, Object> json) {
+        this.exercises = new ArrayList<>();
+        this.tag = (String) json.get(TAG);
+
+        List<Object> jsonExercises = (List<Object>) json.get(EXERCISES);
+        for (Object exercise : jsonExercises) {
+            RoutineExercise routineExercise = new RoutineExercise((Map<String, Object>) exercise);
+            this.exercises.add(routineExercise);
         }
     }
 
     public RoutineDay clone() {
-        RoutineDay retVal = new RoutineDay();
-        for (Integer sortVal : this.exercises.keySet()) {
-            RoutineExercise specificExerciseCloned = new RoutineExercise(this.exercises.get(sortVal));
-            retVal.getExercises().putIfAbsent(sortVal, specificExerciseCloned);
+        RoutineDay clonedDay = new RoutineDay();
+        clonedDay.tag = this.tag;
+        for (RoutineExercise routineExercise : this.exercises) {
+            RoutineExercise specificExerciseCloned = new RoutineExercise(routineExercise);
+            clonedDay.getExercises().add(specificExerciseCloned);
         }
-        return retVal;
+        return clonedDay;
     }
 
-    public void put(int sortVal, RoutineExercise routineExercise) {
-        this.exercises.put(sortVal, routineExercise);
+    public void put(int exerciseIndex, RoutineExercise routineExercise) {
+        this.exercises.set(exerciseIndex, routineExercise);
     }
 
-    public RoutineExercise getExercise(int sortVal) {
-        return this.exercises.get(sortVal);
+    public void appendExercise(RoutineExercise exercise) {
+        this.exercises.add(exercise);
     }
 
     public boolean deleteExercise(String exerciseId) {
-        boolean deleted = false;
-
-        int index = -1;
-        for (Integer sortVal : this.exercises.keySet()) {
-            if (this.exercises.get(sortVal).getExerciseId().equals(exerciseId)) {
-                index = sortVal;
-            }
-        }
-        if (index != -1) {
-            this.exercises.remove(index);
-            balanceMap();
-            deleted = true;
-        }
-        return deleted;
-    }
-
-    private void balanceMap() {
-        int i = 0;
-        Map<Integer, RoutineExercise> temp = new HashMap<>();
-        for (Integer sortVal : this.exercises.keySet()) {
-            temp.put(i, this.exercises.get(sortVal));
-            i++;
-        }
-        this.exercises = temp;
+        return this.exercises.removeIf(exercise -> exercise.getExerciseId().equals(exerciseId));
     }
 
     @Override
-    public Iterator<Integer> iterator() {
-        return this.exercises.keySet().iterator();
+    public Iterator<RoutineExercise> iterator() {
+        return this.exercises.iterator();
     }
 
     @Override
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();
-        for (Integer sortVal : this) {
-            retVal.put(sortVal.toString(), this.getExercise(sortVal).asMap());
+        List<Object> jsonExercises = new ArrayList<>();
+        for (RoutineExercise exercise : this) {
+            jsonExercises.add(exercise.asMap());
         }
+        retVal.put(EXERCISES, jsonExercises);
+        retVal.put(TAG, this.tag);
         return retVal;
     }
 

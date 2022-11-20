@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import models.OwnedExercise;
+import models.RoutineDay;
 import models.RoutineExercise;
 import models.Routine;
+import models.RoutineWeek;
 import models.User;
 
 public class WorkoutUtils {
@@ -20,10 +22,9 @@ public class WorkoutUtils {
         boolean updateDefaultWeight = user.getUserPreferences().isUpdateDefaultWeightOnSave();
         // get a list of all exercises by id
         Set<String> exercises = new HashSet<>();
-        for (Integer week : routine) {
-            for (Integer day : routine.getWeek(week)) {
-                List<RoutineExercise> exerciseListForDay = routine.getExerciseListForDay(week, day);
-                for (RoutineExercise routineExercise : exerciseListForDay) {
+        for (RoutineWeek week : routine) {
+            for (RoutineDay day : week) {
+                for (RoutineExercise routineExercise : day) {
                     String exerciseId = routineExercise.getExerciseId();
                     OwnedExercise ownedExercise = user.getOwnedExercises().get(exerciseId);
                     if (updateDefaultWeight && routineExercise.getWeight() > ownedExercise.getDefaultWeight()) {
@@ -48,10 +49,9 @@ public class WorkoutUtils {
         boolean updateDefaultWeight = user.getUserPreferences().isUpdateDefaultWeightOnSave();
         // get a list of all new exercises (by id)
         Set<String> newExercises = new HashSet<>();
-        for (Integer week : newRoutine) {
-            for (Integer day : newRoutine.getWeek(week)) {
-                List<RoutineExercise> exerciseListForDay = newRoutine.getExerciseListForDay(week, day);
-                for (RoutineExercise routineExercise : exerciseListForDay) {
+        for (RoutineWeek week : newRoutine) {
+            for (RoutineDay day : week) {
+                for (RoutineExercise routineExercise : day) {
                     String exerciseId = routineExercise.getExerciseId();
                     OwnedExercise ownedExercise = user.getOwnedExercises().get(exerciseId);
                     if (updateDefaultWeight && routineExercise.getWeight() > ownedExercise.getDefaultWeight()) {
@@ -65,12 +65,10 @@ public class WorkoutUtils {
         }
         // get a set of all the old exercises (by id)
         Set<String> oldExercises = new HashSet<>();
-        for (Integer week : oldRoutine) {
-            for (Integer day : oldRoutine.getWeek(week)) {
-                List<RoutineExercise> exerciseListForDay = oldRoutine.getExerciseListForDay(week, day);
-                for (RoutineExercise routineExercise : exerciseListForDay) {
-                    String exerciseId = routineExercise.getExerciseId();
-                    oldExercises.add(exerciseId);
+        for (RoutineWeek week : oldRoutine) {
+            for (RoutineDay day : week) {
+                for (RoutineExercise routineExercise : day) {
+                    oldExercises.add(routineExercise.getExerciseId());
                 }
             }
         }
@@ -89,12 +87,10 @@ public class WorkoutUtils {
     }
 
     public static String findMostFrequentFocus(final User user, final Routine routine) {
-        // todo delete once all apps are on newest version
         Map<String, Integer> focusCount = new HashMap<>();
-        for (Integer week : routine) {
-            for (Integer day : routine.getWeek(week)) {
-                List<RoutineExercise> exerciseListForDay = routine.getExerciseListForDay(week, day);
-                for (RoutineExercise routineExercise : exerciseListForDay) {
+        for (RoutineWeek week : routine) {
+            for (RoutineDay day : week) {
+                for (RoutineExercise routineExercise : day) {
                     String exerciseId = routineExercise.getExerciseId();
                     for (String focus : user.getOwnedExercises().get(exerciseId).getFocuses()) {
                         focusCount.merge(focus, 1, Integer::sum);

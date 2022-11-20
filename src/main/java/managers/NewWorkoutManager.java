@@ -69,7 +69,6 @@ public class NewWorkoutManager {
             final Workout newWorkout = new Workout();
             newWorkout.setCreationDate(creationTime);
             newWorkout.setCreator(activeUser);
-            newWorkout.setMostFrequentFocus(WorkoutUtils.findMostFrequentFocus(user, routine));
             newWorkout.setWorkoutId(workoutId);
             newWorkout.setWorkoutName(workoutName);
             newWorkout.setRoutine(routine);

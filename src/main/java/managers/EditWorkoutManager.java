@@ -6,7 +6,6 @@ import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
-import exceptions.UnauthorizedException;
 import utils.Metrics;
 import utils.UpdateItemTemplate;
 import utils.Validator;
@@ -34,7 +33,7 @@ public class EditWorkoutManager {
 
     /**
      * Saves edited changes to an existing workout. The edited workout is saved in the database and the user's owned
-     * exercises are updated to match whether they are apart of this workout now or not. The most frequent focus is also
+     * exercises are updated to match whether they are a part of this workout now or not. The most frequent focus is also
      * updated in the workout if it now is different as a result of the edits.
      *
      * @param activeUser    the user that is editing this workout.
@@ -62,10 +61,8 @@ public class EditWorkoutManager {
             // update all the exercises that are now a part of this workout
             WorkoutUtils.updateOwnedExercisesOnEdit(user, editedWorkout.getRoutine(),
                 oldWorkout.getRoutine(), workoutId, oldWorkout.getWorkoutName());
-            // update most frequent focus since exercises have changed
-            editedWorkout.setMostFrequentFocus(WorkoutUtils.findMostFrequentFocus(user, editedWorkout.getRoutine()));
 
-            // Need to determine if the current week/day is valid (frontend's responsibility is updating them)
+            // Need to determine if the current week/day is valid (responsibility of frontend)
             confirmValidCurrentDayAndWeek(editedWorkout);
             UpdateItemTemplate updateUserItemData = new UpdateItemTemplate(activeUser, UserDAO.USERS_TABLE_NAME)
                 .withUpdateExpression("set " + User.EXERCISES + "= :exerciseMap")
@@ -73,12 +70,10 @@ public class EditWorkoutManager {
 
             UpdateItemTemplate updateWorkoutItemData = new UpdateItemTemplate(workoutId, WorkoutDAO.WORKOUT_TABLE_NAME)
                 .withUpdateExpression("set " +
-                    Workout.MOST_FREQUENT_FOCUS + " = :mostFrequentFocusVal, " +
                     Workout.CURRENT_WEEK + " =:currentWeekVal, " +
                     Workout.CURRENT_DAY + " =:currentDayVal, " +
                     "#routine = :routineMap")
                 .withValueMap(new ValueMap()
-                    .withString(":mostFrequentFocusVal", editedWorkout.getMostFrequentFocus())
                     .withNumber(":currentWeekVal", editedWorkout.getCurrentWeek())
                     .withNumber(":currentDayVal", editedWorkout.getCurrentDay())
                     .withMap(":routineMap", editedWorkout.getRoutine().asMap()))

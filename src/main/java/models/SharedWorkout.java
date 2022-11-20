@@ -50,13 +50,13 @@ public class SharedWorkout implements Model {
         this.workoutName = workout.getWorkoutName();
         this.creator = workout.getCreator();
         this.routine = new SharedRoutine(workout.getRoutine(), user.getOwnedExercises());
-        // preserve the focuses and video url of the exercises for user that might accept this workout
+        // preserve the focuses and video url of the exercises
         this.exercises = new HashMap<>();
         Set<String> exerciseNames = new HashSet<>();
         Map<String, String> exerciseNameToId = new HashMap<>();
-        for (Integer week : workout.getRoutine()) {
-            for (Integer day : workout.getRoutine().getWeek(week)) {
-                for (RoutineExercise exercise : workout.getRoutine().getExerciseListForDay(week, day)) {
+        for (RoutineWeek week : workout.getRoutine()) {
+            for (RoutineDay day : week) {
+                for (RoutineExercise exercise : day) {
                     String exerciseName = user.getOwnedExercises().get(exercise.getExerciseId()).getExerciseName();
                     exerciseNames.add(exerciseName);
                     exerciseNameToId.putIfAbsent(exerciseName, exercise.getExerciseId());

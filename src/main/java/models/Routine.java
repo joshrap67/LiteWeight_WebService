@@ -10,87 +10,73 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
-public class Routine implements Model, Iterable<Integer> {
+public class Routine implements Model, Iterable<RoutineWeek> {
 
-    private Map<Integer, RoutineWeek> weeks;
+    public static final String WEEKS = "weeks";
+
+    private List<RoutineWeek> weeks;
 
     public Routine() {
-        this.weeks = new HashMap<>();
+        this.weeks = new ArrayList<>();
     }
 
     public Routine(Routine toBeCloned) {
         // copy constructor
-        this.weeks = new HashMap<>();
-        for (Integer week : toBeCloned) {
+        this.weeks = new ArrayList<>();
+        for (RoutineWeek week : toBeCloned) {
             RoutineWeek routineWeek = new RoutineWeek();
-            for (Integer day : toBeCloned.getWeek(week)) {
-                routineWeek.put(day, toBeCloned.getDay(week, day).clone());
+            for (RoutineDay day : week) {
+                routineWeek.appendDay(day.clone());
             }
-            this.weeks.putIfAbsent(week, routineWeek);
+            this.weeks.add(routineWeek);
         }
     }
 
     public Routine(Map<String, Object> json) throws InvalidAttributeException {
         if (json == null) {
-            this.weeks = null;
+            this.weeks = new ArrayList<>();
         } else {
-            this.weeks = new HashMap<>();
-            for (String week : json.keySet()) {
-                RoutineWeek routineWeek = new RoutineWeek((Map<String, Object>) json.get(week));
-                this.weeks.put(Integer.parseInt(week), routineWeek);
+            this.weeks = new ArrayList<>();
+            List<Object> jsonWeeks = (List<Object>) json.get(WEEKS);
+            for (Object week : jsonWeeks) {
+                RoutineWeek routineWeek = new RoutineWeek((Map<String, Object>) week);
+                this.weeks.add(routineWeek);
             }
         }
     }
 
     public Routine(final SharedRoutine routine, final Map<String, String> exerciseNameToId) {
-        // this constructor is used to convert from a sent routine back to a normal workout routine
-        this.weeks = new HashMap<>();
-        for (Integer week : routine) {
+        // this constructor is used to convert from a shared routine back to a normal workout routine
+        this.weeks = new ArrayList<>();
+        for (SharedWeek week : routine) {
             final RoutineWeek routineWeek = new RoutineWeek();
-            for (Integer day : routine.getWeek(week)) {
+            for (SharedDay day : week) {
                 final RoutineDay routineDay = new RoutineDay();
-                int sortVal = 0;
-                for (SharedExercise sharedExercise : routine.getExerciseListForDay(week, day)) {
+                routineDay.setTag(day.getTag());
+                for (SharedExercise sharedExercise : day) {
                     RoutineExercise routineExercise = new RoutineExercise(sharedExercise,
                         exerciseNameToId.get(sharedExercise.getExerciseName()));
-                    routineDay.put(sortVal, routineExercise);
-                    sortVal++;
+                    routineDay.appendExercise(routineExercise);
                 }
-                routineWeek.put(day, routineDay);
+                routineWeek.appendDay(routineDay);
             }
-            this.putWeek(week, routineWeek);
+            this.appendWeek(routineWeek);
         }
-    }
-
-    public List<RoutineExercise> getExerciseListForDay(int week, int day) {
-        List<RoutineExercise> exerciseList = new ArrayList<>();
-        for (Integer sortVal : this.getWeek(week).getDay(day)) {
-            exerciseList.add(this.getDay(week, day).getExercise(sortVal));
-        }
-        return exerciseList;
     }
 
     public RoutineWeek getWeek(int week) {
         return this.weeks.get(week);
     }
 
-    public RoutineDay getDay(int week, int day) {
-        return this.weeks.get(week).getDay(day);
-    }
-
-    public void putWeek(int weekIndex, RoutineWeek week) {
-        this.weeks.put(weekIndex, week);
-    }
-
-    public boolean removeExercise(int week, int day, String exerciseId) {
-        return this.getDay(week, day).deleteExercise(exerciseId);
+    public void appendWeek(RoutineWeek week) {
+        this.weeks.add(week);
     }
 
     public static void deleteExerciseFromRoutine(final String exerciseId, final Routine routine) {
         // removes all instances of a given exercise in the routine
-        for (Integer week : routine) {
-            for (Integer day : routine.getWeek(week)) {
-                routine.removeExercise(week, day, exerciseId);
+        for (RoutineWeek week : routine) {
+            for (RoutineDay day : week) {
+                day.deleteExercise(exerciseId);
             }
         }
     }
@@ -101,8 +87,8 @@ public class Routine implements Model, Iterable<Integer> {
 
     public int getTotalNumberOfDays() {
         int days = 0;
-        for (Integer week : this.weeks.keySet()) {
-            days += this.weeks.get(week).getNumberOfDays();
+        for (RoutineWeek week : this) {
+            days += week.getNumberOfDays();
         }
         return days;
     }
@@ -110,16 +96,17 @@ public class Routine implements Model, Iterable<Integer> {
     @Override
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();
-        for (Integer week : this.weeks.keySet()) {
-            retVal.put(week.toString(), this.getWeek(week).asMap());
+        List<Object> jsonWeeks = new ArrayList<>();
+        for (RoutineWeek week : this) {
+            jsonWeeks.add(week.asMap());
         }
-
+        retVal.put(WEEKS, jsonWeeks);
         return retVal;
     }
 
     @Override
-    public Iterator<Integer> iterator() {
-        return this.weeks.keySet().iterator();
+    public Iterator<RoutineWeek> iterator() {
+        return this.weeks.iterator();
     }
 
     @Override

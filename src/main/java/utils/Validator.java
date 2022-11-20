@@ -6,13 +6,23 @@ import java.util.ArrayList;
 import java.util.List;
 import models.OwnedExercise;
 import models.Routine;
+import models.RoutineDay;
+import models.RoutineWeek;
 import models.User;
 import models.Workout;
 
 public class Validator {
 
+    // todo unit test
+
     private static final int
-        MAX_WEIGHT = 99999, MAX_SETS = 99, MAX_REPS = 999, MAX_DETAILS_LENGTH = 120, MAX_URL_LENGTH = 200, MAX_EXERCISE_NAME = 40;
+        MAX_WEIGHT = 99999,
+        MAX_SETS = 99,
+        MAX_REPS = 999,
+        MAX_DETAILS_LENGTH = 120,
+        MAX_URL_LENGTH = 200,
+        MAX_EXERCISE_NAME = 40,
+        MAX_DAY_TAG_LENGTH = 25;
 
     public static String validNewWorkoutInput(final String workoutName, final User activeUser,
         final Routine routine) {
@@ -20,8 +30,7 @@ public class Validator {
         if (activeUser.getWorkoutMetas().size() >= Globals.MAX_FREE_WORKOUTS && activeUser.getPremiumToken() == null) {
             error.append("Max amount of free workouts reached.\n");
         }
-        if (activeUser.getPremiumToken() != null
-            && activeUser.getWorkoutMetas().size() >= Globals.MAX_WORKOUTS) {
+        if (activeUser.getPremiumToken() != null && activeUser.getWorkoutMetas().size() >= Globals.MAX_WORKOUTS) {
             error.append("Maximum workouts exceeded.\n");
         }
 
@@ -168,20 +177,22 @@ public class Validator {
 
     private static String routineDayErrors(final Routine routine) {
         StringBuilder error = new StringBuilder();
-        boolean emptyDays = false;
-        for (Integer week : routine) {
-            int dayCount = routine.getWeek(week).getNumberOfDays();
+        int weekIndex = 0;
+        for (RoutineWeek week : routine) {
+            weekIndex++;
+            int dayCount = week.getNumberOfDays();
             if (dayCount > Globals.MAX_DAYS_ROUTINE) {
-                error.append("Week: ").append(week).append(" exceeds maximum amount of days in a week.\n");
+                error.append("Week: ").append(weekIndex).append(" exceeds maximum amount of days in a week.\n");
             }
-            for (Integer day : routine.getWeek(week)) {
-                if (routine.getExerciseListForDay(week, day).isEmpty()) {
-                    emptyDays = true;
+            int dayIndex = 0;
+            for (RoutineDay day : week) {
+                dayIndex++;
+                if (day.getTag() != null && day.getTag().length() > MAX_DAY_TAG_LENGTH) {
+                    error.append("Day tag for Week ")
+                        .append(weekIndex).append(" Day ").append(dayIndex)
+                        .append(" exceeds maximum length.\n");
                 }
             }
-        }
-        if (emptyDays) {
-            error.append("Workout has a day without any exercises.\n");
         }
         return error.toString().trim();
     }

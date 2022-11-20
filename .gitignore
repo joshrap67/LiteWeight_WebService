@@ -3,3 +3,7 @@ target
 LiteWeight_WebService.iml
 auto_confirm_users/site-packages/*
 *.zip
+patcher/Backups/
+patcher/bin
+patcher/obj
+patcher/.vs

@@ -9,6 +9,8 @@ import daos.SharedWorkoutDAO;
 import daos.UserDAO;
 import daos.WorkoutDAO;
 import exceptions.ManagerExecutionException;
+import models.SharedDay;
+import models.SharedWeek;
 import utils.AttributeValueUtils;
 import imports.Globals;
 import utils.Metrics;
@@ -99,7 +101,6 @@ public class AcceptReceivedWorkoutManager {
             final Routine routine = new Routine(workoutToAccept.getRoutine(), exerciseNameToId);
             newWorkout.setCreationDate(creationTime);
             newWorkout.setCreator(activeUser);
-            newWorkout.setMostFrequentFocus(sharedWorkoutMeta.getMostFrequentFocus());
             newWorkout.setWorkoutId(workoutId);
             newWorkout.setWorkoutName(workoutToAccept.getWorkoutName());
             newWorkout.setRoutine(routine);
@@ -162,9 +163,9 @@ public class AcceptReceivedWorkoutManager {
             error.append("Maximum workouts would be exceeded.");
         }
         Set<String> sharedWorkoutExercises = new HashSet<>();
-        for (Integer week : sharedWorkout.getRoutine()) {
-            for (Integer day : sharedWorkout.getRoutine().getWeek(week)) {
-                for (SharedExercise sharedExercise : sharedWorkout.getRoutine().getExerciseListForDay(week, day)) {
+        for (SharedWeek week : sharedWorkout.getRoutine()) {
+            for (SharedDay day : week) {
+                for (SharedExercise sharedExercise : day) {
                     sharedWorkoutExercises.add(sharedExercise.getExerciseName());
                 }
             }
@@ -194,9 +195,9 @@ public class AcceptReceivedWorkoutManager {
 
     private void addNewExercises(final SharedWorkout sharedWorkout, final User user) {
         Set<String> sharedWorkoutExercises = new HashSet<>();
-        for (Integer week : sharedWorkout.getRoutine()) {
-            for (Integer day : sharedWorkout.getRoutine().getWeek(week)) {
-                for (SharedExercise sharedExercise : sharedWorkout.getRoutine().getExerciseListForDay(week, day)) {
+        for (SharedWeek week : sharedWorkout.getRoutine()) {
+            for (SharedDay day : week) {
+                for (SharedExercise sharedExercise : day) {
                     sharedWorkoutExercises.add(sharedExercise.getExerciseName());
                 }
             }

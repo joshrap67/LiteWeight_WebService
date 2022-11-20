@@ -37,6 +37,6 @@ public class ResultStatus<T> {
     }
 
     public static <T> ResultStatus<T> failureBadRequest(final String errorMessage) {
-        return new ResultStatus<>(BAD_REQUEST, "Error: " + errorMessage);
+        return new ResultStatus<>(BAD_REQUEST, errorMessage);
     }
 }

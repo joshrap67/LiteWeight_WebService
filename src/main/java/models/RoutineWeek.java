@@ -1,25 +1,31 @@
 package models;
 
 import interfaces.Model;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import lombok.Data;
 
 @Data
-public class RoutineWeek implements Iterable<Integer>, Model {
+public class RoutineWeek implements Iterable<RoutineDay>, Model {
 
-    private Map<Integer, RoutineDay> days;
+    public static final String DAYS = "days";
+
+    private List<RoutineDay> days;
 
     public RoutineWeek() {
-        this.days = new HashMap<>();
+        this.days = new ArrayList<>();
     }
 
-    public RoutineWeek(Map<String, Object> daysForWeek) {
-        this.days = new HashMap<>();
-        for (String day : daysForWeek.keySet()) {
-            RoutineDay routineDay = new RoutineDay((Map<String, Object>) daysForWeek.get(day));
-            this.days.put(Integer.parseInt(day), routineDay);
+    public RoutineWeek(Map<String, Object> json) {
+        this.days = new ArrayList<>();
+
+        List<Object> jsonDays = (List<Object>) json.get(DAYS);
+        for (Object day : jsonDays) {
+            RoutineDay routineDay = new RoutineDay((Map<String, Object>) day);
+            this.days.add(routineDay);
         }
     }
 
@@ -31,22 +37,29 @@ public class RoutineWeek implements Iterable<Integer>, Model {
         return this.days.get(day);
     }
 
+    public void appendDay(RoutineDay routineDay) {
+        this.days.add(routineDay);
+    }
+
     public void put(int dayIndex, RoutineDay routineDay) {
-        this.days.put(dayIndex, routineDay);
+        this.days.set(dayIndex, routineDay);
     }
 
     @Override
     public Map<String, Object> asMap() {
         HashMap<String, Object> retVal = new HashMap<>();
-        for (Integer day : this) {
-            retVal.put(day.toString(), this.getDay(day).asMap());
+        List<Object> jsonDays = new ArrayList<>();
+        for (RoutineDay day : this) {
+            jsonDays.add(day.asMap());
         }
+        retVal.put(DAYS, jsonDays);
+
         return retVal;
     }
 
     @Override
-    public Iterator<Integer> iterator() {
-        return this.days.keySet().iterator();
+    public Iterator<RoutineDay> iterator() {
+        return this.days.iterator();
     }
 
     @Override

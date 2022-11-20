@@ -1,6 +1,6 @@
 # LiteWeight WebService
 
-This web service exposes a REST API intended to be consumed by the Android Application [Liteweight](https://github.com/joshrap67/LiteWeight) (compatible with versions 2.x.x)
+This web service exposes a REST API intended to be consumed by the Android Application [Liteweight](https://github.com/joshrap67/LiteWeight) (compatible with versions >= 2.2.x)
 
 Refer to the [Wiki](https://github.com/joshrap67/LiteWeight_WebService/wiki) for details on the implementation of the service.
 

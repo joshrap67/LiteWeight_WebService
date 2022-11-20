@@ -18,7 +18,7 @@ public class RoutineExercise implements Model {
 
     private boolean completed;
     private String exerciseId;
-    private double weight;
+    private Double weight;
     private Integer sets;
     private Integer reps;
     private String details;

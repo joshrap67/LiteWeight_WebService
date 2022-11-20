@@ -62,14 +62,33 @@ public class ProxyPostController implements
             .put("sendFeedback", SendFeedbackController.class)
             .build());
 
+    private static final int minimumLiteWeightVersion = 10; // update this when there is a breaking change
+    private static final int upgradeStatusCode = 426;
+
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
         final String classMethod = this.getClass().getSimpleName() + ".processApiRequest";
 
         final Metrics metrics = new Metrics(context.getAwsRequestId(), context.getLogger());
         metrics.commonSetup(classMethod);
+        String version = request.getHeaders().get(RequestFields.VERSION_NAME_HEADER);
+        String versionCode = request.getHeaders().get(RequestFields.VERSION_CODE_HEADER);
+        if (version != null && versionCode != null) {
+            metrics.log("LiteWeight version code for request: " + version);
+            try {
+                int versionCodeInteger = Integer.parseInt(versionCode);
+                if (versionCodeInteger < minimumLiteWeightVersion) {
+                    metrics.commonClose(false);
+                    metrics.logMetrics();
+                    return new APIGatewayProxyResponseEvent()
+                        .withBody("You must upgrade your version of LiteWeight to continue. ")
+                        .withStatusCode(upgradeStatusCode);
+                }
+            } catch (Exception e) {
+                metrics.log("Version code not in proper format. Continuing request...");
+            }
+        }
 
         ResultStatus<String> resultStatus;
-
         try {
             String action = request.getPath(); // in the form '/action'
             String[] splitAction = action.split("/"); // remove the prefixed slash
