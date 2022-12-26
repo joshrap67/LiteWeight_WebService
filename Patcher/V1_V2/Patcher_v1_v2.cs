@@ -53,10 +53,10 @@ public class Patcher_v1_v2 : Patcher
             });
         }
 
-        return; // uncomment when ready
+        //return; // uncomment when ready
 
         // patch the workouts
-        foreach (var v1Workout in v1Workouts)
+        foreach (var v1Workout in v1Workouts.ToList())
         {
             var v2Workout = new Workout_v2()
             {

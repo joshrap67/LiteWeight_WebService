@@ -22,7 +22,7 @@ public class Validator {
         MAX_DETAILS_LENGTH = 120,
         MAX_URL_LENGTH = 200,
         MAX_EXERCISE_NAME = 40,
-        MAX_DAY_TAG_LENGTH = 25;
+        MAX_DAY_TAG_LENGTH = 50;
 
     public static String validNewWorkoutInput(final String workoutName, final User activeUser,
         final Routine routine) {
