@@ -33,7 +33,7 @@ public class RenameWorkoutManager {
 
     /**
      * Renames a given workout and loops through all owned exercises to update their workout mapping to have this new
-     * name,
+     * name.
      *
      * @param activeUser     user that is renaming the workout.
      * @param workoutId      id of the workout that is to be renamed.

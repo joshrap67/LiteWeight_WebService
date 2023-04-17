@@ -39,7 +39,7 @@ public class NewWorkoutManager {
 
     /**
      * Creates a new workout if all input is valid and if the user has not already reached the max number of workouts
-     * allowed. Updates all exercises that are apart of the newly created workout to have this workout listed in their
+     * allowed. Updates all exercises that are a part of the newly created workout to have this workout listed in their
      * workout maps.
      *
      * @param activeUser  user that is creating this new workout.
